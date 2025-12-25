@@ -80,7 +80,15 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 showGUI = !showGUI;
             }
-        }
+
+            if (showGUI)
+            {
+                onOpenCheatConsole();
+            } else
+            {
+                onCloseCheatConsole();
+            }
+        } 
 
         private void OnGUI()
         {
@@ -127,6 +135,142 @@ namespace BitchlandCheatConsoleBepInEx
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
+        public static void addallitems()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addallitems");
+
+            if (Main.Instance.Player.CurrentBackpack == null)
+            {
+                GameObject backpack2 = getItemByName(null, "backpack2");
+                if (backpack2 == null)
+                {
+                    backpack2 = getItemByName(null, "backpack");
+                }
+                if (backpack2 == null)
+                {
+                    return;
+                }
+                Main.Instance.Player.DressClothe(Main.Spawn(backpack2));
+            }
+
+            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            {
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
+
+                List<GameObject> items = getAllItems();
+
+                int length = items.Count;
+
+                for (int i = 0; i < length; i++)
+                {
+                    Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(items[i]);
+                }
+            }
+        }
+
+        public static void cleanskin()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: cleanskin");
+            Person _this = Main.Instance.Player;
+            _this.States[0] = false;
+            _this.States[2] = false;
+            _this.States[3] = false;
+            _this.States[8] = false;
+            _this.States[12] = false;
+            _this.States[13] = false;
+            _this.States[14] = false;
+            _this.States[15] = false;
+            _this.States[16 /*0x10*/] = false;
+            _this.States[17] = false;
+            _this.States[18] = false;
+            _this.States[19] = false;
+            _this.States[26] = false;
+            _this.States[33] = false;
+            _this.States[23] = false;
+            _this.States[24] = false;
+            _this.States[25] = false;
+            _this.DirtySkin = false;
+        }
+
+        public static void heal()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: heal");
+            Main.Instance.Player.TheHealth.currentHealth = Main.Instance.Player.TheHealth.maxHealth;
+            Main.Instance.GameplayMenu.UpdateHealth();
+        }
+
+        public static void nude()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: nude");
+            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Nude;
+            Main.Instance.Player.States[9] = true; // Nude
+            Main.Instance.Player.States[10] = false; // Casual
+            Main.Instance.Player.States[11] = false; // Sexy
+
+            if (Main.Instance.Player.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
+            {
+                Main.Instance.Player.EquippedClothes[i].CasualPoints = 0;
+                Main.Instance.Player.EquippedClothes[i].SexyPoints = 0;
+            }
+
+            Main.Instance.Player.GetClothingCondition();
+        }
+        public static void sexy()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: sexy");
+            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Sexy;
+            Main.Instance.Player.States[9] = false; // Nude
+            Main.Instance.Player.States[10] = false; // Casual
+            Main.Instance.Player.States[11] = true; // Sexy
+
+            if (Main.Instance.Player.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
+            {
+                Main.Instance.Player.EquippedClothes[i].CasualPoints = 0;
+                Main.Instance.Player.EquippedClothes[i].SexyPoints = add;
+                Main.Instance.Player.EquippedClothes[i].SexyPoints = Main.Instance.Player.EquippedClothes[i].CasualPoints + Main.Instance.Player.EquippedClothes[i].SexyPoints + add;
+            }
+
+            Main.Instance.Player.GetClothingCondition();
+        }
+
+        public static void casual()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: casual");
+            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Casual;
+            Main.Instance.Player.States[9] = false; // Nude
+            Main.Instance.Player.States[10] = true; // Casual
+            Main.Instance.Player.States[11] = false; // Sexy
+
+            if (Main.Instance.Player.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
+            {
+                Main.Instance.Player.EquippedClothes[i].CasualPoints = add;
+                Main.Instance.Player.EquippedClothes[i].SexyPoints = 0;
+                Main.Instance.Player.EquippedClothes[i].CasualPoints = Main.Instance.Player.EquippedClothes[i].CasualPoints + Main.Instance.Player.EquippedClothes[i].SexyPoints + add;
+            }
+
+            Main.Instance.Player.GetClothingCondition();
+        }
         public static void clearbackpack()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: clearbackpack");
@@ -211,6 +355,42 @@ namespace BitchlandCheatConsoleBepInEx
                 case "itemlist":
                     {
                         itemlist();
+                    }
+                    break;
+
+                case "cleanskin":
+                    {
+                        cleanskin();
+                    }
+                    break;
+
+                case "casual":
+                    {
+                        casual();
+                    }
+                    break;
+
+                case "sexy":
+                    {
+                        sexy();
+                    }
+                    break;
+
+                case "nude":
+                    {
+                        nude();
+                    }
+                    break;
+
+                case "heal":
+                    {
+                        heal();
+                    }
+                    break;
+
+                case "addallitems":
+                    {
+                        addallitems();
                     }
                     break;
 
@@ -489,6 +669,27 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        private static List<GameObject> getAllItems()
+        {
+            List<GameObject> itemList = new List<GameObject> ();
+
+            for (int i = 0; i < itemPCount; i++)
+            {
+                string prefab = itemsP[i];
+                List<GameObject> items = getPrefabsByName(prefab);
+                if (items == null)
+                {
+                    continue;
+                }
+                for (int j = 0; j < items.Count; j++)
+                {
+                    if (items[j] != null)
+                        itemList.Add(items[j]);
+                }
+            }
+
+            return itemList;
+        }
         private static void addItemReal(GameObject item, int value)
         {
             if (Main.Instance.Player.CurrentBackpack == null)
@@ -577,9 +778,48 @@ namespace BitchlandCheatConsoleBepInEx
             Logger.LogInfo($"Plugin BitchlandCheatConsoleBepInEx BepInEx is loaded!");
         }
 
-        private static Vector3 explorerSpawnPoint = new Vector3(-2.949118f, 1.192093E-07f, 39.10889f);
-        private static Vector3 explorerSpawnPoint2 = new Vector3(179.8053f, 0.05544382f, -73.4415f);
-        private static Vector3 hardcoreSpawnPoint = new Vector3(-69f, 0.0f, 10f);
-        private static Vector3 hardcoreSpawnPoint2 = new Vector3(-49.10827f, 3.067196f, 14.40517f);
+        public void onOpenCheatConsole()
+        {
+            if (onOpenCheat)
+            {
+                return;
+            }
+            onOpenCheat = true;
+            Main.Instance.GameplayMenu.CloseEscMenu();
+            Main.Instance.GameplayMenu.CloseJournal();
+            Main.Instance.GameplayMenu.AllowCursor();
+            Main.Instance.GameplayMenu.UpdateAmmo();
+            Main.Instance.GameplayMenu.UpdateNeeds();
+            Main.Instance.GameplayMenu.UpdateArousal();
+        }
+
+        public void onCloseCheatConsole()
+        {
+            if (!onOpenCheat)
+            {
+                return;
+            }
+            onOpenCheat = false;
+            Main.Instance.GameplayMenu.CloseEscMenu();
+            Main.Instance.GameplayMenu.CloseJournal();
+            Main.Instance.GameplayMenu.DisallowCursor();
+            Main.Instance.GameplayMenu.UpdateAmmo();
+            Main.Instance.GameplayMenu.UpdateNeeds();
+            Main.Instance.GameplayMenu.UpdateArousal();
+        }
+
+        private static bool onOpenCheat = false;
+        private static UI_Gameplay UI_Gameplay_Instance = null;
+
+        [HarmonyPatch(typeof(UI_Gameplay), "Update")] 
+        [HarmonyPrefix]
+        public static bool Update(object __instance)
+        {
+            if (UI_Gameplay_Instance == null && __instance != null)
+            {
+                UI_Gameplay_Instance = (UI_Gameplay) __instance;
+            }
+            return true;
+        }
     }
 }
