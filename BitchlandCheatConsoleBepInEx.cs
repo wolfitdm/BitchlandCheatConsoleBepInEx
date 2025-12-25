@@ -1625,7 +1625,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static bool onOpenCheat = false;
 
-        [HarmonyPatch(typeof(UI_Gameplay), "SelectInventory")]
+        /*[HarmonyPatch(typeof(UI_Gameplay), "SelectInventory")]
         [HarmonyPrefix]
         public static bool SelectInventory(object __instance)
         {
@@ -1715,7 +1715,7 @@ namespace BitchlandCheatConsoleBepInEx
                 UnityEngine.Object.Destroy((UnityEngine.Object)_this.StatesEntries[index]);
             for (int index = 0; index < Main.Instance.Player.States.Length; ++index)
             {
-                Main.Instance.Player.States[index] = index < 20 ? false : true;
+                //Main.Instance.Player.States[index] = index < 20 ? false : true;
                 if (Main.Instance.Player.States[index])
                 {
                     GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(_this.StatesEntry, _this.StatesEntry.transform.parent);
@@ -1726,7 +1726,6 @@ namespace BitchlandCheatConsoleBepInEx
             }
             Main.Instance.MusicPlayer.PlayOneShot(_this.JournalSound1);
             return false;
-        }
-
+        }*/
     }
 }
