@@ -47,10 +47,46 @@ namespace BitchlandCheatConsoleBepInEx
             spawnpointsNames.Add("safearea2");
             spawnpointsNames.Add("safearea3");
             spawnpointsNames.Add("safearea4");
+            spawnpointsNames.Add("slums");
+            spawnpointsNames.Add("plaza");
+            spawnpointsNames.Add("clinic");
+            spawnpointsNames.Add("hs");
+            spawnpointsNames.Add("highstreet");
+            spawnpointsNames.Add("vs");
+            spawnpointsNames.Add("vendingstreet");
+            spawnpointsNames.Add("lab");
+            spawnpointsNames.Add("garden");
+            spawnpointsNames.Add("army");
+            spawnpointsNames.Add("tc");
+            spawnpointsNames.Add("trainingcenter");
+            spawnpointsNames.Add("sc");
+            spawnpointsNames.Add("stripclub");
+            spawnpointsNames.Add("carol");
+            spawnpointsNames.Add("jailyard");
+            spawnpointsNames.Add("jail");
+            spawnpointsNames.Add("f8");
             spawnpoints.Add("safearea1", new Vector3(-2.949118f, 1.192093E-07f, 39.10889f));
             spawnpoints.Add("safearea2", new Vector3(179.8053f, 0.05544382f, -73.4415f));
             spawnpoints.Add("safearea3", new Vector3(-69f, 0.0f, 10f));
             spawnpoints.Add("safearea4", new Vector3(-49.10827f, 3.067196f, 14.40517f));
+            spawnpoints.Add("slums", new Vector3(46.70115f, 5.960464E-08f, 34.79505f));
+            spawnpoints.Add("plaza", new Vector3(20.92864f, 0.06719887f, 2.584693f));
+            spawnpoints.Add("clinic", new Vector3(18.31792f, 0.06720525f, 15.40343f));
+            spawnpoints.Add("hs", new Vector3(70.0073f, 0.05544364f, -59.5325f));
+            spawnpoints.Add("highstreet", new Vector3(70.0073f, 0.05544364f, -59.5325f));
+            spawnpoints.Add("vs", new Vector3(86.47327f, 0.06720108f, -6.379012f));
+            spawnpoints.Add("vendingstreet", new Vector3(86.47327f, 0.06720108f, -6.379012f));
+            spawnpoints.Add("lab", new Vector3(95.99965f, 5.960464E-08f, -120.2192f));
+            spawnpoints.Add("garden", new Vector3(95.99965f, 5.960464E-08f, -120.2192f));
+            spawnpoints.Add("army", new Vector3(-26.46828f, 0f, 34.43687f));
+            spawnpoints.Add("tc", new Vector3(-48.20982f, 0.07555467f, 3.772348f));
+            spawnpoints.Add("trainingcenter", new Vector3(-48.20982f, 0.07555467f, 3.772348f));
+            spawnpoints.Add("sc", new Vector3(-2.626162f, 0.06719756f, 6.736708f));
+            spawnpoints.Add("stripclub", new Vector3(-2.626162f, 0.06719756f, 6.736708f));
+            spawnpoints.Add("carol", new Vector3(-2.626162f, 0.06719756f, 6.736708f));
+            spawnpoints.Add("jailyard", new Vector3(-69f, 0.0f, 10f));
+            spawnpoints.Add("jail", new Vector3(-49.10827f, 3.067196f, 14.40517f));
+            spawnpoints.Add("f8", new Vector3(-69f, 0.0f, 10f));
             spawnpointsCount = spawnpoints.Count;
 
             itemsP.Clear();
@@ -156,6 +192,296 @@ namespace BitchlandCheatConsoleBepInEx
 
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        public static void warpfollower()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: warpfollower");
+            if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+            {
+                for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    if (Main.Instance.Player.transform != null && Main.Instance.PeopleFollowingPlayer[i].transform != null)
+                    {
+                       Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                    }
+                }
+            }
+        }
+        public static void unstuckme()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unstuckme");
+            try
+            {
+                Main.Instance.Player.RunBlockers.Clear();
+            }
+            catch
+            {
+
+                try
+                {
+                    Main.Instance.Player.RunBlockers = new List<string>();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            try
+            {
+                Main.Instance.Player.MoveBlockers.Clear();
+            }
+            catch
+            {
+
+                try
+                {
+                    Main.Instance.Player.MoveBlockers = new List<string>();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            try
+            {
+                Main.Instance.Player.ThisPersonInt.InteractBlockers.Clear();
+            }
+            catch
+            {
+
+                try
+                {
+                    Main.Instance.Player.ThisPersonInt.InteractBlockers = new List<string>();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            try
+            {
+                Main.Instance.Player.CanMove = true;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.InteractingWith.CanLeave = true;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.Interacting = false;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.InCombat = false;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.CanSaveFlags.Remove("CantMoveNow");
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                Main.Instance.CanSaveFlags = Main.Instance.CanSaveFlags;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.SleepMenu.SetActive(false);
+            }
+            catch (Exception e)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.EscMenu.SetActive(false);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.TextInputMenu.SetActive(false);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.TraderMenu.SetActive(false);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.EnableMove();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.AllowCursor();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.EndChat();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.UnstuckPlayer();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.m_Character.m_Animator.SetFloat("Forward", 0.5f);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.m_Character.m_Animator.SetFloat("Turn", 0.5f);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.m_Character.m_Rigidbody.velocity = Vector3.one;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                UI_Gameplay _this = (UI_Gameplay)Main.Instance.GameplayMenu;
+                try
+                {
+                    _this.CloseStorage();
+                }
+                catch (Exception ex)
+                {
+                }
+
+                try
+                {
+                    _this.CloseEscMenu();
+                }
+                catch (Exception ex)
+                {
+                }
+
+                try
+                {
+                    _this.CloseJournal();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("UNSTUCK ME 2.0 Following Player ");
+                    for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                    {
+                        if (Main.Instance.Player.transform != null && Main.Instance.PeopleFollowingPlayer[i].transform != null)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("UNSTUCK ME MINI F8 2.0 Following Player ");
+                            Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.ShowNotification("UNSTUCK ME 3.0!");
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Logger.LogInfo("UNSTUCK ME REALLLY!");
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        public static void autosave()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: autosave");
+            Main.Instance.SaveGame(true);
+        }
+        public static void save()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: save");
+            Main.Instance.SaveGame(false);
+        }
+        public static void maxrelationships()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxrelationships");
+            if (Main.Instance.GameplayMenu.Relationships != null)
+            {
+                int length = Main.Instance.GameplayMenu.Relationships.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    Main.Instance.GameplayMenu.Relationships[i].Favor = 100000000;
+                }
+            }
         }
 
         public static void pregnancy(bool realpregnancy)
@@ -547,36 +873,43 @@ namespace BitchlandCheatConsoleBepInEx
 
             Logger.LogInfo($"User entered: {inputText}");
 
-
-            string pattern3 = @"(?:^(?<command>\w+)\s+(?<key>\w+)\s+(?<value>\w+)$)";
-            Regex rg3 = new Regex(pattern3, RegexOptions.IgnoreCase);
-            Match rg3Match = rg3.Match(inputText);
-
-            if (rg3Match.Success)
+            try
             {
-                handleCommandLength3(rg3Match.Groups["command"].Value.ToLower(), rg3Match.Groups["key"].Value.ToLower(), rg3Match.Groups["value"].Value.ToLower());
-                return;
+                string pattern3 = @"(?:^(?<command>\w+)\s+(?<key>\w+)\s+(?<value>\w+)$)";
+                Regex rg3 = new Regex(pattern3, RegexOptions.IgnoreCase);
+                Match rg3Match = rg3.Match(inputText);
+
+                if (rg3Match.Success)
+                {
+                    handleCommandLength3(rg3Match.Groups["command"].Value.ToLower(), rg3Match.Groups["key"].Value.ToLower(), rg3Match.Groups["value"].Value.ToLower());
+                    return;
+                }
+
+                string pattern2 = @"(?:^(?<command>\w+)\s+(?<value>\w+)$)";
+                Regex rg2 = new Regex(pattern2, RegexOptions.IgnoreCase);
+                Match rg2Match = rg2.Match(inputText);
+
+                if (rg2Match.Success)
+                {
+                    handleCommandLength2(rg2Match.Groups["command"].Value.ToLower(), rg2Match.Groups["value"].Value.ToLower());
+                    return;
+                }
+
+                string pattern1 = @"(?:^(?<command>\w+)$)";
+
+                Regex rg1 = new Regex(pattern1, RegexOptions.IgnoreCase);
+                Match rg1Match = rg1.Match(inputText);
+
+                if (rg1Match.Success)
+                {
+                    handleCommandLength1(rg1Match.Groups["command"].Value.ToLower());
+                    return;
+                }
+
             }
-
-            string pattern2 = @"(?:^(?<command>\w+)\s+(?<value>\w+)$)";
-            Regex rg2 = new Regex(pattern2, RegexOptions.IgnoreCase);
-            Match rg2Match = rg2.Match(inputText);
-
-            if (rg2Match.Success)
+            catch (Exception ex)
             {
-                handleCommandLength2(rg2Match.Groups["command"].Value.ToLower(), rg2Match.Groups["value"].Value.ToLower());
-                return;
-            }
-
-            string pattern1 = @"(?:^(?<command>\w+)$)";
-
-            Regex rg1 = new Regex(pattern1, RegexOptions.IgnoreCase);
-            Match rg1Match = rg1.Match(inputText);
-
-            if (rg1Match.Success)
-            {
-                handleCommandLength1(rg1Match.Groups["command"].Value.ToLower());
-                return;
+                Logger.LogError(ex.ToString());
             }
 
         }
@@ -732,6 +1065,37 @@ namespace BitchlandCheatConsoleBepInEx
                 case "infinitehealth":
                     {
                         infinitehealth();
+                    }
+                    break;
+
+                case "maxrs":
+                case "maxrelationships":
+                    {
+                        maxrelationships();
+                    }
+                    break;
+
+                case "save":
+                    {
+                        save();
+                    }
+                    break;
+
+                case "autosave":
+                    {
+                        autosave();
+                    }
+                    break;
+
+                case "unstuckme":
+                    {
+                        unstuckme();
+                    }
+                    break;
+
+                case "warpfollower":
+                    {
+                        warpfollower();
                     }
                     break;
 

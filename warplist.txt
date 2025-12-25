@@ -1,4 +1,24 @@
-safearea1
-safearea2
-safearea3
-safearea4
+warplist:
+
+* safearea1
+* safearea2
+* safearea3
+* safearea4
+* slums
+* plaza
+* clinic
+* hs
+* highstreet
+* vs
+* vendingstreet
+* lab
+* garden
+* army
+* tc
+* traingingcenter
+* sc
+* stripclub
+* carol
+* jailyard
+* jail
+* f8

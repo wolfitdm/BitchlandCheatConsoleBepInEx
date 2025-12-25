@@ -29,6 +29,12 @@ commands with no params:
 * realpregnancy -> set fertility to on (1) or off (0) and you are really pregnant now
 * invincible -> toggle infinite health (nobody can not longer hit you
 * infinitehealth -> toggle infinite health (nobody can not longer hit you
+* maxrs -> sets all relationsships to maximum
+* maxrelationships -> sets all relationsships to maximum
+* save -> saves the game on everytime in the normal slot
+* autosave -> saves the game on everytime in the autosave slot
+* unstuckme -> unstuck the player
+* warpfollower -> teleports all follower to you
 
 commands with 1 param:
 
