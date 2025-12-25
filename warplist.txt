@@ -1,0 +1,4 @@
+safearea1
+safearea2
+safearea3
+safearea4

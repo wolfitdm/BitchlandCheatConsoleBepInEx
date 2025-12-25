@@ -1,0 +1,35 @@
+setstate 0 false -> remove "Dirty -10 Sexy"
+setstate 1 true  -> add "Horny +10 Sexy"
+setstate 2 false -> remove "Very Dirty -20 Sexy"
+setstate 3 false -> Shitten -20 Sexy
+setstate 4 true -> add "Sleepy - ? speed"
+setstate 5 false -> remove "Needs toilet"
+getstate 6 -> Hungry
+setstate 7 true -> add "Pregnant"
+setstate 7 false -> remove "Pregnant"
+setstate 8 false -> remove "Bloody -10 Sexy"
+setstate 9 false -> remove "Clothing vibe Nude"
+setsate 10 false -> remove "Clothing vibe Casual"
+setstate 11 true -> add "Clothing vibe Sexy"
+setstate 12 false -> Cum Stains + 1 Sexy 
+setstate 13 false -> Cum Stains + 2 Sexy
+setstate 14 false -> Cum Stains + 3 Sexy
+setstate 15 false -> Cum Stains + 4 Sexy 
+setstate 16 false -> Cum Stains + 5 Sexy 
+setstate 17 false -> Body Writting + 1 Sexy 
+setstate 18 false -> Body Writting + 2 Sexy 
+setstate 19 false -> Body Writting + 3 Sexy 
+setstate 20 false -> Bruises - 10 Sexy 
+setstate 21 false -> Heavy Bruises - 20 Sexy 
+setstate 22 false -> Basic Makeup + 10 Sexy
+setstate 23 false -> Runny Makeup + 1 Sexy
+setstate 24 false -> Runny Makeup + 1 Sexy
+setstate 25 false -> Runny Makeup + 1 Sexy
+setstate 26 false -> Cum in mouth + 1 Sexy
+setstate 27 true -> Beard
+setstate 28 true -> Lipstick
+setstate 29 true -> Lipstick
+setstate 30 true -> Lipstick
+setstate 31 true -> Skin color lips
+setstate 32 true -> Freckets
+setstate 33 true -> Dirty Mouth

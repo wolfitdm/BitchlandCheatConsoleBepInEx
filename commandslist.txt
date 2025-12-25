@@ -1,0 +1,51 @@
+Bitchland Cheat console
+
+commands:
+
+commands with no params:
+
+* clearbackpack -> clears your backpack
+* warplist - list telepoint points
+* itemlist -> lists items
+* weaponlist -> lists weapons
+* cleanskin -> cleans your skin
+* nude -> set clothing condition to nude
+* casual -> set clothing condition to casual
+* sexy -> set clothing condition to sexy
+* realnude -> set clothing condition to nude and all other states/clothing vibes to nude
+* realcasual -> set clothing condition to nude and all other states/clothing vibes to casual
+* realsexy -> set clothing condition to nude and all other states/clothing vibes to sexy
+* heal  -> heal your player
+* nohunger -> You don't longer hungry
+* fullenergy -> full energy
+* notoilet -> you dont need longer a toilet
+* maxsexskills -> set all sex skills to level 300
+* maxarmyskills -> set all army skills to level 300
+* maxworkskills -> -> set all work skills to level 300
+* maxallskills -> set all skills to level 300
+* maxarousal -> set arousal heart to max
+* addallitems  -> add all items from the game (current 300)
+* pregnancy -> set fertility to on (1) or off (0)
+* realpregnancy -> set fertility to on (1) or off (0) and you are really pregnant now
+* invincible -> toggle infinite health (nobody can not longer hit you
+* infinitehealth -> toggle infinite health (nobody can not longer hit you
+
+commands with 1 param:
+
+* warp name -> teleports to a warp (teleport) point
+* addmoney value
+* addweapon name
+* getstate number
+* setfavor number
+* setsexmultiplier number
+* setsexmaddictionmultiplier number
+* setsexskills number
+* setarmyskills number
+* setworkskills number
+* setallskills number
+* setarousal number
+
+commands with 2 params:
+
+* additem name amount -> add the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
+* setstate number -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
