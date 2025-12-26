@@ -193,6 +193,101 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+        public static void lock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lock");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Lockable)
+                {
+                    int_Lockable int_Lo = (int_Lockable)la;
+                    int_Lo.m_Locked = true;
+                    int_Lo.InteractIcon = 1;
+                    if (int_Lo.InteractText != null)
+                    {
+                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void unlock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlock");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Lockable)
+                {
+                    int_Lockable int_Lo = (int_Lockable)la;
+                    int_Lo.m_Locked = false;
+                    int_Lo.InteractIcon = int_Lo.DefaultInteractIcon;
+                    if (int_Lo.InteractText != null)
+                    {
+                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void storagemax_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: storagemax");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is Int_Storage)
+                {
+                    Int_Storage int_storage = (Int_Storage)la;
+                    int_storage.StorageMax = int.MaxValue;
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void storagemax_int_backpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: storagemaxbackpack");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.CurrentBackpack == null)
+                {
+                    return;
+                }
+
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
+            }
+            catch (Exception e)
+            {
+            }
+        }
 
         public static void warpfollower()
         {
@@ -1096,6 +1191,32 @@ namespace BitchlandCheatConsoleBepInEx
                 case "warpfollower":
                     {
                         warpfollower();
+                    }
+                    break;
+
+                case "lock":
+                    {
+                        lock_int();
+                    }
+                    break;
+
+
+                case "unlock":
+                    {
+                        unlock_int();
+                    }
+                    break;
+
+                case "storagemax":
+                    {
+                        storagemax_int();
+                    }
+                    break;
+
+                case "storagemaxbp":
+                case "storagemaxbackpack":
+                    {
+                        storagemax_int_backpack();
                     }
                     break;
 

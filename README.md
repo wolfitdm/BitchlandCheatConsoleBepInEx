@@ -35,6 +35,11 @@ commands with no params:
 * autosave -> saves the game on everytime in the autosave slot
 * unstuckme -> unstuck the player
 * warpfollower -> teleports all follower to you
+* lock -> If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be closed
+* unlock -> If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be open
+* storagemax -> If you look at a backpack, locker, or any other container with the camera and enter this command in the console, then the container will now have a maximum size of 2,147,483,647.
+* storagemaxbp -> sets the container size of your backpack to 2,147,483,647
+* storagemaxbackpack -> sets the container size of your backpack to 2,147,483,647
 
 commands with 1 param:
 
