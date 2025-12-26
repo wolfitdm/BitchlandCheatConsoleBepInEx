@@ -875,7 +875,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
-                string pattern3 = @"(?:^(?<command>\w+)\s+(?<key>\w+)\s+(?<value>\w+)$)";
+                string pattern3 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)$)";
                 Regex rg3 = new Regex(pattern3, RegexOptions.IgnoreCase);
                 Match rg3Match = rg3.Match(inputText);
 
@@ -885,7 +885,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                string pattern2 = @"(?:^(?<command>\w+)\s+(?<value>\w+)$)";
+                string pattern2 = @"(?:^(?<command>\S+)\s+(?<value>\S+)$)";
                 Regex rg2 = new Regex(pattern2, RegexOptions.IgnoreCase);
                 Match rg2Match = rg2.Match(inputText);
 
@@ -895,7 +895,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                string pattern1 = @"(?:^(?<command>\w+)$)";
+                string pattern1 = @"(?:^(?<command>\S+)$)";
 
                 Regex rg1 = new Regex(pattern1, RegexOptions.IgnoreCase);
                 Match rg1Match = rg1.Match(inputText);
