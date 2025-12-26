@@ -1110,6 +1110,14 @@ namespace BitchlandCheatConsoleBepInEx
         {
             switch (command)
             {
+                // not for @Neoton begin
+                case "additem":
+                    {
+                        additem(value, "1");
+                    }
+                    break;
+                // not for @Neoton end
+
                 case "warp":
                     {
                         warp(value);
