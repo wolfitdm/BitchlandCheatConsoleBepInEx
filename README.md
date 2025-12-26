@@ -40,6 +40,15 @@ commands with no params:
 * storagemax -> If you look at a backpack, locker, or any other container with the camera and enter this command in the console, then the container will now have a maximum size of 2,147,483,647.
 * storagemaxbp -> sets the container size of your backpack to 2,147,483,647
 * storagemaxbackpack -> sets the container size of your backpack to 2,147,483,647
+* isnpcfuckable -> is npc the you are looked at, fuckable, yes or no?
+* getpersonstate ->  -> is npc the you are looked at, fuckable, yes or no?
+* setnpctonotfuckable -> set the npc the you are looked at, to not fuckable
+* setpersonstatetowork -> set the npc the you are looked at, to not fuckable
+* setnpctofuckable -> set the npc the you are looked at, to fuckable
+* setpersonstatetofree -> set the npc the you are looked at, to fuckable
+* togglenpcfuckable -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
+* togglepersonstate -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
+* completeallquests -> marks all quests as done
 
 commands with 1 param:
 

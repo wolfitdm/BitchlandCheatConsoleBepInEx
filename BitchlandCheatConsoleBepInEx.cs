@@ -193,6 +193,230 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+
+        public static void completeallquests()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: completallquests");
+            int allMissionsCount = Main.Instance.AllMissions.Count;
+            for (int index1 = 0; index1 < allMissionsCount; ++index1)
+            {
+                if (!Main.Instance.AllMissions[index1].CurrentGoal.isNull())
+                {
+                    Main.Instance.AllMissions[index1].CurrentGoal.Completed = true;
+                    Main.Instance.AllMissions[index1].CurrentGoal.Failed = false;
+                    string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.AllMissions[index1].CurrentGoal.ToString();
+                    Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                    Debug.Log((object)completeQuestString);
+                }
+
+                int goalsCount = Main.Instance.AllMissions[index1].Goals.Count;
+                for (int index2 = 0; index2 < goalsCount; ++index2)
+                {
+                    if (!Main.Instance.AllMissions[index1].Goals[index2].isNull())
+                    {
+                        Main.Instance.AllMissions[index1].Goals[index2].Completed = true;
+                        Main.Instance.AllMissions[index1].Goals[index2].Failed = false;
+                        string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.AllMissions[index1].Goals[index2].ToString();
+                        Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                        Debug.Log((object)completeQuestString);
+                    }
+                }
+            }
+            allMissionsCount = Main.Instance.GameplayMenu.CurrentMissions.Count;
+            for (int index3 = 0; index3 < allMissionsCount; ++index3)
+            {
+                if (!Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.isNull())
+                {
+                    Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.Completed = true;
+                    Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.Failed = false;
+                    string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.ToString();
+                    Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                    Debug.Log((object)completeQuestString);
+                }
+                int goalsCount = Main.Instance.GameplayMenu.CurrentMissions[index3].Goals.Count;
+                for (int index4 = 0; index4 < goalsCount; ++index4)
+                {
+                    if (!Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].isNull())
+                    {
+                        Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].Completed = true;
+                        Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].Failed = false;
+                        string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].ToString();
+                        Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                        Debug.Log((object)completeQuestString);
+                    }
+                }
+            }
+            if (!Main.Instance.GameplayMenu.CurrentMission.IsNull())
+            {
+                if (!Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.isNull())
+                {
+                    Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.Completed = true;
+                    Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.Failed = false;
+                    string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.ToString();
+                    Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                    Debug.Log((object)completeQuestString);
+                }
+                int goalsCount = Main.Instance.GameplayMenu.CurrentMission.Goals.Count;
+                for (int index = 0; index < goalsCount; ++index)
+                {
+                    if (!Main.Instance.GameplayMenu.CurrentMission.Goals[index].isNull())
+                    {
+                        Main.Instance.GameplayMenu.CurrentMission.Goals[index].Completed = true;
+                        Main.Instance.GameplayMenu.CurrentMission.Goals[index].Failed = false;
+                        string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMission.Goals[index].ToString();
+                        Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
+                        Debug.Log((object)completeQuestString);
+                    }
+                }
+            }
+            string completeQuestString2 = "bl_CompleteAllQuestsModDoWork.doWork() Complete All Quests";
+            Main.Instance.GameplayMenu.ShowNotification(completeQuestString2);
+            Debug.Log((object)completeQuestString2);
+        }
+        public static void getpersonstate()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getpersonstate");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Person)
+                {
+                    int_Person int_P = (int_Person)la;
+                    if (int_P.ThisPerson != null)
+                    {
+                        Person thisPerson = (Person)int_P.ThisPerson;
+                        if (thisPerson.State == Person_State.Free)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is free");
+                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is fuckable great!, yeah :)");
+                        }
+                        else if (thisPerson.State == Person_State.Work)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is work");
+                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is not fuckable, soo bad ): ");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void togglepersonstate()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglepersonstate");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Person)
+                {
+                    int_Person int_P = (int_Person)la;
+                    if (int_P.ThisPerson != null)
+                    {
+                        Person thisPerson = (Person)int_P.ThisPerson;
+                        if (thisPerson.State == Person_State.Free)
+                        {
+                            thisPerson.State = Person_State.Work;
+                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was free, now person state is work");
+                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is not fuckable now, soo bad ): ");
+                        }
+                        else if (thisPerson.State == Person_State.Work)
+                        {
+                            thisPerson.State = Person_State.Free;
+                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was work, now person state is free");
+                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is fuckable now great!, yeah :)");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void setpersonstatetowork()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonstatetowork");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Person)
+                {
+                    int_Person int_P = (int_Person)la;
+                    if (int_P.ThisPerson != null)
+                    {
+                        Person thisPerson = (Person)int_P.ThisPerson;
+                        if (thisPerson.State == Person_State.Free)
+                        {
+                            thisPerson.State = Person_State.Work;
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state was free, now person state is work");
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
+                        }
+                        else if (thisPerson.State == Person_State.Work)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state is already work");
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void setpersonstatetofree()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonstatetofree");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_Person)
+                {
+                    int_Person int_P = (int_Person)la;
+                    if (int_P.ThisPerson != null)
+                    {
+                        Person thisPerson = (Person)int_P.ThisPerson;
+                        if (thisPerson.State == Person_State.Free)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state is already free");
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
+                        }
+                        else if (thisPerson.State == Person_State.Work)
+                        {
+                            thisPerson.State = Person_State.Free;
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state was work, now person state is free");
+                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
         public static void lock_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: lock");
@@ -212,7 +436,7 @@ namespace BitchlandCheatConsoleBepInEx
                     int_Lo.InteractIcon = 1;
                     if (int_Lo.InteractText != null)
                     {
-                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
+                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Unlocked", "(Locked");
                     }
                 }
             }
@@ -220,7 +444,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
             }
         }
-
         public static void unlock_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unlock");
@@ -277,7 +500,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: storagemaxbackpack");
             try
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.CurrentBackpack == null)
+                if (Main.Instance.Player == null || Main.Instance.Player.CurrentBackpack == null || Main.Instance.Player.CurrentBackpack.ThisStorage == null)
                 {
                     return;
                 }
@@ -1217,6 +1440,40 @@ namespace BitchlandCheatConsoleBepInEx
                 case "storagemaxbackpack":
                     {
                         storagemax_int_backpack();
+                    }
+                    break;
+
+                case "isnpcfuckable":
+                case "getpersonstate":
+                    {
+                        getpersonstate();
+                    }
+                    break;
+
+                case "setnpctonotfuckable":
+                case "setpersonstatetowork":
+                    {
+                        setpersonstatetowork();
+                    }
+                    break;
+
+                case "setnpctofuckable":
+                case "setpersonstatetofree":
+                    {
+                        setpersonstatetofree();
+                    }
+                    break;
+
+                case "togglenpcfuckable":
+                case "togglepersonstate":
+                    {
+                        togglepersonstate();
+                    }
+                    break;
+
+                case "completeallquests":
+                    {
+                        completeallquests();
                     }
                     break;
 
