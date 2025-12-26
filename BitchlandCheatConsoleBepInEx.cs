@@ -193,7 +193,68 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+        public static void spawnbirthintopod()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnbirthintopod");
 
+            if (!(Main.Instance.Player is Girl))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("you are a male!");
+                return;
+            }
+
+            int_HealthPod pod = null;
+
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is int_HealthPod)
+                {
+                    int_HealthPod int_P = (int_HealthPod)la;
+                    if (int_P != null)
+                    {
+                        pod = int_P;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+
+            int_HealthPod podAvailable = pod;
+            if (podAvailable == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You must look at a HealthPod, in the clinic you can found a healthpod, or in the lab you can also found a healthpod");
+                return;
+            }
+            Person parent1 = Main.Instance.Player;
+            Person parent2 = (Main.Instance.Player as Girl).PregnancyParent;
+            Person offspring = Main.Instance.CreateOffspring(parent1, parent2);
+            podAvailable.PodUseType = 2;
+            podAvailable.Interact(offspring);
+            offspring.IsPlayerDescendant = true;
+            offspring.CantBeForced = true;
+        }
+        public static void spawnmale()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+        }
+        public static void spawnfemale()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemale");
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+        }
         public static void completeallquests()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: completallquests");
@@ -805,11 +866,20 @@ namespace BitchlandCheatConsoleBepInEx
         public static void pregnancy(bool realpregnancy)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: pregnancy");
+            bool isNotAGirl = Main.Instance.Player is Girl;
+            isNotAGirl = !isNotAGirl;
+
+            if (isNotAGirl)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You are a male!");
+                return;
+            }
+            
             float fertility = Main.Instance.Player.Fertility;
             float storymodefertility = Main.Instance.Player.StoryModeFertility;
 
             bool togglePregnancy = fertility > 0 || storymodefertility > 0;
-            
+
             togglePregnancy = !togglePregnancy;
 
             if (togglePregnancy)
@@ -817,7 +887,7 @@ namespace BitchlandCheatConsoleBepInEx
                 fertility = 1;
                 storymodefertility = 0;
                 Main.Instance.GameplayMenu.ShowNotification("pregnancy on");
-            } 
+            }
             else
             {
                 fertility = 0;
@@ -825,9 +895,15 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("pregnancy off");
             }
 
-            if (realpregnancy)
+            Main.Instance.Player.Fertility = fertility;
+            Main.Instance.Player.StoryModeFertility = storymodefertility;
+
+            if (realpregnancy && togglePregnancy)
             {
-                Main.Instance.Player.States[7] = togglePregnancy; // toggle you are pregnant state
+                // Main.Instance.Player.States[7] = togglePregnancy; // toggle you are pregnant state
+                Main.Instance.Player.Fertility *= 1000;
+                (Main.Instance.Player as Girl).BecomePreg();
+                Main.Instance.Player.Fertility = fertility;
             }
         }
 
@@ -1477,6 +1553,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmale":
+                    {
+                        spawnmale();
+                    }
+                    break;
+
+                case "spawnfemale":
+                    {
+                        spawnfemale();
+                    }
+                    break;
+
+                case "spawnbirth":
+                case "spawnbirthintopod":
+                    {
+                        spawnbirthintopod();
+                    }
+                    break;
                 default: {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
@@ -1565,6 +1659,19 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setarousal":
                     {
                         setarousal(value);
+                    }
+                    break;
+
+                case "setstoragesize":
+                    {
+                        setstoragesize(value);
+                    }
+                    break;
+
+                case "setstoragesizebp":
+                case "setstoragesizebackpack":
+                    {
+                        setstoragesizebackpack(value);
                     }
                     break;
 
@@ -1724,6 +1831,115 @@ namespace BitchlandCheatConsoleBepInEx
 
                 Main.Instance.Player.WeaponInv.DropAllWeapons();
                 Main.Instance.Player.WeaponInv.PickupWeapon(weaponx);
+            }
+        }
+        public static void setstoragesizebackpack(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setstoragesizebackpack");
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            int level = amount;
+
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.CurrentBackpack == null || Main.Instance.Player.CurrentBackpack.ThisStorage == null)
+                {
+                    return;
+                }
+
+                int count = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Count;
+
+                if (level <= count)
+                {
+                    level = count + 10;
+                }
+
+                level = level <= 0 ? int.MaxValue : level;
+
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = level;
+                Main.Instance.GameplayMenu.ShowNotification("setstoragesizebackpack: set storage size from player to " + level.ToString());
+            }
+            catch (Exception e)
+            {
+            }
+
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is Int_Storage)
+                {
+                    Int_Storage int_storage = (Int_Storage)la;
+                    int_storage.StorageMax = level;
+                    Main.Instance.GameplayMenu.ShowNotification("setstoragesizebackpack: set storage size to " + level.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void setstoragesize(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setstoragesize");
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            int level = amount;
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la is Int_Storage)
+                {
+                    Int_Storage int_storage = (Int_Storage)la;
+
+                    int count = int_storage.StorageItems.Count;
+
+                    if (level <= count)
+                    {
+                        level = count + 10;
+                    }
+
+                    level = level <= 0 ? int.MaxValue : level;
+
+                    int_storage.StorageMax = level;
+                    Main.Instance.GameplayMenu.ShowNotification("setstoragesize: set storage size to " + level.ToString());
+                }
+            }
+            catch (Exception e)
+            {
             }
         }
 
@@ -2228,9 +2444,22 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
             {
-                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
-
                 value = value <= 0 ? 1 : value;
+
+                int count = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Count;
+
+                count += value + 10;
+
+                count = count <= 0 ? int.MaxValue : count;
+
+                int storagemax = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax;
+
+                if (count >= storagemax)
+                {
+                    storagemax = count;
+                }
+
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = storagemax;
 
                 for (int i = 0; i < value; i++)
                 {

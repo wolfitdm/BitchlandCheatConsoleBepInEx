@@ -49,10 +49,17 @@ commands with no params:
 * togglenpcfuckable -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
 * togglepersonstate -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
 * completeallquests -> marks all quests as done
+* spawnmale -> spawn a male npc on your position (is not safe yet)
+* spawnfemale -> spawn a female npc on your position (is not safe yet)
+* spawnbirth -> spawn a birth into a health pod, the you look at.
+* spawnbirthintopod ->  spawn a birth into a health pod, the you look at.
 
 commands with 1 param:
 
 * warp name -> teleports to a warp (teleport) point
+* setstoragesizebackpack amount > change the storage size of your backpack to amount
+* setstoragesizebp amount -> change the storage size of your backpack to amount
+* setstoragesize amount -> change the storage size of the container you are looking at
 * addmoney value
 * addweapon name
 * getstate number
