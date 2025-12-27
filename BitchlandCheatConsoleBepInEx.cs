@@ -10,13 +10,19 @@ using System;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization.Json;
 using System.Security.Policy;
 using System.Text.RegularExpressions;
 using UMA.Examples;
 using UnityEngine;
+using UnityStandardAssets.Water;
+using static Mono.Security.X509.X520;
+using static UnityEngine.InputSystem.Controls.DiscreteButtonControl;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -131,8 +137,8 @@ namespace BitchlandCheatConsoleBepInEx
 
         private void Update()
         {
-           TriggerUpdate();
-        } 
+            TriggerUpdate();
+        }
         private void OnGUI()
         {
             if (!showGUI) return;
@@ -193,6 +199,80 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+        public static void OpenUrl(string url)
+        {
+            try
+            {
+                // .NET Core / .NET 5+ safe way
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch
+            {
+                // Fallback for older .NET or restricted environments
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url.Replace("&", "^&")}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+        public static void patreon()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: patreon");
+            OpenUrl("https://www.patreon.com/breakfast5");
+        }
+        public static void kofi()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: kofi");
+            OpenUrl("https://www.patreon.com/breakfast5");
+        }
+        public static void subscribestar()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: subscribestar");
+            OpenUrl("https://subscribestar.adult/breakfast5");
+        }
+        public static void discord()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: discord");
+            OpenUrl("https://discord.gg/QjjXAyfwEU");
+        }
+        public static void getmodslink()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getmodslink");
+            OpenUrl("https://discord.gg/S7hcQvYzmJ");
+        }
+        public static void getmoremods()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getmoremods");
+            OpenUrl("https://discord.com/channels/1021414197558513664/1228264001893437491");
+        }
+        public static void supportme()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: supportme");
+            patreon();
+            kofi();
+            subscribestar();
+            discord();
+            getmodslink();
+            getmoremods();
+        }
+
         public static void spawnbirthintopod()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnbirthintopod");
@@ -241,19 +321,210 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.IsPlayerDescendant = true;
             offspring.CantBeForced = true;
         }
-        public static void spawnmale()
+
+        public static Person CreatePersonFemaleNew(string name)
+        {
+            bool LoadSpecificNPC = true;
+            bool spawnFemale = true;
+            Person PersonGenerated = null;
+            if (LoadSpecificNPC)
+            {
+                PersonGenerated = spawnFemale ? UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonPrefab).GetComponent<Person>() : UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonGuyPrefab).GetComponent<Person>();
+                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
+                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
+                Directory.CreateDirectory(femalesDir);
+                Directory.CreateDirectory(malesDir);
+                string filename = $"{Main.AssetsFolder}/wolfitdm/females/"+name+".png";
+                if (!File.Exists(filename)) {
+                    return null;
+                }
+                PersonGenerated._DontLoadClothing = true;
+                PersonGenerated._DontLoadInteraction = true;
+                PersonGenerated.LoadFromFile(filename);
+                PersonGenerated.transform.position = Main.Instance.Player.transform.position;
+                PersonGenerated.transform.rotation = Main.Instance.Player.transform.rotation;
+            }
+            PersonGenerated.WorldSaveID = Main.GenerateRandomString(25);
+            PersonGenerated.DontSaveInMain = true;
+            PersonGenerated.JobIndex = 0;
+            PersonGenerated.SPAWN_noUglyHair = false;
+            PersonGenerated.SPAWN_onlyGoodHair = true;
+            PersonGenerated.State = Person_State.Free;
+            PersonGenerated.Home = Main.Instance.PossibleStreetHomes[UnityEngine.Random.Range(0, Main.Instance.PossibleStreetHomes.Count)];
+            PersonGenerated.CurrentZone = null;
+            PersonGenerated.StartingClothes = new List<GameObject>();
+            PersonGenerated.StartingWeapons = new List<GameObject>();
+            PersonGenerated._StartingClothes = new List<string>();
+            PersonGenerated._StartingWeapons = new List<string>();
+            PersonGenerated.Inited = false;
+            PersonGenerated.PersonType = Main.Instance.PersonTypes[(int)Person_Type.Wild];
+            RandomNPCHere inst = new RandomNPCHere();
+            inst.SpawnClean = true;
+            PersonGenerated.PutFeet();
+            PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
+            setReverseWildStates(PersonGenerated);
+            PersonGenerated.TheHealth.canDie = false;
+            return PersonGenerated;
+        }
+
+        public static Person CreatePersonMaleOld()
+        {
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            return s;
+        }
+
+        public static Person CreatePersonFemaleOld()
+        {
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            return s;
+        }
+
+        public static void spawnmale(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
-            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
-            s.transform.position = Main.Instance.Player.transform.position;
-            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            if (value != null || value == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("not safe yet");
+                return;
+            }
+            Person s = CreatePersonMaleOld();
         }
-        public static void spawnfemale()
+
+        public static void spawnmalenude(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
+            if (value != null || value == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("not safe yet");
+                return;
+            }
+            Person s = CreatePersonMaleOld();
+        }
+        public static void spawnfemale(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemale");
-            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
-            s.transform.position = Main.Instance.Player.transform.position;
-            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            Person s = null;
+            switch (value)
+            {
+                case "jeanne":
+                    {
+                        s = CreatePersonFemaleNew("jeanne");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[184]);
+                            s.DressClothe(Main.Instance.AllPrefabs[43]);
+                            s.DressClothe(Main.Instance.AllPrefabs[38]);
+                            s.DressClothe(Main.Instance.AllPrefabs[40]);
+                            s.DressClothe(Main.Instance.AllPrefabs[36]);
+                        }
+                    }
+                    break;
+
+                case "sarahoffwork":
+                    {
+                        s = CreatePersonFemaleNew("sarah");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[14]);
+                        }
+                    }
+                    break;
+
+                case "uniformedsarah":
+                    {
+                        s = CreatePersonFemaleNew("sarah");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[14]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[1]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[2]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[3]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[4]);
+                            s.DressClothe(Main.Instance.Prefabs_Hair[63]);
+                        }
+                    }
+                    break;
+
+                case "nameless":
+                    {
+                        s = CreatePersonFemaleNew("nameless");
+                        if (s != null)
+                        {
+                            GameObject[] uniform = new GameObject[6];
+                            uniform[0] = Main.Spawn(Main.Instance.AllPrefabs[36], Main.Instance.DisabledObjects);
+                            uniform[1] = Main.Spawn(Main.Instance.AllPrefabs[144], Main.Instance.DisabledObjects);
+                            uniform[2] = Main.Spawn(Main.Instance.AllPrefabs[161], Main.Instance.DisabledObjects);
+                            uniform[3] = Main.Spawn(Main.Instance.AllPrefabs[165], Main.Instance.DisabledObjects);
+                            uniform[4] = Main.Spawn(Main.Instance.AllPrefabs[197], Main.Instance.DisabledObjects);
+                            uniform[5] = Main.Spawn(Main.Instance.AllPrefabs[198], Main.Instance.DisabledObjects);
+                            int_PickableClothingPackage componentInChildren = uniform[3].GetComponentInChildren<int_PickableClothingPackage>(true);
+                            if (componentInChildren != null)
+                            {
+                                componentInChildren.ClothingData = ":RGBA(0.000, 0.000, 0.000, 1.000):RGBA(0.000, 0.000, 0.000, 0.000)";
+                            }
+                            s.ChangeUniform(uniform);
+                        }
+                    }
+                    break;
+
+                case "rit":
+                    {
+                        s = CreatePersonFemaleNew("rit");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[184]);
+                            s.DressClothe(Main.Instance.AllPrefabs[193]);
+                            s.DressClothe(Main.Instance.AllPrefabs[38]);
+                            s.DressClothe(Main.Instance.AllPrefabs[40]);
+                        }
+                    }
+                    break;
+
+                case "carol":
+                    {
+                        s = CreatePersonFemaleNew("carol");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[7]);
+                            s.DressClothe(Main.Instance.AllPrefabs[31]);
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[55]);
+                            s.DressClothe(Main.Instance.AllPrefabs[4]);
+                        }
+                    }
+                    break;
+
+                case "beth":
+                    {
+                        s = CreatePersonFemaleNew("beth");
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[197]);
+                            s.DressClothe(Main.Instance.AllPrefabs[198]);
+                            s.DressClothe(Main.Instance.AllPrefabs[33]);
+                            s.DressClothe(Main.Instance.AllPrefabs[174]);
+                            s.DressClothe(Main.Instance.AllPrefabs[177]);
+                        }
+                    }
+                    break;
+
+                default:
+                    {
+                        s = CreatePersonFemaleNew(value);
+                    }
+                    break;
+            }
+        }
+        public static void spawnfemalenude(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
+            Person s = CreatePersonFemaleNew(value);
         }
         public static void completeallquests()
         {
@@ -267,7 +538,7 @@ namespace BitchlandCheatConsoleBepInEx
                     Main.Instance.AllMissions[index1].CurrentGoal.Failed = false;
                     string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.AllMissions[index1].CurrentGoal.ToString();
                     Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                    Debug.Log((object)completeQuestString);
+                    Logger.LogInfo(completeQuestString);
                 }
 
                 int goalsCount = Main.Instance.AllMissions[index1].Goals.Count;
@@ -279,7 +550,7 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.AllMissions[index1].Goals[index2].Failed = false;
                         string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.AllMissions[index1].Goals[index2].ToString();
                         Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                        Debug.Log((object)completeQuestString);
+                        Logger.LogInfo(completeQuestString);
                     }
                 }
             }
@@ -292,7 +563,7 @@ namespace BitchlandCheatConsoleBepInEx
                     Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.Failed = false;
                     string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMissions[index3].CurrentGoal.ToString();
                     Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                    Debug.Log((object)completeQuestString);
+                    Logger.LogInfo(completeQuestString);
                 }
                 int goalsCount = Main.Instance.GameplayMenu.CurrentMissions[index3].Goals.Count;
                 for (int index4 = 0; index4 < goalsCount; ++index4)
@@ -303,7 +574,7 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].Failed = false;
                         string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMissions[index3].Goals[index4].ToString();
                         Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                        Debug.Log((object)completeQuestString);
+                        Logger.LogInfo(completeQuestString);
                     }
                 }
             }
@@ -315,7 +586,7 @@ namespace BitchlandCheatConsoleBepInEx
                     Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.Failed = false;
                     string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMission.CurrentGoal.ToString();
                     Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                    Debug.Log((object)completeQuestString);
+                    Logger.LogInfo(completeQuestString);
                 }
                 int goalsCount = Main.Instance.GameplayMenu.CurrentMission.Goals.Count;
                 for (int index = 0; index < goalsCount; ++index)
@@ -326,13 +597,13 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.CurrentMission.Goals[index].Failed = false;
                         string completeQuestString = "bl_CompleteAllQuestsModDoWork.doWork() Complete quest: " + Main.Instance.GameplayMenu.CurrentMission.Goals[index].ToString();
                         Main.Instance.GameplayMenu.ShowNotification(completeQuestString);
-                        Debug.Log((object)completeQuestString);
+                        Logger.LogInfo(completeQuestString);
                     }
                 }
             }
             string completeQuestString2 = "bl_CompleteAllQuestsModDoWork.doWork() Complete All Quests";
             Main.Instance.GameplayMenu.ShowNotification(completeQuestString2);
-            Debug.Log((object)completeQuestString2);
+            Logger.LogInfo(completeQuestString2);
         }
         public static void getpersonstate()
         {
@@ -582,7 +853,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     if (Main.Instance.Player.transform != null && Main.Instance.PeopleFollowingPlayer[i].transform != null)
                     {
-                       Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                        Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
                     }
                 }
             }
@@ -874,7 +1145,7 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("You are a male!");
                 return;
             }
-            
+
             float fertility = Main.Instance.Player.Fertility;
             float storymodefertility = Main.Instance.Player.StoryModeFertility;
 
@@ -914,7 +1185,8 @@ namespace BitchlandCheatConsoleBepInEx
             if (Main.Instance.Player.CantBeHit)
             {
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: on");
-            } else
+            }
+            else
             {
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: off");
             }
@@ -1024,11 +1296,247 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
-
-        public static void cleanskin()
+        public static void setNudeStates(Person person, bool realnude = false, bool setallnudestates = false)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: cleanskin");
-            Person _this = Main.Instance.Player;
+            person.ClothingCondition = e_ClothingCondition.Nude;
+            person.States[9] = true; // Nude Clothing Vipe
+            person.States[10] = false; // Casual Clothing Vipe
+            person.States[11] = false; // Sexy Clothing Vipe
+
+            if (realnude)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = false; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallnudestates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = false; // Cum Stains + 1 Sexy 
+                person.States[13] = false; // Cum Stains + 2 Sexy
+                person.States[14] = false; // Cum Stains + 3 Sexy
+                person.States[15] = false; // Cum Stains + 4 Sexy 
+                person.States[16] = false; // Cum Stains + 5 Sexy 
+                person.States[17] = false; // Body Writting + 1 Sexy 
+                person.States[18] = false; // Body Writting + 2 Sexy 
+                person.States[19] = false; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = false; // Basic Makeup + 10 Sexy
+                person.States[23] = false; // Runny Makeup + 1 Sexy
+                person.States[24] = false; // Runny Makeup + 1 Sexy
+                person.States[25] = false; // Runny Makeup + 1 Sexy
+                person.States[26] = false; // Cum in mouth + 1 Sexy
+
+                if (setallnudestates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+
+        public static void setNudeClothesPoints(Person person)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].SexyPoints = 0;
+                person.EquippedClothes[i].CasualPoints = 0;
+            }
+
+            person.GetClothingCondition();
+        }
+        public static void setSexyStates(Person person, bool realsexy, bool setallsexystates = false)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            person.ClothingCondition = e_ClothingCondition.Sexy;
+            person.States[9] = false; // Nude Clothing Vipe
+            person.States[10] = false; // Casual Clothing Vipe
+            person.States[11] = true; // Sexy Clothing Vipe
+
+            if (realsexy)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = true; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallsexystates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = true; // Cum Stains + 1 Sexy 
+                person.States[13] = true; // Cum Stains + 2 Sexy
+                person.States[14] = true; // Cum Stains + 3 Sexy
+                person.States[15] = true; // Cum Stains + 4 Sexy 
+                person.States[16] = true; // Cum Stains + 5 Sexy 
+                person.States[17] = true; // Body Writting + 1 Sexy 
+                person.States[18] = true; // Body Writting + 2 Sexy 
+                person.States[19] = true; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = true; // Basic Makeup + 10 Sexy
+                person.States[23] = true; // Runny Makeup + 1 Sexy
+                person.States[24] = true; // Runny Makeup + 1 Sexy
+                person.States[25] = true; // Runny Makeup + 1 Sexy
+                person.States[26] = true; // Cum in mouth + 1 Sexy
+
+                if (setallsexystates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+
+        public static void setSexyClothesPoints(Person person)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].CasualPoints = 0;
+                person.EquippedClothes[i].SexyPoints = add;
+                person.EquippedClothes[i].SexyPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
+            }
+
+            person.GetClothingCondition();
+        }
+
+        public static void setCasualStates(Person person, bool realcasual = false, bool setallcasualstates = false)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            person.ClothingCondition = e_ClothingCondition.Casual;
+            person.States[9] = false; // Nude Clothing Vipe
+            person.States[10] = true; // Casual Clothing Vipe
+            person.States[11] = false; // Sexy Clothing Vipe
+
+            if (realcasual)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = false; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallcasualstates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = false; // Cum Stains + 1 Sexy 
+                person.States[13] = false; // Cum Stains + 2 Sexy
+                person.States[14] = false; // Cum Stains + 3 Sexy
+                person.States[15] = false; // Cum Stains + 4 Sexy 
+                person.States[16] = false; // Cum Stains + 5 Sexy 
+                person.States[17] = false; // Body Writting + 1 Sexy 
+                person.States[18] = false; // Body Writting + 2 Sexy 
+                person.States[19] = false; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = false; // Basic Makeup + 10 Sexy
+                person.States[23] = false; // Runny Makeup + 1 Sexy
+                person.States[24] = false; // Runny Makeup + 1 Sexy
+                person.States[25] = false; // Runny Makeup + 1 Sexy
+                person.States[26] = false; // Cum in mouth + 1 Sexy
+
+                if (setallcasualstates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+
+        public static void setCasualClothesPoints(Person person)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].SexyPoints = 0;
+                person.EquippedClothes[i].CasualPoints = add;
+                person.EquippedClothes[i].CasualPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
+            }
+
+            person.GetClothingCondition();
+        }
+
+        public static void setCleanSkinStates(Person _this)
+        {
+            if (_this == null)
+            {
+                return;
+            }
+
             _this.States[0] = false;
             _this.States[2] = false;
             _this.States[3] = false;
@@ -1049,6 +1557,31 @@ namespace BitchlandCheatConsoleBepInEx
             _this.DirtySkin = false;
         }
 
+        public static void setReverseWildStates(Person person)
+        {
+            if (person == null)
+            {
+                return;
+            }
+
+            person.States[17] = false;
+            person.States[18] = false;
+            person.States[19] = false;
+            person.States[12] = false;
+            person.States[13] = false;
+            person.States[14] = false;
+            person.States[15] = false;
+            person.States[16 /*0x10*/] = false;
+            person.States[20] = false;
+            person.DirtySkin = false;
+        }
+        public static void cleanskin()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: cleanskin");
+            Person _this = Main.Instance.Player;
+            setCleanSkinStates(_this);
+        }
+
         public static void heal()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: heal");
@@ -1059,188 +1592,27 @@ namespace BitchlandCheatConsoleBepInEx
         public static void nude(bool realnude)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: nude");
-            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Nude;
-            Main.Instance.Player.States[9] = true; // Nude Clothing Vipe
-            Main.Instance.Player.States[10] = false; // Casual Clothing Vipe
-            Main.Instance.Player.States[11] = false; // Sexy Clothing Vipe
 
-            if (realnude)
-            {
-                Main.Instance.Player.States[0] = false; // Dirty -10 Sexy
-                Main.Instance.Player.States[1] = false; // Horny +10 Sexy
-                Main.Instance.Player.States[2] = false; // Very Dirty -20 Sexy
-                Main.Instance.Player.States[3] = false; // Shitten -20 Sexy
-                                                        //Main.Instance.Player.States[4] = false; // Sleepy - speed
-                                                        //Main.Instance.Player.States[5] = false; // Needs toilet
-                                                        //Main.Instance.Player.States[6] = false; // Hungry
-                                                        //Main.Instance.Player.States[7] = false; // Pregnant
-                Main.Instance.Player.States[8] = false; // Bloody -10 Sexy
-                                                        //Main.Instance.Player.States[9] = false; // Clothing vibe Nude
-                                                        //Main.Instance.Player.States[10] = false; // Clothing vibe Casual
-                                                        //Main.Instance.Player.States[12] = true; // Clothing vibe Sexy
-                Main.Instance.Player.States[12] = false; // Cum Stains + 1 Sexy 
-                Main.Instance.Player.States[13] = false; // Cum Stains + 2 Sexy
-                Main.Instance.Player.States[14] = false; // Cum Stains + 3 Sexy
-                Main.Instance.Player.States[15] = false; // Cum Stains + 4 Sexy 
-                Main.Instance.Player.States[16] = false; // Cum Stains + 5 Sexy 
-                Main.Instance.Player.States[17] = false; // Body Writting + 1 Sexy 
-                Main.Instance.Player.States[18] = false; // Body Writting + 2 Sexy 
-                Main.Instance.Player.States[19] = false; // Body Writting + 3 Sexy 
-                Main.Instance.Player.States[20] = false; // Bruises - 10 Sexy 
-                Main.Instance.Player.States[21] = false; // Heavy Bruises - 20 Sexy 
-                Main.Instance.Player.States[22] = false; // Basic Makeup + 10 Sexy
-                Main.Instance.Player.States[23] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[24] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[25] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[26] = false; // Cum in mouth + 1 Sexy
-                                                         //Main.Instance.Player.States[27] = true; // Beard
-                                                         //Main.Instance.Player.States[28] = true; // Lipstick
-                                                         //Main.Instance.Player.States[29] = true; // Lipstick
-                                                         //Main.Instance.Player.States[30] = true; // Lipstick
-                                                         //Main.Instance.Player.States[31] = true; // Skin color lips
-                                                         //Main.Instance.Player.States[32] = true; // Freckets
-                                                         //Main.Instance.Player.States[33] = true; // Dirty Mouth
-            }
+            setNudeStates(Main.Instance.Player, realnude, false);
 
-            if (Main.Instance.Player.EquippedClothes == null)
-            {
-                return;
-            }
-
-            int add = 100;
-
-            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
-            {
-                Main.Instance.Player.EquippedClothes[i].CasualPoints = 0;
-                Main.Instance.Player.EquippedClothes[i].SexyPoints = 0;
-            }
-
-            Main.Instance.Player.GetClothingCondition();
+            setNudeClothesPoints(Main.Instance.Player);
         }
         public static void sexy(bool realsexy)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: sexy");
-            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Sexy;
-            Main.Instance.Player.States[9] = false; // Nude Clothing Vipe
-            Main.Instance.Player.States[10] = false; // Casual Clothing Vipe
-            Main.Instance.Player.States[11] = true; // Sexy Clothing Vipe
 
-            if (realsexy)
-            {
-                Main.Instance.Player.States[0] = false; // Dirty -10 Sexy
-                Main.Instance.Player.States[1] = true; // Horny +10 Sexy
-                Main.Instance.Player.States[2] = false; // Very Dirty -20 Sexy
-                Main.Instance.Player.States[3] = false; // Shitten -20 Sexy
-                                                        //Main.Instance.Player.States[4] = false; // Sleepy - speed
-                                                        //Main.Instance.Player.States[5] = false; // Needs toilet
-                                                        //Main.Instance.Player.States[6] = false; // Hungry
-                                                        //Main.Instance.Player.States[7] = false; // Pregnant
-                Main.Instance.Player.States[8] = false; // Bloody -10 Sexy
-                                                        //Main.Instance.Player.States[9] = false; // Clothing vibe Nude
-                                                        //Main.Instance.Player.States[10] = false; // Clothing vibe Casual
-                                                        //Main.Instance.Player.States[12] = true; // Clothing vibe Sexy
-                Main.Instance.Player.States[12] = true; // Cum Stains + 1 Sexy 
-                Main.Instance.Player.States[13] = true; // Cum Stains + 2 Sexy
-                Main.Instance.Player.States[14] = true; // Cum Stains + 3 Sexy
-                Main.Instance.Player.States[15] = true; // Cum Stains + 4 Sexy 
-                Main.Instance.Player.States[16] = true; // Cum Stains + 5 Sexy 
-                Main.Instance.Player.States[17] = true; // Body Writting + 1 Sexy 
-                Main.Instance.Player.States[18] = true; // Body Writting + 2 Sexy 
-                Main.Instance.Player.States[19] = true; // Body Writting + 3 Sexy 
-                Main.Instance.Player.States[20] = false; // Bruises - 10 Sexy 
-                Main.Instance.Player.States[21] = false; // Heavy Bruises - 20 Sexy 
-                Main.Instance.Player.States[22] = true; // Basic Makeup + 10 Sexy
-                Main.Instance.Player.States[23] = true; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[24] = true; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[25] = true; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[26] = true; // Cum in mouth + 1 Sexy
-                                                        //Main.Instance.Player.States[27] = true; // Beard
-                                                        //Main.Instance.Player.States[28] = true; // Lipstick
-                                                        //Main.Instance.Player.States[29] = true; // Lipstick
-                                                        //Main.Instance.Player.States[30] = true; // Lipstick
-                                                        //Main.Instance.Player.States[31] = true; // Skin color lips
-                                                        //Main.Instance.Player.States[32] = true; // Freckets
-                                                        //Main.Instance.Player.States[33] = true; // Dirty Mouth
-            }
+            setSexyStates(Main.Instance.Player, realsexy, false);
 
-            if (Main.Instance.Player.EquippedClothes == null)
-            {
-                return;
-            }
-
-            int add = 100;
-
-            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
-            {
-                Main.Instance.Player.EquippedClothes[i].CasualPoints = 0;
-                Main.Instance.Player.EquippedClothes[i].SexyPoints = add;
-                Main.Instance.Player.EquippedClothes[i].SexyPoints = Main.Instance.Player.EquippedClothes[i].CasualPoints + Main.Instance.Player.EquippedClothes[i].SexyPoints + add;
-            }
-
-            Main.Instance.Player.GetClothingCondition();
+            setSexyClothesPoints(Main.Instance.Player);
         }
 
         public static void casual(bool realcasual)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: casual");
-            Main.Instance.Player.ClothingCondition = e_ClothingCondition.Casual;
-            Main.Instance.Player.States[9] = false; // Nude
-            Main.Instance.Player.States[10] = true; // Casual
-            Main.Instance.Player.States[11] = false; // Sexy
 
-            if (realcasual)
-            {
-                Main.Instance.Player.States[0] = false; // Dirty -10 Sexy
-                Main.Instance.Player.States[1] = false; // Horny +10 Sexy
-                Main.Instance.Player.States[2] = false; // Very Dirty -20 Sexy
-                Main.Instance.Player.States[3] = false; // Shitten -20 Sexy
-                                                        //Main.Instance.Player.States[4] = false; // Sleepy - speed
-                                                        //Main.Instance.Player.States[5] = false; // Needs toilet
-                                                        //Main.Instance.Player.States[6] = false; // Hungry
-                                                        //Main.Instance.Player.States[7] = false; // Pregnant
-                Main.Instance.Player.States[8] = false; // Bloody -10 Sexy
-                                                        //Main.Instance.Player.States[9] = false; // Clothing vibe Nude
-                                                        //Main.Instance.Player.States[10] = false; // Clothing vibe Casual
-                                                        //Main.Instance.Player.States[12] = true; // Clothing vibe Sexy
-                Main.Instance.Player.States[12] = false; // Cum Stains + 1 Sexy 
-                Main.Instance.Player.States[13] = false; // Cum Stains + 2 Sexy
-                Main.Instance.Player.States[14] = false; // Cum Stains + 3 Sexy
-                Main.Instance.Player.States[15] = false; // Cum Stains + 4 Sexy 
-                Main.Instance.Player.States[16] = false; // Cum Stains + 5 Sexy 
-                Main.Instance.Player.States[17] = false; // Body Writting + 1 Sexy 
-                Main.Instance.Player.States[18] = false; // Body Writting + 2 Sexy 
-                Main.Instance.Player.States[19] = false; // Body Writting + 3 Sexy 
-                Main.Instance.Player.States[20] = false; // Bruises - 10 Sexy 
-                Main.Instance.Player.States[21] = false; // Heavy Bruises - 20 Sexy 
-                Main.Instance.Player.States[22] = false; // Basic Makeup + 10 Sexy
-                Main.Instance.Player.States[23] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[24] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[25] = false; // Runny Makeup + 1 Sexy
-                Main.Instance.Player.States[26] = false; // Cum in mouth + 1 Sexy
-                                                         //Main.Instance.Player.States[27] = true; // Beard
-                                                         //Main.Instance.Player.States[28] = true; // Lipstick
-                                                         //Main.Instance.Player.States[29] = true; // Lipstick
-                                                         //Main.Instance.Player.States[30] = true; // Lipstick
-                                                         //Main.Instance.Player.States[31] = true; // Skin color lips
-                                                         //Main.Instance.Player.States[32] = true; // Freckets
-                                                         //Main.Instance.Player.States[33] = true; // Dirty Mouth
-            }
+            setCasualStates(Main.Instance.Player, realcasual, false);
 
-            if (Main.Instance.Player.EquippedClothes == null)
-            {
-                return;
-            }
-
-            int add = 100;
-
-            for (int i = 0; i < Main.Instance.Player.EquippedClothes.Count; i++)
-            {
-                Main.Instance.Player.EquippedClothes[i].CasualPoints = add;
-                Main.Instance.Player.EquippedClothes[i].SexyPoints = 0;
-                Main.Instance.Player.EquippedClothes[i].CasualPoints = Main.Instance.Player.EquippedClothes[i].CasualPoints + Main.Instance.Player.EquippedClothes[i].SexyPoints + add;
-            }
-
-            Main.Instance.Player.GetClothingCondition();
+            setCasualClothesPoints(Main.Instance.Player);
         }
         public static void clearbackpack()
         {
@@ -1555,13 +1927,25 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "spawnmale":
                     {
-                        spawnmale();
+                        spawnmale("brat");
                     }
                     break;
 
                 case "spawnfemale":
                     {
-                        spawnfemale();
+                        spawnfemale("brat");
+                    }
+                    break;
+
+                case "spawnmalenude":
+                    {
+                        spawnmalenude("brat");
+                    }
+                    break;
+
+                case "spawnfemalenude":
+                    {
+                        spawnfemalenude("brat");
                     }
                     break;
 
@@ -1571,7 +1955,51 @@ namespace BitchlandCheatConsoleBepInEx
                         spawnbirthintopod();
                     }
                     break;
-                default: {
+
+                case "patreon":
+                    {
+                        patreon();
+                    }
+                    break;
+
+                case "kofi":
+                    {
+                        kofi();
+                    }
+                    break;
+
+                case "subscribestar":
+                    {
+                        subscribestar();
+                    }
+                    break;
+
+                case "discord":
+                    {
+                        discord();
+                    }
+                    break;
+
+                case "getmodslink":
+                    {
+                        getmodslink();
+                    }
+                    break;
+
+                case "getmoremods":
+                    {
+                        getmoremods();
+                    }
+                    break;
+
+                case "supportme":
+                    {
+                        supportme();
+                    }
+                    break;
+
+                default:
+                    {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
@@ -1675,7 +2103,32 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
-                default: {
+                case "spawnmale":
+                    {
+                        spawnmale(value);
+                    }
+                    break;
+
+                case "spawnfemale":
+                    {
+                        spawnfemale(value);
+                    }
+                    break;
+
+                case "spawnmalenude":
+                    {
+                        spawnmalenude(value);
+                    }
+                    break;
+
+                case "spawnfemalenude":
+                    {
+                        spawnfemalenude(value);
+                    }
+                    break;
+
+                default:
+                    {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
                     }
                     break;
@@ -1698,7 +2151,8 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
-                default: {
+                default:
+                    {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
@@ -1771,9 +2225,9 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return null;
             }
-            
+
             List<string> all = new List<string>();
-            
+
             int length = Prefabs.Count;
             for (int i = 0; i < length; i++)
             {
@@ -1803,13 +2257,13 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
-            Debug.Log((object)itemi);
+            Logger.LogInfo(itemi);
 
             int length = Prefabs.Count;
             for (int i = 0; i < length; i++)
             {
                 string item = Prefabs[i];
-                Debug.Log((object)item);
+                Logger.LogInfo(item);
             }
         }
 
@@ -1823,7 +2277,7 @@ namespace BitchlandCheatConsoleBepInEx
             if (weapon != null)
             {
                 GameObject weaponx = Main.Spawn(weapon.gameObject);
-                
+
                 if (weaponx == null)
                 {
                     return;
@@ -2158,7 +2612,8 @@ namespace BitchlandCheatConsoleBepInEx
             if (spawnpoints.ContainsKey(town))
             {
                 Main.Instance.Player.transform.position = spawnpoints[town];
-            } else
+            }
+            else
             {
                 Main.Instance.GameplayMenu.ShowNotification("No telepoint point found");
             }
@@ -2194,7 +2649,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
-            Debug.Log((object)itemi);
+            Logger.LogInfo(itemi);
 
             int length = Prefabs.Count;
             for (int i = 0; i < length; i++)
@@ -2207,7 +2662,7 @@ namespace BitchlandCheatConsoleBepInEx
                 string iname = Prefabs[i].name;
                 iname = iname.ToLower().Replace(" ", "_");
                 string item = iname;
-                Debug.Log((object)item);
+                Logger.LogInfo(item);
 
             }
         }
@@ -2377,7 +2832,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 string iname = Prefabs[i].name;
                 iname = iname.ToLower().Replace(" ", "_");
-                
+
                 if (iname == name)
                 {
                     return Prefabs[i];
@@ -2390,15 +2845,17 @@ namespace BitchlandCheatConsoleBepInEx
         {
             GameObject item = null;
 
-            if (name == null) { 
-                return null; 
+            if (name == null)
+            {
+                return null;
             }
 
             for (int i = 0; i < itemPCount; i++)
             {
                 item = getItemByName(itemsP[i], name);
-                if (item != null) { 
-                    return item; 
+                if (item != null)
+                {
+                    return item;
                 }
             }
 
@@ -2407,7 +2864,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static List<GameObject> getAllItems()
         {
-            List<GameObject> itemList = new List<GameObject> ();
+            List<GameObject> itemList = new List<GameObject>();
 
             for (int i = 0; i < itemPCount; i++)
             {
@@ -2498,8 +2955,8 @@ namespace BitchlandCheatConsoleBepInEx
                 bool amount2 = false;
                 try
                 {
-                   amount2 = bool.Parse(value);
-                   amount = amount2 ? 1 : 0;
+                    amount2 = bool.Parse(value);
+                    amount = amount2 ? 1 : 0;
                 }
                 catch (Exception ex2)
                 {
@@ -2508,7 +2965,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             bool state = amount >= 1 ? true : false;
-            
+
             Main.Instance.Player.States[index] = state;
             Main.Instance.GameplayMenu.ShowNotification("setstate " + index.ToString() + " to " + (state ? "true" : "false"));
         }
@@ -2531,7 +2988,8 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 addItemReal(item, amount);
                 Main.Instance.GameplayMenu.ShowNotification("additem: " + item.name.ToString() + " " + amount.ToString() + " added");
-            } else
+            }
+            else
             {
                 Main.Instance.GameplayMenu.ShowNotification("additem: No item found");
             }
@@ -2604,6 +3062,201 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static bool onOpenCheat = false;
 
+       /* [HarmonyPatch(typeof(BaseObjectPlacer), "ExecuteSimpleSpawning")]
+        [HarmonyPrefix]
+        public static bool ExecuteSimpleSpawning(ProcGenConfigSO globalConfig, Transform objectRoot, List<Vector3> candidateLocations, object __instance)
+        {
+            string lines = "";
+            BaseObjectPlacer _this = (BaseObjectPlacer)__instance;
+            FieldInfo ObjectsField = __instance.GetType().GetField("Objects", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (ObjectsField == null)
+            {
+                return true;
+            }
+
+            object fieldValue = ObjectsField.GetValue(__instance);
+
+            if (fieldValue == null)
+            {
+                return true;
+            }
+
+            List<PlaceableObjectConfig> Objects = (List<PlaceableObjectConfig>)fieldValue;
+
+            List<GameObject> prefabs = new List<GameObject>();
+
+            foreach (PlaceableObjectConfig placeableObjectConfig in Objects)
+            {
+                int count = placeableObjectConfig.Prefabs.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+                    GameObject prefab = placeableObjectConfig.Prefabs[i];
+
+                    if (prefab == null)
+                    {
+                        continue;
+                    }
+
+                    string line = "prefab name: " + prefab.name.ToString();
+
+                    Logger.LogInfo(line);
+
+                    lines += line + "\n";
+
+                    prefabs.Add(prefab);
+                }
+            }
+
+            System.IO.File.WriteAllText("output.txt", lines);
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(MainMenu), "PutDisplayGirl")]
+        [HarmonyPrefix]
+        public static bool PutDisplayGirl(object __instance)
+        {
+            MainMenu _this = (MainMenu)__instance;
+            Transform displayGirl = _this.DisplayGirls[_this.CurrentDisplayGirl];
+            Girl _girl;
+            if (displayGirl.childCount == 0)
+            {
+                _girl = Main.Spawn(Main.Instance.PersonPrefab, _this.DisplayGirls[_this.CurrentDisplayGirl]).GetComponent<Girl>();
+                _girl.LoadFromFile($"{Main.AssetsFolder}/Characters/MainMenu/{displayGirl.name}.png");
+                 Logger.LogInfo("GIrl NAME: " + displayGirl.name);
+                _girl.transform.localEulerAngles = Vector3.zero;
+                _girl.transform.localPosition = Vector3.zero;
+                _girl.AddMoveBlocker("mainmenudisplay");
+                _girl.LodRen.gameObject.SetActive(false);
+                _girl.SetHighLod();
+                _girl.Anim.applyRootMotion = false;
+                _girl.LookAtPlayer.enabled = true;
+                _girl.LookAtPlayer.playerTransform = _this.MainMenuCam;
+                _girl.LookAtPlayer.DontBlockSides = true;
+                _girl.A_Standing = "boobs1";
+                _this.CurrentGirlText.text = displayGirl.name;
+                _girl.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+                string path = $"{Main.AssetsFolder}/Characters/MainMenu/{displayGirl.name}.txt";
+                bool flag = false;
+                if (File.Exists(path))
+                {
+                    foreach (string readAllLine in File.ReadAllLines(path))
+                    {
+                        string[] strArray1 = readAllLine.Split("=", StringSplitOptions.None);
+                        switch (strArray1[0])
+                        {
+                            case "anim":
+                                flag = true;
+                                _girl.A_Standing = strArray1[1];
+                                break;
+                            case "clothes":
+                                string[] strArray2 = strArray1[1].Split(";", StringSplitOptions.None);
+                                _this._Clothes = new GameObject[strArray2.Length];
+                                for (int index1 = 0; index1 < strArray2.Length; ++index1)
+                                {
+                                    string[] strArray3 = strArray2[index1].Split(":", StringSplitOptions.None);
+                                    for (int index2 = 0; index2 < Main.Instance.AllPrefabs.Count; ++index2)
+                                    {
+                                        if (strArray3[0] == Main.Instance.AllPrefabs[index2].name)
+                                        {
+                                            _this._Clothes[index1] = Main.Instance.AllPrefabs[index2];
+                                            Logger.LogInfo("DISPLAY GIRL NAME " + displayGirl.name + " AllPrefabs[index2]: " + index2.ToString());
+                                            if (strArray3.Length > 1 && (UnityEngine.Object)_this._Clothes[index1].GetComponentInChildren<int_PickableClothingPackage>(true) != (UnityEngine.Object)null)
+                                            {
+                                                GameObject gameObject = Main.Spawn(_this._Clothes[index1], Main.Instance.DisabledObjects);
+                                                int_PickableClothingPackage componentInChildren = gameObject.GetComponentInChildren<int_PickableClothingPackage>(true);
+                                                if ((UnityEngine.Object)componentInChildren != (UnityEngine.Object)null)
+                                                {
+                                                    componentInChildren.ClothingData = $":{strArray3[1]}:RGBA(0.000, 0.000, 0.000, 0.000)";
+                                                    Logger.LogInfo("DISPLAY GIRL NAME " + displayGirl.name + " index2: " + index2.ToString() + " clothingData: " + componentInChildren.ClothingData);
+                                                }
+                                                    
+                                                _this._Clothes[index1] = gameObject;
+                                                break;
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                                _girl.ChangeUniform(_this._Clothes);
+                                break;
+                            case "extraheadrot":
+                                _girl.LookAtPlayer.ExtraRot = true;
+                                _girl.LookAtPlayer.AddHeadRotation = Main.ParseVector3(strArray1[1]);
+                                break;
+                            case "eyes":
+                                if (bool.Parse(strArray1[1]))
+                                {
+                                    _girl.LookAtPlayer.OnlyEyes = true;
+                                    break;
+                                }
+                                _girl.LookAtPlayer.OnlyEyes = false;
+                                break;
+                            case "face":
+                                _girl.ApplyFaceBlendShapeData(Main.Instance.BlendShapesDatas[int.Parse(strArray1[1])]);
+                                break;
+                            case "name":
+                                _this.CurrentGirlText.text = strArray1[1];
+                                displayGirl.name = strArray1[1];
+                                break;
+                            case "pos":
+                                _girl.transform.localPosition = Main.ParseVector3(strArray1[1]);
+                                break;
+                            case "rot":
+                                _girl.transform.localEulerAngles = Main.ParseVector3(strArray1[1]);
+                                break;
+                            case "scale":
+                                _girl.transform.localScale = Main.ParseVector3(strArray1[1]);
+                                break;
+                        }
+                    }
+                }
+                if (!flag || flag && _girl.A_Standing == "boobs1")
+                {
+                    mminit_1 component = _this.MainMenuPos.GetComponent<mminit_1>();
+                    component.TheGirl = _girl;
+                    component.Init();
+                }
+                else
+                    Main.RunInNextFrame((Action)(() =>
+                    {
+                        if (!_girl.gameObject.activeSelf)
+                            return;
+                        _girl.GirlPhysics = true;
+                    }));
+                _this.DisplayGirls[0].gameObject.SetActive(false);
+            }
+            else
+            {
+                _girl = displayGirl.GetComponentInChildren<Girl>(true);
+                Logger.LogInfo("name from girl: " + _girl.name);
+                for (int i = 0; i < _girl.EquippedClothes.Count; i++)
+                {
+                    string name = _girl.EquippedClothes[i].name.Replace(" ", "_").ToLower();
+                    Logger.LogInfo("name from girl and item :" + _girl.name + " item: " + name);
+                    for (int j = 0; j < Main.Instance.AllPrefabs.Count; j++)
+                    {
+                        string prefabitem = Main.Instance.AllPrefabs[j].name;
+                        prefabitem = prefabitem.Replace(" ","_").ToLower();
+                        if (name == prefabitem)
+                        {
+                            Logger.LogInfo("name from girl and item :" + _girl.name + " item: " + name + " index: " + j.ToString());
+                        }
+                    }
+                }
+                _girl.gameObject.SetActive(true);
+                _this.CurrentGirlText.text = displayGirl.name;
+                Main.RunInNextFrame((Action)(() =>
+                {
+                    if (!(_girl.A_Standing != "boobs1") || !_girl.gameObject.activeSelf)
+                        return;
+                    _girl.GirlPhysics = true;
+                }));
+            }
+            return false;
+        }
         /*[HarmonyPatch(typeof(UI_Gameplay), "SelectInventory")]
         [HarmonyPrefix]
         public static bool SelectInventory(object __instance)

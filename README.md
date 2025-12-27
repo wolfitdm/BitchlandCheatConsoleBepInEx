@@ -49,10 +49,17 @@ commands with no params:
 * togglenpcfuckable -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
 * togglepersonstate -> set the npc the you are looked at, from fuckable to not fuckable, or from not fuckable to fuckable
 * completeallquests -> marks all quests as done
-* spawnmale -> spawn a male npc on your position (is not safe yet)
-* spawnfemale -> spawn a female npc on your position (is not safe yet)
+* spawnmale -> spawn a male npc on your position
+* spawnfemale -> spawn a female npc on your position
 * spawnbirth -> spawn a birth into a health pod, the you look at.
 * spawnbirthintopod ->  spawn a birth into a health pod, the you look at.
+* patreon -> Open the patreon page in the browser from breakfast5
+* kofi -> Open the kofi page in the browser from breakfast5
+* subscribestar -> Open the subscribestar page in the browser from breakfast5
+* discord -> Open the discord page in the browser from breakfast5
+* getmodslink -> Open the special sharing mod channel discord page in browser from breakfast5
+* getmoremods -> Open the mods sharing channel discord page in browser from breakfast5
+* supportme -> Open all pages from breakfast5
 
 commands with 1 param:
 
@@ -71,6 +78,8 @@ commands with 1 param:
 * setworkskills number
 * setallskills number
 * setarousal number
+* spawnmale name -> spawn a male npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
+* spawnfemale name -> spawn a female npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
 
 commands with 2 params:
 
