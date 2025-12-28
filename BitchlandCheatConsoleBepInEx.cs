@@ -383,7 +383,7 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.CantBeForced = true;
         }
 
-        public static Person CreatePersonNew(string name, bool spawnFemale = true)
+        public static Person CreatePersonNew(string name, bool save = true, bool spawnFemale = true)
         {
             bool LoadSpecificNPC = true;
             Person PersonGenerated = null;
@@ -396,7 +396,8 @@ namespace BitchlandCheatConsoleBepInEx
                 Directory.CreateDirectory(malesDir);
                 string maleOrFemale = spawnFemale ? "females" : "males";
                 string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
-                if (!File.Exists(filename)) {
+                if (!File.Exists(filename))
+                {
                     Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
                     return null;
                 }
@@ -407,13 +408,14 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated.transform.rotation = Main.Instance.Player.transform.rotation;
             }
             PersonGenerated.WorldSaveID = Main.GenerateRandomString(25);
-            PersonGenerated.DontSaveInMain = true;
+            PersonGenerated.DontSaveInMain = !save;
+            PersonGenerated.CanSaveFlagger = new List<string>();
             PersonGenerated.JobIndex = 0;
             PersonGenerated.SPAWN_noUglyHair = false;
             PersonGenerated.SPAWN_onlyGoodHair = true;
             PersonGenerated.State = Person_State.Free;
             PersonGenerated.Home = Main.Instance.PossibleStreetHomes[UnityEngine.Random.Range(0, Main.Instance.PossibleStreetHomes.Count)];
-            PersonGenerated.CurrentZone = null;
+            //PersonGenerated.CurrentZone = null;
             PersonGenerated.StartingClothes = new List<GameObject>();
             PersonGenerated.StartingWeapons = new List<GameObject>();
             PersonGenerated._StartingClothes = new List<string>();
@@ -424,12 +426,20 @@ namespace BitchlandCheatConsoleBepInEx
             inst.SpawnClean = true;
             PersonGenerated.PutFeet();
             PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
+            if (PersonGenerated.Name == null || PersonGenerated.Name.Length == 0)
+            {
+                PersonGenerated.Name = Main.Instance.GenerateRandomName();
+            }
+            if (PersonGenerated.States == null || PersonGenerated.States.Length < 34)
+            {
+                PersonGenerated.States = new bool[34];
+            }
+            PersonGenerated.RefreshColors();
             setReverseWildStates(PersonGenerated);
             PersonGenerated.TheHealth.canDie = false;
             setPersonaltyToNympho(PersonGenerated);
             return PersonGenerated;
         }
-
         public static Person CreatePersonMaleOld()
         {
             Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
@@ -446,7 +456,7 @@ namespace BitchlandCheatConsoleBepInEx
             return s;
         }
 
-        public static void spawnmale(string value)
+        public static void spawnmale(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
             Person s = null;
@@ -454,18 +464,18 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 default:
                     {
-                        s = CreatePersonNew(value, false);
+                        s = CreatePersonNew(value, save, false);
                     }
                     break;
             }
         }
 
-        public static void spawnmalenude(string value)
+        public static void spawnmalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
-            Person s = CreatePersonNew(value, false);
+            Person s = CreatePersonNew(value, save, false);
         }
-        public static void spawnfemale(string value)
+        public static void spawnfemale(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemale");
             Person s = null;
@@ -473,7 +483,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = CreatePersonNew("jeanne");
+                        s = CreatePersonNew("jeanne", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -487,7 +497,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = CreatePersonNew("sarahoffwork");
+                        s = CreatePersonNew("sarahoffwork", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -498,7 +508,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = CreatePersonNew("uniformedsarah");
+                        s = CreatePersonNew("uniformedsarah", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -514,7 +524,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = CreatePersonNew("nameless");
+                        s = CreatePersonNew("nameless", save);
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -536,7 +546,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = CreatePersonNew("rit");
+                        s = CreatePersonNew("rit", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -549,7 +559,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = CreatePersonNew("carol");
+                        s = CreatePersonNew("carol", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -563,7 +573,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = CreatePersonNew("beth");
+                        s = CreatePersonNew("beth", save);
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -577,15 +587,15 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = CreatePersonNew(value);
+                        s = CreatePersonNew(value, save);
                     }
                     break;
             }
         }
-        public static void spawnfemalenude(string value)
+        public static void spawnfemalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
-            Person s = CreatePersonNew(value);
+            Person s = CreatePersonNew(value, save);
         }
         public static void completeallquests()
         {
@@ -2036,6 +2046,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalesave":
+                    {
+                        spawnmale("guy1", true);
+                    }
+                    break;
+
+                case "spawnfemalesave":
+                    {
+                        spawnfemale("nameless", true);
+                    }
+                    break;
+
+                case "spawnmalenudesave":
+                    {
+                        spawnmalenude("guy1", true);
+                    }
+                    break;
+
+                case "spawnfemalenudesave":
+                    {
+                        spawnfemalenude("brat", true);
+                    }
+                    break;
+
                 case "spawnbirth":
                 case "spawnbirthintopod":
                     {
@@ -2229,6 +2263,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "spawnfemalenude":
                     {
                         spawnfemalenude(value);
+                    }
+                    break;
+
+                case "spawnmalesave":
+                    {
+                        spawnmale(value, true);
+                    }
+                    break;
+
+                case "spawnfemalesave":
+                    {
+                        spawnfemale(value, true);
+                    }
+                    break;
+
+                case "spawnmalenudesave":
+                    {
+                        spawnmalenude(value, true);
+                    }
+                    break;
+
+                case "spawnfemalenudesave":
+                    {
+                        spawnfemalenude(value, true);
                     }
                     break;
 

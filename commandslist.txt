@@ -53,6 +53,10 @@ commands with no params:
 * spawnfemale -> spawn a female npc on your position
 * spawnmalenude -> spawn a male npc on your position (naked version)
 * spawnfemalenude -> spawn a female npc on your position (naked version)
+* spawnmalesave -> spawn a male npc on your position, and saves the npc to your next save game
+* spawnfemalesave -> spawn a female npc on your position, and saves the npc to your next save game
+* spawnmalenudesave -> spawn a male npc on your position (naked version), and saves the npc to your next save game
+* spawnfemalenudesave -> spawn a female npc on your position (naked version), and saves the npc to your next save game
 * spawnbirth -> spawn a birth into a health pod, the you look at.
 * spawnbirthintopod ->  spawn a birth into a health pod, the you look at.
 * patreon -> Open the patreon page in the browser from breakfast5
@@ -87,7 +91,10 @@ commands with 1 param:
 * spawnfemale name -> spawn a female npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
 * spawnmalenude name -> spawn a male npc on your position (naked version), every image is spawnable at Assets\wolfitdm\males\name.png
 * spawnfemalenude name -> spawn a female npc on your position (naked version), every image is spawnable at Assets\wolfitdm\females\name.png
-
+* spawnmalesave name -> spawn a male npc on your position, and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\males\name.png
+* spawnfemalesave name -> spawn a female npc on your position, and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\females\name.png
+* spawnmalenudesave name -> spawn a male npc on your position (naked version), and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\males\name.png
+* spawnfemalenudesave name -> spawn a female npc on your position (naked version), and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\females\name.png
 * addmoney value
 * addweapon name
 * getstate number
