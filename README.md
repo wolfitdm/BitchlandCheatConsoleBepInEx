@@ -63,6 +63,8 @@ commands with no params:
 * getmoremods -> Open the mods sharing channel discord page in browser from breakfast5
 * supportme -> Open all pages from breakfast5
 * help -> Open all pages where you can see the commands list, item list, states list, warplist and so on
+* nympho -> set the person the you looked at, to the personalty typ nympho, and add hims all fetishes except dirty
+* iamanympho -> set the player, to the personalty typ nympho, and add hims all fetishes except dirty
 
 commands with 1 param:
 

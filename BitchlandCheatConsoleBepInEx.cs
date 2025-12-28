@@ -273,6 +273,53 @@ namespace BitchlandCheatConsoleBepInEx
             getmoremods();
         }
 
+        public static void iamanympho()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: iamanympho");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                setPersonaltyToNympho(Main.Instance.Player);
+                Main.Instance.GameplayMenu.ShowNotification("set the player to a nympho!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void nympho()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: nympho");
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la != null)
+                {
+                    if (la is int_Person)
+                    {
+                        int_Person int_thisPerson = (int_Person)la;
+                        if (int_thisPerson.ThisPerson != null)
+                        {
+                            Person thisPerson = int_thisPerson.ThisPerson;
+                            setPersonaltyToNympho(thisPerson);
+                            Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
         public static void help()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: help");
@@ -379,6 +426,7 @@ namespace BitchlandCheatConsoleBepInEx
             PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
             setReverseWildStates(PersonGenerated);
             PersonGenerated.TheHealth.canDie = false;
+            setPersonaltyToNympho(PersonGenerated);
             return PersonGenerated;
         }
 
@@ -1570,6 +1618,32 @@ namespace BitchlandCheatConsoleBepInEx
             _this.DirtySkin = false;
         }
 
+        public static void setPersonaltyToNympho(Person PersonGenerated)
+        {
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            PersonGenerated.Personality = Personality_Type.Nympho;
+            if (PersonGenerated.Fetishes == null)
+            {
+                PersonGenerated.Fetishes = new List<e_Fetish>();
+            }
+            PersonGenerated.Fetishes.Clear();
+            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
+            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
+            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
+            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
+            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Clean);
+            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
+            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
+            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
+            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
+        }
+
         public static void setReverseWildStates(Person person)
         {
             if (person == null)
@@ -2014,6 +2088,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "help":
                     {
                         help();
+                    }
+                    break;
+
+                case "nympho":
+                    {
+                        nympho();
+                    }
+                    break;
+
+                case "iamanympho":
+                    {
+                        iamanympho();
                     }
                     break;
 
