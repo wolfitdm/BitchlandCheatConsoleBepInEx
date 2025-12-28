@@ -273,6 +273,20 @@ namespace BitchlandCheatConsoleBepInEx
             getmoremods();
         }
 
+        public static void help()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: help");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/README.md");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/commandslist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/commandslist.md");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/itemlist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/statelist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/warplist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/weaponlist.txt");
+            OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
+        }
+
         public static void spawnbirthintopod()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnbirthintopod");
@@ -322,10 +336,9 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.CantBeForced = true;
         }
 
-        public static Person CreatePersonFemaleNew(string name)
+        public static Person CreatePersonNew(string name, bool spawnFemale = true)
         {
             bool LoadSpecificNPC = true;
-            bool spawnFemale = true;
             Person PersonGenerated = null;
             if (LoadSpecificNPC)
             {
@@ -334,8 +347,10 @@ namespace BitchlandCheatConsoleBepInEx
                 string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
                 Directory.CreateDirectory(femalesDir);
                 Directory.CreateDirectory(malesDir);
-                string filename = $"{Main.AssetsFolder}/wolfitdm/females/"+name+".png";
+                string maleOrFemale = spawnFemale ? "females" : "males";
+                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
                 if (!File.Exists(filename)) {
+                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
                     return null;
                 }
                 PersonGenerated._DontLoadClothing = true;
@@ -386,23 +401,21 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnmale(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
-            if (value != null || value == null)
+            Person s = null;
+            switch (value)
             {
-                Main.Instance.GameplayMenu.ShowNotification("not safe yet");
-                return;
+                default:
+                    {
+                        s = CreatePersonNew(value, false);
+                    }
+                    break;
             }
-            Person s = CreatePersonMaleOld();
         }
 
         public static void spawnmalenude(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
-            if (value != null || value == null)
-            {
-                Main.Instance.GameplayMenu.ShowNotification("not safe yet");
-                return;
-            }
-            Person s = CreatePersonMaleOld();
+            Person s = CreatePersonNew(value, false);
         }
         public static void spawnfemale(string value)
         {
@@ -412,7 +425,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = CreatePersonFemaleNew("jeanne");
+                        s = CreatePersonNew("jeanne");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -426,7 +439,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = CreatePersonFemaleNew("sarah");
+                        s = CreatePersonNew("sarahoffwork");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -437,7 +450,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = CreatePersonFemaleNew("sarah");
+                        s = CreatePersonNew("uniformedsarah");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -453,7 +466,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = CreatePersonFemaleNew("nameless");
+                        s = CreatePersonNew("nameless");
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -475,7 +488,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = CreatePersonFemaleNew("rit");
+                        s = CreatePersonNew("rit");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -488,7 +501,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = CreatePersonFemaleNew("carol");
+                        s = CreatePersonNew("carol");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -502,7 +515,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = CreatePersonFemaleNew("beth");
+                        s = CreatePersonNew("beth");
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -516,7 +529,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = CreatePersonFemaleNew(value);
+                        s = CreatePersonNew(value);
                     }
                     break;
             }
@@ -524,7 +537,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnfemalenude(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
-            Person s = CreatePersonFemaleNew(value);
+            Person s = CreatePersonNew(value);
         }
         public static void completeallquests()
         {
@@ -1927,19 +1940,19 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "spawnmale":
                     {
-                        spawnmale("brat");
+                        spawnmale("guy1");
                     }
                     break;
 
                 case "spawnfemale":
                     {
-                        spawnfemale("brat");
+                        spawnfemale("nameless");
                     }
                     break;
 
                 case "spawnmalenude":
                     {
-                        spawnmalenude("brat");
+                        spawnmalenude("guy1");
                     }
                     break;
 
@@ -1995,6 +2008,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "supportme":
                     {
                         supportme();
+                    }
+                    break;
+
+                case "help":
+                    {
+                        help();
                     }
                     break;
 

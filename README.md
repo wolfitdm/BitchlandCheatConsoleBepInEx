@@ -51,6 +51,8 @@ commands with no params:
 * completeallquests -> marks all quests as done
 * spawnmale -> spawn a male npc on your position
 * spawnfemale -> spawn a female npc on your position
+* spawnmalenude -> spawn a male npc on your position (naked version)
+* spawnfemalenude -> spawn a female npc on your position (naked version)
 * spawnbirth -> spawn a birth into a health pod, the you look at.
 * spawnbirthintopod ->  spawn a birth into a health pod, the you look at.
 * patreon -> Open the patreon page in the browser from breakfast5
@@ -60,6 +62,7 @@ commands with no params:
 * getmodslink -> Open the special sharing mod channel discord page in browser from breakfast5
 * getmoremods -> Open the mods sharing channel discord page in browser from breakfast5
 * supportme -> Open all pages from breakfast5
+* help -> Open all pages where you can see the commands list, item list, states list, warplist and so on
 
 commands with 1 param:
 
@@ -78,8 +81,10 @@ commands with 1 param:
 * setworkskills number
 * setallskills number
 * setarousal number
-* spawnmale name -> spawn a male npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
+* spawnmale name -> spawn a male npc on your position, every image is spawnable at Assets\wolfitdm\males\name.png
 * spawnfemale name -> spawn a female npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
+* spawnmalenude name -> spawn a male npc on your position (naked version), every image is spawnable at Assets\wolfitdm\males\name.png
+* spawnfemalenude name -> spawn a female npc on your position (naked version), every image is spawnable at Assets\wolfitdm\females\name.png
 
 commands with 2 params:
 
