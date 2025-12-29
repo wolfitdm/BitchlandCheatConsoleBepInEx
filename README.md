@@ -69,6 +69,18 @@ commands with no params:
 * help -> Open all pages where you can see the commands list, item list, states list, warplist and so on
 * nympho -> set the person the you looked at, to the personalty typ nympho, and add hims all fetishes except dirty
 * iamanympho -> set the player, to the personalty typ nympho, and add hims all fetishes except dirty
+* copy -> copies the object you are currently looking at
+* c -> copies the object you are currently looking at
+* copyobject -> copies the object you are currently looking at
+* raycastobjcopy -> copies the object you are currently looking at
+* paste -> spawns the object that you previously copied using the command copy
+* p -> spawns the object that you previously copied using the command copy
+* spawnobject ->  spawns the object that you previously copied using the command copy
+* raycastobjpaste1 -> spawns the object that you previously copied using the command copy
+* paste2 -> spawns the object 2 that you previously copied using the command copy
+* p2 -> spawns the object that you previously copied using the command copy
+* spawnobject2 ->  spawns the object that you previously copied using the command copy
+* raycastobjpaste2 -> spawns the object that you previously copied using the command copy
 
 commands with 1 param:
 
@@ -106,6 +118,14 @@ commands with 1 param:
 * setworkskills number
 * setallskills number
 * setarousal number
+* saveobject name -> saves the object to the file named name
+* s name -> saves the object to the file named name
+* loadobject name -> loads the object from the file
+* l name -> loads the object from the file
+* saveobject2 name -> saves the object 2 to the file named name
+* s2 name -> saves the object 2 to the file named name
+* loadobject2 name -> loads the object 2 from the file
+* l2 name -> loads the object 2 from the file
 
 commands with 2 params:
 

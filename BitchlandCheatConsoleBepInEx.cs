@@ -18,11 +18,13 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization.Json;
 using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 using UMA.Examples;
 using UnityEngine;
 using UnityStandardAssets.Water;
 using static Mono.Security.X509.X520;
 using static UnityEngine.InputSystem.Controls.DiscreteButtonControl;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -120,7 +122,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Init();
             // Toggle GUI with F1 key
-            if (Input.GetKeyUp(KeyCode.F1) || Input.GetKeyUp(KeyCode.F2))
+            if (Input.GetKeyUp(KeyCodeF1) || Input.GetKeyUp(KeyCodeF2))
             {
                 showGUI = !showGUI;
             }
@@ -168,8 +170,8 @@ namespace BitchlandCheatConsoleBepInEx
 
             bool pressSubmitButton = GUILayout.Button("Submit");
             bool pressEnter = Event.current.isKey && Event.current.keyCode == KeyCode.Return && hasFocus;
-            bool pressF1 = Event.current.isKey && Event.current.keyCode == KeyCode.F1 && hasFocus;
-            bool pressF2 = Event.current.isKey && Event.current.keyCode == KeyCode.F2 && hasFocus;
+            bool pressF1 = Event.current.isKey && Event.current.keyCode == KeyCodeF1 && hasFocus;
+            bool pressF2 = Event.current.isKey && Event.current.keyCode == KeyCodeF2 && hasFocus;
 
             if (pressF1 || pressF2)
             {
@@ -273,6 +275,143 @@ namespace BitchlandCheatConsoleBepInEx
             getmoremods();
         }
 
+        public static string SaveGameObjectFile(GameObject rootObject, string name)
+        {
+            if (name == null || name.Length == 0)
+            {
+                return "";
+            }
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            string filename = $"{objectsFolder}/{name}.obj";
+            
+            if (File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(filename + " exists!");
+                return "";
+            }
+
+            try
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(GameObject));
+                TextWriter writer = new StreamWriter(filename);
+                serializer.Serialize(writer, rootObject);
+                writer.Close();
+                Logger.LogInfo("object saved as xml file");
+                return filename;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                Logger.LogInfo("Can not save object as xml file");
+                return "";
+            }
+        }
+
+        public static GameObject LoadGameObjectFile(string name)
+        {
+            if (name == null || name.Length == 0)
+            {
+                return null;
+            }
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            string filename = $"{objectsFolder}/{name}.obj";
+
+            if (!File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
+                return null;
+            }
+
+            try
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(GameObject));
+                TextReader reader = new StreamReader(filename);
+                GameObject buildingInfo = serializer.Deserialize(reader) as GameObject;
+                reader.Close();
+                Logger.LogInfo("object loaded from XML file");
+                return buildingInfo;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                Logger.LogInfo("Can not load xml file as GameObject");
+                return null;
+            }
+        }
+        public static void saveobject(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: saveobject");
+            if (copyObj != null)
+            {
+                string filename = SaveGameObjectFile(copyObj, value);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"saveobject: loaded or copied object '{copyObj.name}' saved to '{filename}' ");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+        public static void saveobject2(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: saveobject2");
+            if (copyObj2 != null)
+            {
+                string filename = SaveGameObjectFile(copyObj2, value);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"saveobject2: loaded or copied object '{copyObj2.name}' saved to '{filename}' ");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
+        public static void loadobject(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: loadobject");
+            GameObject obj = LoadGameObjectFile(value);
+
+            if (obj != null)
+            {
+                copyObj = obj;
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"loadobject: object '{copyObj.name}' loaded, now you can use the command 'paste'");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+        public static void loadobject2(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: loadobject2");
+            GameObject obj = LoadGameObjectFile(value);
+
+            if (obj != null)
+            {
+                copyObj2 = obj;
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"loadobject2: object '{copyObj2.name}' loaded, now you can use the command 'paste2'");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
         public static void iamanympho()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: iamanympho");
@@ -318,6 +457,113 @@ namespace BitchlandCheatConsoleBepInEx
             }
             catch (Exception e)
             {
+            }
+        }
+
+        public static GameObject copyObj = null;
+        public static GameObject copyObj2 = null;
+
+        public static void copy()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: copy");
+            try
+            {
+                RaycastHit hitInfo;
+                WeaponSystem _this = Main.Instance.Player.WeaponInv;
+                if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
+                {
+                    Component obj = hitInfo.transform.GetComponent<Component>();
+                    Component obj2 = hitInfo.transform.root.GetComponent<Component>();
+                    
+                    if (obj != null)
+                    {
+                        copyObj = obj.gameObject;
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied, now you can use the command 'paste', to spawn the object!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied, now you can use the command 'saveobject name', to save the object to file!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+
+                    if (obj2 != null)
+                    {
+                        copyObj2 = obj2.gameObject;
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied, now you can use the command 'paste2', to spawn the object!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied, now you can use the command 'saveobject2 name', to save the object to file!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+                }
+            } 
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+            }
+        }
+
+        public static void paste()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: paste");
+            if (copyObj != null)
+            {
+
+                GameObject newElement = Main.Spawn(copyObj);
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"paste: object '{newElement.name}' pastied!");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+        public static void paste2()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: paste2");
+            if (copyObj2 != null)
+            {
+
+                GameObject newElement = Main.Spawn(copyObj2);
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"paste2: object '{newElement.name}' pastied!");
+                }
+                catch (Exception ex)
+                {
+                }
             }
         }
         public static void help()
@@ -1220,7 +1466,10 @@ namespace BitchlandCheatConsoleBepInEx
             float fertility = Main.Instance.Player.Fertility;
             float storymodefertility = Main.Instance.Player.StoryModeFertility;
 
-            bool togglePregnancy = fertility > 0 || storymodefertility > 0;
+            bool setFertility = fertility > 0;
+            bool setStoryModeFertility = storymodefertility > 0;
+
+            bool togglePregnancy = setFertility || setStoryModeFertility;
 
             togglePregnancy = !togglePregnancy;
 
@@ -1358,6 +1607,11 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
 
                 List<GameObject> items = getAllItems();
+
+                if (items == null || items.Count == 0)
+                {
+                    return;
+                }
 
                 int length = items.Count;
 
@@ -2137,6 +2391,33 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "raycastobjcopy":
+                case "copyobject":
+                case "c":
+                case "copy":
+                    {
+                        copy();
+                    }
+                    break;
+
+                case "spawnobject":
+                case "raycastobjpaste1":
+                case "p":
+                case "paste":
+                    {
+                        paste();
+                    }
+                    break;
+
+                case "spawnobject2":
+                case "raycastobjpaste2":
+                case "p2":
+                case "paste2":
+                    {
+                       paste2();
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -2290,6 +2571,34 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "s":
+                case "saveobject":
+                    {
+                        saveobject(value);
+                    }
+                    break;
+
+                case "l":
+                case "loadobject":
+                    {
+                        loadobject(value);
+                    }
+                    break;
+
+                case "s2":
+                case "saveobject2":
+                    {
+                        saveobject2(value);
+                    }
+                    break;
+
+                case "l2":
+                case "loadobject2":
+                    {
+                        loadobject2(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
@@ -2321,36 +2630,58 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
-        private static List<Weapon> getPrefabsByName2(string prefab)
+        private static List<GameObject> getPrefabsByName2(string prefab)
         {
-            List<Weapon> Prefabs = null;
-            if (prefab == null)
+            List<GameObject> Prefabs2 = new List<GameObject>();
+
+            try
             {
-                Prefabs = Main.Instance.Prefabs_Weapons;
-                return Prefabs;
+                List<Weapon> Prefabs = null;
+
+                if (prefab == null)
+                {
+                    Prefabs = Main.Instance.Prefabs_Weapons;
+                }
+
+                switch (prefab)
+                {
+                    case "Weapons":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Weapons;
+                        }
+                        break;
+
+                    default:
+                        {
+                            Prefabs = Main.Instance.Prefabs_Weapons;
+                        }
+                        break;
+                }
+
+                if (Prefabs == null)
+                {
+                    return Prefabs2;
+                }
+
+                int length = Prefabs.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    Prefabs2.Add(Prefabs[i].gameObject);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
             }
 
-            switch (prefab)
-            {
-                case "Weapons":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Weapons;
-                    }
-                    break;
-
-                default:
-                    {
-                        Prefabs = Main.Instance.Prefabs_Weapons;
-                    }
-                    break;
-            }
-
-            return Prefabs;
+            return Prefabs2;
         }
-        private static Weapon getWeaponByName(string prefab, string name)
+        private static GameObject getWeaponByName(string prefab, string name)
         {
-            List<Weapon> Prefabs = getPrefabsByName2(prefab);
-            if (Prefabs == null)
+            List<GameObject> Prefabs = getPrefabsByName2(prefab);
+
+            if (Prefabs == null || Prefabs.Count == 0)
             {
                 return null;
             }
@@ -2382,9 +2713,9 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static List<string> getAllWeaponsByPrefab(string prefab)
         {
-            List<Weapon> Prefabs = getPrefabsByName2(prefab);
+            List<GameObject> Prefabs = getPrefabsByName2(prefab);
 
-            if (Prefabs == null)
+            if (Prefabs == null || Prefabs.Count == 0)
             {
                 return null;
             }
@@ -2400,7 +2731,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
 
                 //bag.PickupWeapon(Main.Spawn(weapon));
-                Weapon item = Prefabs[i];
+                GameObject item = Prefabs[i];
                 string name = item.name.Replace(" ", "_").ToLower();
                 all.Add(name);
             }
@@ -2414,7 +2745,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             List<string> Prefabs = getAllWeaponsByPrefab(null);
 
-            if (Prefabs == null)
+            if (Prefabs == null || Prefabs.Count == 0)
             {
                 return;
             }
@@ -2429,17 +2760,15 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogInfo(item);
             }
         }
-
-
         public static void addweapon(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: addweapon");
 
-            Weapon weapon = getWeaponByName(null, value);
+            GameObject weapon = getWeaponByName(null, value);
 
             if (weapon != null)
             {
-                GameObject weaponx = Main.Spawn(weapon.gameObject);
+                GameObject weaponx = Main.Spawn(weapon);
 
                 if (weaponx == null)
                 {
@@ -2559,7 +2888,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
             }
         }
-
         public static void setarousal(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: setarousal");
@@ -2806,7 +3134,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             List<GameObject> Prefabs = getPrefabsByName(prefab);
 
-            if (Prefabs == null)
+            if (Prefabs == null || Prefabs.Count == 0)
             {
                 return;
             }
@@ -2851,121 +3179,129 @@ namespace BitchlandCheatConsoleBepInEx
         {
             List<GameObject> Prefabs = null;
 
-            if (prefab == null)
+            try
             {
-                Prefabs = Main.Instance.AllPrefabs;
-                return Prefabs;
+                if (prefab == null)
+                {
+                    Prefabs = Main.Instance.AllPrefabs;
+                    return Prefabs;
+                }
+
+                switch (prefab)
+                {
+                    case "Any":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Any;
+                        }
+                        break;
+
+                    case "Shoes":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Shoes;
+                        }
+                        break;
+
+                    case "Pants":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Pants;
+                        }
+                        break;
+
+                    case "Top":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Top;
+                        }
+                        break;
+
+                    case "UnderwearTop":
+                        {
+                            Prefabs = Main.Instance.Prefabs_UnderwearTop;
+                        }
+                        break;
+
+                    case "UnderwearLower":
+                        {
+                            Prefabs = Main.Instance.Prefabs_UnderwearLower;
+                        }
+                        break;
+
+                    case "Garter":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Garter;
+                        }
+                        break;
+
+                    case "Socks":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Socks;
+                        }
+                        break;
+
+                    case "Hat":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Hat;
+                        }
+                        break;
+
+                    case "Hair":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Hair;
+                        }
+                        break;
+
+                    case "MaleHair":
+                        {
+                            Prefabs = Main.Instance.Prefabs_MaleHair;
+                        }
+                        break;
+
+                    case "Bodies":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Bodies;
+                        }
+                        break;
+
+                    case "Heads":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Heads;
+                        }
+                        break;
+
+                    case "Beards":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Beards;
+                        }
+                        break;
+
+                    case "ProstSuit1":
+                        {
+                            Prefabs = Main.Instance.Prefabs_ProstSuit1;
+                        }
+                        break;
+
+                    case "ProstSuit2":
+                        {
+                            Prefabs = Main.Instance.Prefabs_ProstSuit2;
+                        }
+                        break;
+
+                    case "Weapons":
+                        {
+                            Prefabs = null;
+                        }
+                        break;
+
+                    default:
+                        {
+                            Prefabs = Main.Instance.AllPrefabs;
+                        }
+                        break;
+                }
             }
-
-            switch (prefab)
+            catch (Exception ex)
             {
-                case "Any":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Any;
-                    }
-                    break;
-
-                case "Shoes":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Shoes;
-                    }
-                    break;
-
-                case "Pants":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Pants;
-                    }
-                    break;
-
-                case "Top":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Top;
-                    }
-                    break;
-
-                case "UnderwearTop":
-                    {
-                        Prefabs = Main.Instance.Prefabs_UnderwearTop;
-                    }
-                    break;
-
-                case "UnderwearLower":
-                    {
-                        Prefabs = Main.Instance.Prefabs_UnderwearLower;
-                    }
-                    break;
-
-                case "Garter":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Garter;
-                    }
-                    break;
-
-                case "Socks":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Socks;
-                    }
-                    break;
-
-                case "Hat":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Hat;
-                    }
-                    break;
-
-                case "Hair":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Hair;
-                    }
-                    break;
-
-                case "MaleHair":
-                    {
-                        Prefabs = Main.Instance.Prefabs_MaleHair;
-                    }
-                    break;
-
-                case "Bodies":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Bodies;
-                    }
-                    break;
-
-                case "Heads":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Heads;
-                    }
-                    break;
-
-                case "Beards":
-                    {
-                        Prefabs = Main.Instance.Prefabs_Beards;
-                    }
-                    break;
-
-                case "ProstSuit1":
-                    {
-                        Prefabs = Main.Instance.Prefabs_ProstSuit1;
-                    }
-                    break;
-
-                case "ProstSuit2":
-                    {
-                        Prefabs = Main.Instance.Prefabs_ProstSuit2;
-                    }
-                    break;
-
-                case "Weapons":
-                    {
-                        Prefabs = null;
-                    }
-                    break;
-
-                default:
-                    {
-                        Prefabs = Main.Instance.AllPrefabs;
-                    }
-                    break;
+                Logger.LogError(ex.ToString());
+                Prefabs = new List<GameObject>();
             }
 
             return Prefabs;
@@ -2973,7 +3309,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static GameObject getItemByName(string prefab, string name)
         {
             List<GameObject> Prefabs = getPrefabsByName(prefab);
-            if (Prefabs == null)
+
+            if (Prefabs == null || Prefabs.Count == 0)
             {
                 return null;
             }
@@ -3033,7 +3370,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 string prefab = itemsP[i];
                 List<GameObject> items = getPrefabsByName(prefab);
-                if (items == null)
+                if (items == null || items.Count == 0)
                 {
                     continue;
                 }
@@ -3161,6 +3498,9 @@ namespace BitchlandCheatConsoleBepInEx
         internal static new ManualLogSource Logger;
 
         private ConfigEntry<bool> configEnableMe;
+        private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsole;
+        private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsoleFallback;
+
 
         public BitchlandCheatConsoleBepInEx()
         {
@@ -3173,7 +3513,12 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static string pluginKey = "General.Toggles";
 
+        private static string pluginKeyControls = "General.KeyControls";
+
         public static bool enableThisMod = false;
+
+        public static KeyCode KeyCodeF1 = 0;
+        public static KeyCode KeyCodeF2 = 0;
 
         private void Awake()
         {
@@ -3185,8 +3530,20 @@ namespace BitchlandCheatConsoleBepInEx
                                               true,
                                              "Whether or not you want enable this mod (default true also yes, you want it, and false = no)");
 
+            configKeyCodeOpenTheCheatConsole = Config.Bind(pluginKeyControls,
+                                                           "KeyCodeOpenTheCheatConsole",
+                                                            KeyCode.F1,
+                                                           "KeyCode to open the cheat console default F1");
+
+            configKeyCodeOpenTheCheatConsoleFallback = Config.Bind(pluginKeyControls,
+                                                                   "KeyCodeOpenTheCheatConsoleFallback",
+                                                                   KeyCode.F2,
+                                                                   "KeyCode fallback to open the cheat console default F2");
 
             enableThisMod = configEnableMe.Value;
+
+            KeyCodeF1 = configKeyCodeOpenTheCheatConsole.Value;
+            KeyCodeF2 = configKeyCodeOpenTheCheatConsoleFallback.Value;
 
             Harmony.CreateAndPatchAll(typeof(BitchlandCheatConsoleBepInEx));
 
@@ -3225,10 +3582,67 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static bool onOpenCheat = false;
 
-       /* [HarmonyPatch(typeof(BaseObjectPlacer), "ExecuteSimpleSpawning")]
+        [HarmonyPatch(typeof(Main), "SpawnFromCustomBundle")]
         [HarmonyPrefix]
-        public static bool ExecuteSimpleSpawning(ProcGenConfigSO globalConfig, Transform objectRoot, List<Vector3> candidateLocations, object __instance)
+        public static bool SpawnFromCustomBundle(string assetName, ref GameObject __result, object __instance)
         {
+            Main _this = (Main)__instance;
+            Main.Log("SpawnFromCustomBundle: " + assetName);
+            for (int index = 0; index < _this.RegisteredCustomBundles.Count; ++index)
+            {
+                try
+                {
+                    Main.RegisteredCustomBundle registeredCustomBundle = _this.RegisteredCustomBundles[index];
+                    if (registeredCustomBundle.AssetName == assetName)
+                    {
+                        if ((UnityEngine.Object)registeredCustomBundle.LoadedAsset == (UnityEngine.Object)null)
+                        {
+                            if ((UnityEngine.Object)registeredCustomBundle.LoadedBundle == (UnityEngine.Object)null)
+                                registeredCustomBundle.LoadedBundle = AssetBundle.LoadFromFile(registeredCustomBundle.BundleFileName);
+                            registeredCustomBundle.LoadedAsset = registeredCustomBundle.LoadedBundle.LoadAsset<GameObject>(assetName);
+                        }
+                        GameObject gameObject = Main.Spawn(registeredCustomBundle.LoadedAsset);
+                        registeredCustomBundle.LoadedBundle.Unload(false);
+                        __result = gameObject;
+                        Main.Log(gameObject.name);
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Main.Log($"SpawnFromCustomBundle ERROR: {ex.Message}\n{ex.StackTrace}");
+                }
+            }
+            return false;
+        }
+
+        [HarmonyPatch(typeof(BaseObjectPlacer), "SpawnObject")]
+        [HarmonyPrefix]
+        public static bool SpawnObject(
+            GameObject prefab,
+            Vector3 spawnLocation,
+            Transform objectRoot, object __instance)
+        {
+            Logger.LogInfo("EXECUTE MME SPAWNOBJECT");
+            return true;
+        }
+
+            [HarmonyPatch(typeof(BaseObjectPlacer), "Execute")]
+        [HarmonyPrefix]
+        public static bool Execute(
+            ProcGenConfigSO globalConfig,
+            Transform objectRoot,
+            int mapResolution,
+            float[,] heightMap,
+            Vector3 heightmapScale,
+            float[,] slopeMap,
+            float[,,] alphaMaps,
+            int alphaMapResolution,
+            byte[,] biomeMap,
+            int biomeIndex,
+            BiomeConfigSO biome, object __instance)
+        {
+            Logger.LogInfo("EXECUTE MME EXECUTE");
             string lines = "";
             BaseObjectPlacer _this = (BaseObjectPlacer)__instance;
             FieldInfo ObjectsField = __instance.GetType().GetField("Objects", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -3276,7 +3690,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             return true;
         }
-
+        /*
         [HarmonyPatch(typeof(MainMenu), "PutDisplayGirl")]
         [HarmonyPrefix]
         public static bool PutDisplayGirl(object __instance)
