@@ -1,5 +1,9 @@
 Bitchland Cheat console
 
+F1 and F2 Key configurable in
+
+* BepInEx\config\com.wolfitdm.BitchlandCheatConsoleBepInEx.cfg
+
 commands:
 
 commands with no params:
@@ -81,8 +85,8 @@ commands with no params:
 * p2 -> spawns the object that you previously copied using the command copy
 * spawnobject2 ->  spawns the object that you previously copied using the command copy
 * raycastobjpaste2 -> spawns the object that you previously copied using the command copy
-* npcsexy -> set all sexy states to the npc you are looked at
-* npcinfinitehealth -> toggle infinite health and infinite energy on the npc the you looked at
+* npcsexy -> set all sexy states to the npc you are looked at, set all  states from the npc the you looked at to sexy (Cum stains, Body written, clean, and so on)
+* npcinfinitehealth -> toggle infinite health and infinite energy on the npc the you looked at, the npc the you looked at, have infinite health and energy (you can fuck 24/7 without exchausted)  , you can toggle it with that command
 
 commands with 1 param:
 
