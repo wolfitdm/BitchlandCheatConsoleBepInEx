@@ -81,6 +81,8 @@ commands with no params:
 * p2 -> spawns the object that you previously copied using the command copy
 * spawnobject2 ->  spawns the object that you previously copied using the command copy
 * raycastobjpaste2 -> spawns the object that you previously copied using the command copy
+* npcsexy -> set all sexy states to the npc you are looked at
+* npcinfinitehealth -> toggle infinite health and infinite energy on the npc the you looked at
 
 commands with 1 param:
 
@@ -131,3 +133,4 @@ commands with 2 params:
 
 * additem name amount -> add the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
 * setstate number -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
+* setnpcstate number -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy

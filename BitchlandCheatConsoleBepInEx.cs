@@ -234,6 +234,1034 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+
+
+        public static string SaveGameObjectFile(GameObject rootObject, string name)
+        {
+            if (name == null || name.Length == 0)
+            {
+                return "";
+            }
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            string filename = $"{objectsFolder}/{name}.obj";
+
+            if (File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(filename + " exists!");
+                return "";
+            }
+
+            try
+            {
+                SaveableBehaviour s = rootObject.GetComponent<SaveableBehaviour>();
+                s.SaveToFile(filename);
+                return filename;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return "";
+            }
+        }
+        public static GameObject LoadGameObjectFile(string name)
+        {
+            if (name == null || name.Length == 0)
+            {
+                return null;
+            }
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            string filename = $"{objectsFolder}/{name}.obj";
+
+            if (!File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
+                return null;
+            }
+            try
+            {
+                SaveableBehaviour s = new SaveableBehaviour();
+                s.LoadFromFile(filename);
+                return s.gameObject;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return null;
+            }
+        }
+        public static GameObject getInteract()
+        {
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return null;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la != null)
+                {
+                    GameObject ga = la.gameObject;
+                    return ga;
+                }
+            }
+            catch (Exception e)
+            {
+            }
+            return null;
+        }
+        public static GameObject getPersonInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la != null)
+            {
+                if (la is int_Person)
+                {
+                    int_Person int_thisPerson = (int_Person)la;
+                    if (int_thisPerson.ThisPerson != null)
+                    {
+                        Person thisPerson = int_thisPerson.ThisPerson;
+                        return thisPerson.gameObject;
+                    }
+                }
+            }
+
+            return null;
+        }
+        public static GameObject getHealthPodInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la != null)
+            {
+                if (la is int_HealthPod)
+                {
+                    int_HealthPod int_P = (int_HealthPod)la;
+                    return int_P.gameObject;
+                }
+            }
+
+            return null;
+        }
+        public static GameObject getLockableInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la != null)
+            {
+                if (la is int_Lockable)
+                {
+                    int_Lockable int_Lo = (int_Lockable)la;
+                    return int_Lo.gameObject;
+                }
+            }
+
+            return null;
+        }
+        public static GameObject getStorableInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la is Int_Storage)
+            {
+                Int_Storage int_St = (Int_Storage)la;
+                return int_St.gameObject;
+            }
+
+            return null;
+        }
+
+        public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true)
+        {
+            bool LoadSpecificNPC = true;
+            Person PersonGenerated = null;
+            if (LoadSpecificNPC)
+            {
+                PersonGenerated = spawnFemale ? UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonPrefab).GetComponent<Person>() : UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonGuyPrefab).GetComponent<Person>();
+                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
+                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
+                Directory.CreateDirectory(femalesDir);
+                Directory.CreateDirectory(malesDir);
+                string maleOrFemale = spawnFemale ? "females" : "males";
+                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
+                if (!File.Exists(filename))
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
+                    return null;
+                }
+                PersonGenerated._DontLoadClothing = true;
+                PersonGenerated._DontLoadInteraction = true;
+                PersonGenerated.LoadFromFile(filename);
+                PersonGenerated.transform.position = Main.Instance.Player.transform.position;
+                PersonGenerated.transform.rotation = Main.Instance.Player.transform.rotation;
+            }
+            PersonGenerated.WorldSaveID = Main.GenerateRandomString(25);
+            PersonGenerated.DontSaveInMain = !save;
+            PersonGenerated.CanSaveFlagger = new List<string>();
+            PersonGenerated.JobIndex = 0;
+            PersonGenerated.SPAWN_noUglyHair = false;
+            PersonGenerated.SPAWN_onlyGoodHair = true;
+            PersonGenerated.State = Person_State.Free;
+            PersonGenerated.Home = Main.Instance.PossibleStreetHomes[UnityEngine.Random.Range(0, Main.Instance.PossibleStreetHomes.Count)];
+            //PersonGenerated.CurrentZone = null;
+            PersonGenerated.StartingClothes = new List<GameObject>();
+            PersonGenerated.StartingWeapons = new List<GameObject>();
+            PersonGenerated._StartingClothes = new List<string>();
+            PersonGenerated._StartingWeapons = new List<string>();
+            PersonGenerated.Inited = false;
+            PersonGenerated.PersonType = Main.Instance.PersonTypes[(int)Person_Type.Wild];
+            RandomNPCHere inst = new RandomNPCHere();
+            inst.SpawnClean = true;
+            PersonGenerated.PutFeet();
+            PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
+            if (PersonGenerated.Name == null || PersonGenerated.Name.Length == 0)
+            {
+                PersonGenerated.Name = Main.Instance.GenerateRandomName();
+            }
+            if (PersonGenerated.States == null || PersonGenerated.States.Length < 34)
+            {
+                PersonGenerated.States = new bool[34];
+            }
+            PersonGenerated.RefreshColors();
+            setReverseWildStates(PersonGenerated.gameObject);
+            PersonGenerated.TheHealth.canDie = false;
+            setPersonaltyToNympho(PersonGenerated.gameObject);
+            return PersonGenerated.gameObject;
+        }
+        public static GameObject CreatePersonMaleOld()
+        {
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            return s.gameObject;
+        }
+
+        public static GameObject CreatePersonFemaleOld()
+        {
+            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
+            s.transform.position = Main.Instance.Player.transform.position;
+            s.transform.rotation = Main.Instance.Player.transform.rotation;
+            return s.gameObject;
+        }
+
+        private static List<GameObject> getPrefabsByName2(string prefab)
+        {
+            List<GameObject> Prefabs2 = new List<GameObject>();
+
+            try
+            {
+                List<Weapon> Prefabs = null;
+
+                if (prefab == null)
+                {
+                    Prefabs = Main.Instance.Prefabs_Weapons;
+                }
+
+                switch (prefab)
+                {
+                    case "Weapons":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Weapons;
+                        }
+                        break;
+
+                    default:
+                        {
+                            Prefabs = Main.Instance.Prefabs_Weapons;
+                        }
+                        break;
+                }
+
+                if (Prefabs == null)
+                {
+                    return Prefabs2;
+                }
+
+                int length = Prefabs.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    Prefabs2.Add(Prefabs[i].gameObject);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+            }
+
+            return Prefabs2;
+        }
+        private static GameObject getWeaponByName(string prefab, string name)
+        {
+            List<GameObject> Prefabs = getPrefabsByName2(prefab);
+
+            if (Prefabs == null || Prefabs.Count == 0)
+            {
+                return null;
+            }
+
+            if (name == null || name.Length == 0)
+            {
+                return null;
+            }
+
+            name = name.ToLower();
+
+            int length = Prefabs.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if (Prefabs[i].IsNull())
+                {
+                    continue;
+                }
+
+                string wname = Prefabs[i].name;
+                wname = wname.ToLower().Replace(" ", "_");
+                if (wname == name)
+                {
+                    return Prefabs[i];
+                }
+            }
+            return null;
+        }
+
+        private static List<string> getAllWeaponsByPrefab(string prefab)
+        {
+            List<GameObject> Prefabs = getPrefabsByName2(prefab);
+
+            if (Prefabs == null || Prefabs.Count == 0)
+            {
+                return null;
+            }
+
+            List<string> all = new List<string>();
+
+            int length = Prefabs.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if (Prefabs[i].IsNull())
+                {
+                    continue;
+                }
+
+                //bag.PickupWeapon(Main.Spawn(weapon));
+                GameObject item = Prefabs[i];
+                string name = item.name.Replace(" ", "_").ToLower();
+                all.Add(name);
+            }
+
+            return all;
+        }
+        private static void showWeaponsInLogByPrefab()
+        {
+            string prefabName = "Weapons";
+
+            List<string> Prefabs = getAllWeaponsByPrefab(null);
+
+            if (Prefabs == null || Prefabs.Count == 0)
+            {
+                return;
+            }
+
+            string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
+            Logger.LogInfo(itemi);
+
+            int length = Prefabs.Count;
+            for (int i = 0; i < length; i++)
+            {
+                string item = Prefabs[i];
+                Logger.LogInfo(item);
+            }
+        }
+
+        public static void setNudeStates(GameObject personGa, bool realnude = false, bool setallnudestates = false)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+            person.ClothingCondition = e_ClothingCondition.Nude;
+            person.States[9] = true; // Nude Clothing Vipe
+            person.States[10] = false; // Casual Clothing Vipe
+            person.States[11] = false; // Sexy Clothing Vipe
+
+            if (realnude)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = false; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallnudestates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = false; // Cum Stains + 1 Sexy 
+                person.States[13] = false; // Cum Stains + 2 Sexy
+                person.States[14] = false; // Cum Stains + 3 Sexy
+                person.States[15] = false; // Cum Stains + 4 Sexy 
+                person.States[16] = false; // Cum Stains + 5 Sexy 
+                person.States[17] = false; // Body Writting + 1 Sexy 
+                person.States[18] = false; // Body Writting + 2 Sexy 
+                person.States[19] = false; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = false; // Basic Makeup + 10 Sexy
+                person.States[23] = false; // Runny Makeup + 1 Sexy
+                person.States[24] = false; // Runny Makeup + 1 Sexy
+                person.States[25] = false; // Runny Makeup + 1 Sexy
+                person.States[26] = false; // Cum in mouth + 1 Sexy
+
+                if (setallnudestates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+
+        public static void setNudeClothesPoints(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].SexyPoints = 0;
+                person.EquippedClothes[i].CasualPoints = 0;
+            }
+
+            person.GetClothingCondition();
+        }
+        public static void setSexyStates(GameObject personGa, bool realsexy, bool setallsexystates = false)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.ClothingCondition = e_ClothingCondition.Sexy;
+            person.States[9] = false; // Nude Clothing Vipe
+            person.States[10] = false; // Casual Clothing Vipe
+            person.States[11] = true; // Sexy Clothing Vipe
+
+            if (realsexy)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = true; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallsexystates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = true; // Cum Stains + 1 Sexy 
+                person.States[13] = true; // Cum Stains + 2 Sexy
+                person.States[14] = true; // Cum Stains + 3 Sexy
+                person.States[15] = true; // Cum Stains + 4 Sexy 
+                person.States[16] = true; // Cum Stains + 5 Sexy 
+                person.States[17] = true; // Body Writting + 1 Sexy 
+                person.States[18] = true; // Body Writting + 2 Sexy 
+                person.States[19] = true; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = true; // Basic Makeup + 10 Sexy
+                person.States[23] = true; // Runny Makeup + 1 Sexy
+                person.States[24] = true; // Runny Makeup + 1 Sexy
+                person.States[25] = true; // Runny Makeup + 1 Sexy
+                person.States[26] = true; // Cum in mouth + 1 Sexy
+
+                if (setallsexystates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+
+        public static void setSexyClothesPoints(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].CasualPoints = 0;
+                person.EquippedClothes[i].SexyPoints = add;
+                person.EquippedClothes[i].SexyPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
+            }
+
+            person.GetClothingCondition();
+        }
+
+        public static void setCasualStates(GameObject personGa, bool realcasual = false, bool setallcasualstates = false)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.ClothingCondition = e_ClothingCondition.Casual;
+            person.States[9] = false; // Nude Clothing Vipe
+            person.States[10] = true; // Casual Clothing Vipe
+            person.States[11] = false; // Sexy Clothing Vipe
+
+            if (realcasual)
+            {
+                person.States[0] = false; // Dirty -10 Sexy
+                person.States[1] = false; // Horny +10 Sexy
+                person.States[2] = false; // Very Dirty -20 Sexy
+                person.States[3] = false; // Shitten -20 Sexy
+
+                if (setallcasualstates)
+                {
+                    person.States[4] = false; // Sleepy - speed
+                    person.States[5] = false; // Needs toilet
+                    person.States[6] = false; // Hungry
+                    person.States[7] = false; // Pregnant
+                }
+
+                person.States[8] = false; // Bloody -10 Sexy
+                person.States[12] = false; // Cum Stains + 1 Sexy 
+                person.States[13] = false; // Cum Stains + 2 Sexy
+                person.States[14] = false; // Cum Stains + 3 Sexy
+                person.States[15] = false; // Cum Stains + 4 Sexy 
+                person.States[16] = false; // Cum Stains + 5 Sexy 
+                person.States[17] = false; // Body Writting + 1 Sexy 
+                person.States[18] = false; // Body Writting + 2 Sexy 
+                person.States[19] = false; // Body Writting + 3 Sexy 
+                person.States[20] = false; // Bruises - 10 Sexy 
+                person.States[21] = false; // Heavy Bruises - 20 Sexy 
+                person.States[22] = false; // Basic Makeup + 10 Sexy
+                person.States[23] = false; // Runny Makeup + 1 Sexy
+                person.States[24] = false; // Runny Makeup + 1 Sexy
+                person.States[25] = false; // Runny Makeup + 1 Sexy
+                person.States[26] = false; // Cum in mouth + 1 Sexy
+
+                if (setallcasualstates)
+                {
+                    person.States[27] = false; // Beard
+                    person.States[28] = false; // Lipstick
+                    person.States[29] = false; // Lipstick
+                    person.States[30] = false; // Lipstick
+                    person.States[31] = false; // Skin color lips
+                    person.States[32] = false; // Freckets
+                    person.States[33] = false; // Dirty Mouth
+                }
+            }
+        }
+        public static void setCasualClothesPoints(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.EquippedClothes == null)
+            {
+                return;
+            }
+
+            int add = 100;
+
+            for (int i = 0; i < person.EquippedClothes.Count; i++)
+            {
+                person.EquippedClothes[i].SexyPoints = 0;
+                person.EquippedClothes[i].CasualPoints = add;
+                person.EquippedClothes[i].CasualPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
+            }
+
+            person.GetClothingCondition();
+        }
+
+        public static void setCleanSkinStates(GameObject _thisGa)
+        {
+            if (_thisGa == null)
+            {
+                return;
+            }
+
+            Person _this = _thisGa.GetComponent<Person>();
+
+            if (_this == null)
+            {
+                return;
+            }
+
+            _this.States[0] = false;
+            _this.States[2] = false;
+            _this.States[3] = false;
+            _this.States[8] = false;
+            _this.States[12] = false;
+            _this.States[13] = false;
+            _this.States[14] = false;
+            _this.States[15] = false;
+            _this.States[16 /*0x10*/] = false;
+            _this.States[17] = false;
+            _this.States[18] = false;
+            _this.States[19] = false;
+            _this.States[26] = false;
+            _this.States[33] = false;
+            _this.States[23] = false;
+            _this.States[24] = false;
+            _this.States[25] = false;
+            _this.DirtySkin = false;
+        }
+
+        public static void setPersonaltyToNympho(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            PersonGenerated.Personality = Personality_Type.Nympho;
+            if (PersonGenerated.Fetishes == null)
+            {
+                PersonGenerated.Fetishes = new List<e_Fetish>();
+            }
+            PersonGenerated.Fetishes.Clear();
+            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
+            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
+            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
+            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
+            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Clean);
+            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
+            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
+            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
+            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
+        }
+        public static void setReverseWildStates(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.States[17] = false;
+            person.States[18] = false;
+            person.States[19] = false;
+            person.States[12] = false;
+            person.States[13] = false;
+            person.States[14] = false;
+            person.States[15] = false;
+            person.States[16 /*0x10*/] = false;
+            person.States[20] = false;
+            person.DirtySkin = false;
+        }
+        private static void showItemsInLogByPrefab(string prefab)
+        {
+            string prefabName = null;
+
+            if (prefab == null)
+            {
+                prefabName = "AllPrefabs";
+            }
+            else
+            {
+                prefabName = prefab;
+            }
+
+            List<GameObject> Prefabs = getPrefabsByName(prefab);
+
+            if (Prefabs == null || Prefabs.Count == 0)
+            {
+                return;
+            }
+
+            string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
+            Logger.LogInfo(itemi);
+
+            int length = Prefabs.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if (Prefabs[i].IsNull())
+                {
+                    continue;
+                }
+
+                string iname = Prefabs[i].name;
+                iname = iname.ToLower().Replace(" ", "_");
+                string item = iname;
+                Logger.LogInfo(item);
+
+            }
+        }
+        private static List<GameObject> getPrefabsByName(string prefab)
+        {
+            List<GameObject> Prefabs = null;
+
+            try
+            {
+                if (prefab == null)
+                {
+                    Prefabs = Main.Instance.AllPrefabs;
+                    return Prefabs;
+                }
+
+                switch (prefab)
+                {
+                    case "Any":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Any;
+                        }
+                        break;
+
+                    case "Shoes":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Shoes;
+                        }
+                        break;
+
+                    case "Pants":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Pants;
+                        }
+                        break;
+
+                    case "Top":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Top;
+                        }
+                        break;
+
+                    case "UnderwearTop":
+                        {
+                            Prefabs = Main.Instance.Prefabs_UnderwearTop;
+                        }
+                        break;
+
+                    case "UnderwearLower":
+                        {
+                            Prefabs = Main.Instance.Prefabs_UnderwearLower;
+                        }
+                        break;
+
+                    case "Garter":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Garter;
+                        }
+                        break;
+
+                    case "Socks":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Socks;
+                        }
+                        break;
+
+                    case "Hat":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Hat;
+                        }
+                        break;
+
+                    case "Hair":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Hair;
+                        }
+                        break;
+
+                    case "MaleHair":
+                        {
+                            Prefabs = Main.Instance.Prefabs_MaleHair;
+                        }
+                        break;
+
+                    case "Bodies":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Bodies;
+                        }
+                        break;
+
+                    case "Heads":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Heads;
+                        }
+                        break;
+
+                    case "Beards":
+                        {
+                            Prefabs = Main.Instance.Prefabs_Beards;
+                        }
+                        break;
+
+                    case "ProstSuit1":
+                        {
+                            Prefabs = Main.Instance.Prefabs_ProstSuit1;
+                        }
+                        break;
+
+                    case "ProstSuit2":
+                        {
+                            Prefabs = Main.Instance.Prefabs_ProstSuit2;
+                        }
+                        break;
+
+                    case "Weapons":
+                        {
+                            Prefabs = null;
+                        }
+                        break;
+
+                    default:
+                        {
+                            Prefabs = Main.Instance.AllPrefabs;
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                Prefabs = new List<GameObject>();
+            }
+
+            return Prefabs;
+        }
+        private static GameObject getItemByName(string prefab, string name)
+        {
+            List<GameObject> Prefabs = getPrefabsByName(prefab);
+
+            if (Prefabs == null || Prefabs.Count == 0)
+            {
+                return null;
+            }
+
+            if (name == null || name.Length == 0)
+            {
+                return null;
+            }
+
+            name = name.ToLower();
+
+            int length = Prefabs.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if (Prefabs[i].IsNull())
+                {
+                    continue;
+                }
+
+                string iname = Prefabs[i].name;
+                iname = iname.ToLower().Replace(" ", "_");
+
+                if (iname == name)
+                {
+                    return Prefabs[i];
+                }
+            }
+            return null;
+        }
+        private static GameObject getAllItemByName(string name)
+        {
+            GameObject item = null;
+
+            if (name == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < itemPCount; i++)
+            {
+                item = getItemByName(itemsP[i], name);
+                if (item != null)
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+        private static List<GameObject> getAllItems()
+        {
+            List<GameObject> itemList = new List<GameObject>();
+
+            for (int i = 0; i < itemPCount; i++)
+            {
+                string prefab = itemsP[i];
+                List<GameObject> items = getPrefabsByName(prefab);
+                if (items == null || items.Count == 0)
+                {
+                    continue;
+                }
+                for (int j = 0; j < items.Count; j++)
+                {
+                    if (items[j] != null)
+                        itemList.Add(items[j]);
+                }
+            }
+
+            return itemList;
+        }
+        private static void addItemReal(GameObject item, int value)
+        {
+            if (Main.Instance.Player.CurrentBackpack == null)
+            {
+                GameObject backpack2 = getItemByName(null, "backpack2");
+                if (backpack2 == null)
+                {
+                    backpack2 = getItemByName(null, "backpack");
+                }
+                if (backpack2 == null)
+                {
+                    return;
+                }
+                Main.Instance.Player.DressClothe(Main.Spawn(backpack2));
+            }
+
+            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            {
+                value = value <= 0 ? 1 : value;
+
+                int count = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Count;
+
+                count += value + 10;
+
+                count = count <= 0 ? int.MaxValue : count;
+
+                int storagemax = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax;
+
+                if (count >= storagemax)
+                {
+                    storagemax = count;
+                }
+
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = storagemax;
+
+                for (int i = 0; i < value; i++)
+                {
+                    Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(item);
+                }
+            }
+        }
         public static void patreon()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: patreon");
@@ -273,78 +1301,6 @@ namespace BitchlandCheatConsoleBepInEx
             discord();
             getmodslink();
             getmoremods();
-        }
-
-        public static string SaveGameObjectFile(GameObject rootObject, string name)
-        {
-            if (name == null || name.Length == 0)
-            {
-                return "";
-            }
-
-            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
-
-            Directory.CreateDirectory(objectsFolder);
-
-            string filename = $"{objectsFolder}/{name}.obj";
-            
-            if (File.Exists(filename))
-            {
-                Main.Instance.GameplayMenu.ShowNotification(filename + " exists!");
-                return "";
-            }
-
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(GameObject));
-                TextWriter writer = new StreamWriter(filename);
-                serializer.Serialize(writer, rootObject);
-                writer.Close();
-                Logger.LogInfo("object saved as xml file");
-                return filename;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.ToString());
-                Logger.LogInfo("Can not save object as xml file");
-                return "";
-            }
-        }
-
-        public static GameObject LoadGameObjectFile(string name)
-        {
-            if (name == null || name.Length == 0)
-            {
-                return null;
-            }
-
-            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
-
-            Directory.CreateDirectory(objectsFolder);
-
-            string filename = $"{objectsFolder}/{name}.obj";
-
-            if (!File.Exists(filename))
-            {
-                Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
-                return null;
-            }
-
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(GameObject));
-                TextReader reader = new StreamReader(filename);
-                GameObject buildingInfo = serializer.Deserialize(reader) as GameObject;
-                reader.Close();
-                Logger.LogInfo("object loaded from XML file");
-                return buildingInfo;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.ToString());
-                Logger.LogInfo("Can not load xml file as GameObject");
-                return null;
-            }
         }
         public static void saveobject(string value)
         {
@@ -422,7 +1378,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                setPersonaltyToNympho(Main.Instance.Player);
+                setPersonaltyToNympho(Main.Instance.Player.gameObject);
                 Main.Instance.GameplayMenu.ShowNotification("set the player to a nympho!");
             }
             catch (Exception e)
@@ -432,32 +1388,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void nympho()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: nympho");
-            try
+            GameObject personInteract = getPersonInteract();
+            
+            if (personInteract == null)
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la != null)
-                {
-                    if (la is int_Person)
-                    {
-                        int_Person int_thisPerson = (int_Person)la;
-                        if (int_thisPerson.ThisPerson != null)
-                        {
-                            Person thisPerson = int_thisPerson.ThisPerson;
-                            setPersonaltyToNympho(thisPerson);
-                            Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
-                        }
-                    }
-                }
+                return;
             }
-            catch (Exception e)
-            {
-            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+            setPersonaltyToNympho(thisPerson.gameObject);
+            Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
         }
 
         public static GameObject copyObj = null;
@@ -590,36 +1530,16 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            int_HealthPod pod = null;
+            GameObject podAvailableFree = getHealthPodInteract();
 
-            try
-            {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_HealthPod)
-                {
-                    int_HealthPod int_P = (int_HealthPod)la;
-                    if (int_P != null)
-                    {
-                        pod = int_P;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-            }
-
-            int_HealthPod podAvailable = pod;
-            if (podAvailable == null)
+            if (podAvailableFree == null)
             {
                 Main.Instance.GameplayMenu.ShowNotification("You must look at a HealthPod, in the clinic you can found a healthpod, or in the lab you can also found a healthpod");
                 return;
             }
+
+            int_HealthPod podAvailable = podAvailableFree.GetComponent<int_HealthPod>();
+
             Person parent1 = Main.Instance.Player;
             Person parent2 = (Main.Instance.Player as Girl).PregnancyParent;
             Person offspring = Main.Instance.CreateOffspring(parent1, parent2);
@@ -628,80 +1548,6 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.IsPlayerDescendant = true;
             offspring.CantBeForced = true;
         }
-
-        public static Person CreatePersonNew(string name, bool save = true, bool spawnFemale = true)
-        {
-            bool LoadSpecificNPC = true;
-            Person PersonGenerated = null;
-            if (LoadSpecificNPC)
-            {
-                PersonGenerated = spawnFemale ? UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonPrefab).GetComponent<Person>() : UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonGuyPrefab).GetComponent<Person>();
-                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
-                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
-                Directory.CreateDirectory(femalesDir);
-                Directory.CreateDirectory(malesDir);
-                string maleOrFemale = spawnFemale ? "females" : "males";
-                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
-                if (!File.Exists(filename))
-                {
-                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
-                    return null;
-                }
-                PersonGenerated._DontLoadClothing = true;
-                PersonGenerated._DontLoadInteraction = true;
-                PersonGenerated.LoadFromFile(filename);
-                PersonGenerated.transform.position = Main.Instance.Player.transform.position;
-                PersonGenerated.transform.rotation = Main.Instance.Player.transform.rotation;
-            }
-            PersonGenerated.WorldSaveID = Main.GenerateRandomString(25);
-            PersonGenerated.DontSaveInMain = !save;
-            PersonGenerated.CanSaveFlagger = new List<string>();
-            PersonGenerated.JobIndex = 0;
-            PersonGenerated.SPAWN_noUglyHair = false;
-            PersonGenerated.SPAWN_onlyGoodHair = true;
-            PersonGenerated.State = Person_State.Free;
-            PersonGenerated.Home = Main.Instance.PossibleStreetHomes[UnityEngine.Random.Range(0, Main.Instance.PossibleStreetHomes.Count)];
-            //PersonGenerated.CurrentZone = null;
-            PersonGenerated.StartingClothes = new List<GameObject>();
-            PersonGenerated.StartingWeapons = new List<GameObject>();
-            PersonGenerated._StartingClothes = new List<string>();
-            PersonGenerated._StartingWeapons = new List<string>();
-            PersonGenerated.Inited = false;
-            PersonGenerated.PersonType = Main.Instance.PersonTypes[(int)Person_Type.Wild];
-            RandomNPCHere inst = new RandomNPCHere();
-            inst.SpawnClean = true;
-            PersonGenerated.PutFeet();
-            PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
-            if (PersonGenerated.Name == null || PersonGenerated.Name.Length == 0)
-            {
-                PersonGenerated.Name = Main.Instance.GenerateRandomName();
-            }
-            if (PersonGenerated.States == null || PersonGenerated.States.Length < 34)
-            {
-                PersonGenerated.States = new bool[34];
-            }
-            PersonGenerated.RefreshColors();
-            setReverseWildStates(PersonGenerated);
-            PersonGenerated.TheHealth.canDie = false;
-            setPersonaltyToNympho(PersonGenerated);
-            return PersonGenerated;
-        }
-        public static Person CreatePersonMaleOld()
-        {
-            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
-            s.transform.position = Main.Instance.Player.transform.position;
-            s.transform.rotation = Main.Instance.Player.transform.rotation;
-            return s;
-        }
-
-        public static Person CreatePersonFemaleOld()
-        {
-            Person s = Person.GenerateRandom(spawnedPerson: null, female: true, randomgender: false, randompartsizes: true, _DEBUG: false);
-            s.transform.position = Main.Instance.Player.transform.position;
-            s.transform.rotation = Main.Instance.Player.transform.rotation;
-            return s;
-        }
-
         public static void spawnmale(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
@@ -710,7 +1556,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 default:
                     {
-                        s = CreatePersonNew(value, save, false);
+                        s = CreatePersonNew(value, save, false).GetComponent<Person>();
                     }
                     break;
             }
@@ -719,7 +1565,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnmalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
-            Person s = CreatePersonNew(value, save, false);
+            Person s = CreatePersonNew(value, save, false).GetComponent<Person>();
         }
         public static void spawnfemale(string value, bool save = false)
         {
@@ -729,7 +1575,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = CreatePersonNew("jeanne", save);
+                        s = CreatePersonNew("jeanne", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -743,7 +1589,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = CreatePersonNew("sarahoffwork", save);
+                        s = CreatePersonNew("sarahoffwork", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -754,7 +1600,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = CreatePersonNew("uniformedsarah", save);
+                        s = CreatePersonNew("uniformedsarah", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -770,7 +1616,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = CreatePersonNew("nameless", save);
+                        s = CreatePersonNew("nameless", save).GetComponent<Person>();
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -792,7 +1638,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = CreatePersonNew("rit", save);
+                        s = CreatePersonNew("rit", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -805,7 +1651,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = CreatePersonNew("carol", save);
+                        s = CreatePersonNew("carol", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -819,7 +1665,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = CreatePersonNew("beth", save);
+                        s = CreatePersonNew("beth", save).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -833,7 +1679,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = CreatePersonNew(value, save);
+                        s = CreatePersonNew(value, save).GetComponent<Person>();
                     }
                     break;
             }
@@ -841,7 +1687,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnfemalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
-            Person s = CreatePersonNew(value, save);
+            Person s = CreatePersonNew(value, save).GetComponent<Person>();
         }
         public static void completeallquests()
         {
@@ -925,223 +1771,159 @@ namespace BitchlandCheatConsoleBepInEx
         public static void getpersonstate()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: getpersonstate");
-            try
-            {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
 
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+            GameObject thisPersonFree = getPersonInteract();
 
-                if (la is int_Person)
-                {
-                    int_Person int_P = (int_Person)la;
-                    if (int_P.ThisPerson != null)
-                    {
-                        Person thisPerson = (Person)int_P.ThisPerson;
-                        if (thisPerson.State == Person_State.Free)
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is free");
-                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is fuckable great!, yeah :)");
-                        }
-                        else if (thisPerson.State == Person_State.Work)
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is work");
-                            Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is not fuckable, soo bad ): ");
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
+            if (thisPersonFree == null)
             {
+                return;
             }
+           
+            Person thisPerson = thisPersonFree.GetComponent<Person>();
+                        
+            if (thisPerson.State == Person_State.Free)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is free");
+                Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is fuckable great!, yeah :)");
+            }
+            else if (thisPerson.State == Person_State.Work)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is work");
+                Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is not fuckable, soo bad ): ");
+            }
+                   
         }
         public static void togglepersonstate()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: togglepersonstate");
-            try
+
+            GameObject thisPersonFree = getPersonInteract();
+
+            if (thisPersonFree == null)
             {
-                if (Main.Instance.Player == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_Person)
-                {
-                    int_Person int_P = (int_Person)la;
-                    if (int_P.ThisPerson != null)
-                    {
-                        Person thisPerson = (Person)int_P.ThisPerson;
-                        if (thisPerson.State == Person_State.Free)
-                        {
-                            thisPerson.State = Person_State.Work;
-                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was free, now person state is work");
-                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is not fuckable now, soo bad ): ");
-                        }
-                        else if (thisPerson.State == Person_State.Work)
-                        {
-                            thisPerson.State = Person_State.Free;
-                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was work, now person state is free");
-                            Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is fuckable now great!, yeah :)");
-                        }
-                    }
-                }
+                return;
             }
-            catch (Exception e)
+
+            Person thisPerson = thisPersonFree.GetComponent<Person>();
+
+            if (thisPerson.State == Person_State.Free)
             {
+                thisPerson.State = Person_State.Work;
+                Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was free, now person state is work");
+                Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is not fuckable now, soo bad ): ");
+            }
+            else if (thisPerson.State == Person_State.Work)
+            {
+                 thisPerson.State = Person_State.Free;
+                 Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was work, now person state is free");
+                 Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is fuckable now great!, yeah :)");
             }
         }
         public static void setpersonstatetowork()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonstatetowork");
-            try
+
+            GameObject thisPersonFree = getPersonInteract();
+
+            if (thisPersonFree == null)
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_Person)
-                {
-                    int_Person int_P = (int_Person)la;
-                    if (int_P.ThisPerson != null)
-                    {
-                        Person thisPerson = (Person)int_P.ThisPerson;
-                        if (thisPerson.State == Person_State.Free)
-                        {
-                            thisPerson.State = Person_State.Work;
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state was free, now person state is work");
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
-                        }
-                        else if (thisPerson.State == Person_State.Work)
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state is already work");
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
-                        }
-                    }
-                }
+                return;
             }
-            catch (Exception e)
+
+            Person thisPerson = thisPersonFree.GetComponent<Person>();
+
+            if (thisPerson.State == Person_State.Free)
             {
+                thisPerson.State = Person_State.Work;
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state was free, now person state is work");
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
+            }
+            else if (thisPerson.State == Person_State.Work)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: person state is already work");
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
             }
         }
         public static void setpersonstatetofree()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonstatetofree");
-            try
+
+            GameObject thisPersonFree = getPersonInteract();
+
+            if (thisPersonFree == null)
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_Person)
-                {
-                    int_Person int_P = (int_Person)la;
-                    if (int_P.ThisPerson != null)
-                    {
-                        Person thisPerson = (Person)int_P.ThisPerson;
-                        if (thisPerson.State == Person_State.Free)
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state is already free");
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
-                        }
-                        else if (thisPerson.State == Person_State.Work)
-                        {
-                            thisPerson.State = Person_State.Free;
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state was work, now person state is free");
-                            Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
-                        }
-                    }
-                }
+                return;
             }
-            catch (Exception e)
+
+            Person thisPerson = thisPersonFree.GetComponent<Person>();
+
+            if (thisPerson.State == Person_State.Free)
             {
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state is already free");
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
+            }
+            else if (thisPerson.State == Person_State.Work)
+            {
+                thisPerson.State = Person_State.Free;
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state was work, now person state is free");
+                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
             }
         }
         public static void lock_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: lock");
-            try
+
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_Lockable)
-                {
-                    int_Lockable int_Lo = (int_Lockable)la;
-                    int_Lo.m_Locked = true;
-                    int_Lo.InteractIcon = 1;
-                    if (int_Lo.InteractText != null)
-                    {
-                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Unlocked", "(Locked");
-                    }
-                }
+                return;
             }
-            catch (Exception e)
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            int_Lo.m_Locked = true;
+            int_Lo.InteractIcon = 1;
+            
+            if (int_Lo.InteractText != null)
             {
+                int_Lo.InteractText = int_Lo.InteractText.Replace("(Unlocked", "(Locked");
             }
         }
         public static void unlock_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unlock");
-            try
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
             {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
-
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is int_Lockable)
-                {
-                    int_Lockable int_Lo = (int_Lockable)la;
-                    int_Lo.m_Locked = false;
-                    int_Lo.InteractIcon = int_Lo.DefaultInteractIcon;
-                    if (int_Lo.InteractText != null)
-                    {
-                        int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
-                    }
-                }
+                return;
             }
-            catch (Exception e)
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            int_Lo.m_Locked = false;
+            int_Lo.InteractIcon = int_Lo.DefaultInteractIcon;
+
+            if (int_Lo.InteractText != null)
             {
+                int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
             }
         }
 
         public static void storagemax_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: storagemax");
-            try
-            {
-                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
-                {
-                    return;
-                }
+            GameObject storable = getStorableInteract();
 
-                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
-
-                if (la is Int_Storage)
-                {
-                    Int_Storage int_storage = (Int_Storage)la;
-                    int_storage.StorageMax = int.MaxValue;
-                }
-            }
-            catch (Exception e)
+            if (storable == null)
             {
+                return;
             }
+
+            Int_Storage int_storage = storable.GetComponent<Int_Storage>();
+
+            int_storage.StorageMax = int.MaxValue;
         }
 
         public static void storagemax_int_backpack()
@@ -1504,11 +2286,38 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.Player.CantBeHit = !Main.Instance.Player.CantBeHit;
             if (Main.Instance.Player.CantBeHit)
             {
+                Main.Instance.Player.NoEnergyLoss = true;
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: on");
             }
             else
             {
+                Main.Instance.Player.NoEnergyLoss = false;
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: off");
+            }
+        }
+        public static void npcinfinitehealth()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcinfinitehealth");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            person.CantBeHit = !person.CantBeHit;
+            if (person.CantBeHit)
+            {
+                person.NoEnergyLoss = true;
+                Main.Instance.GameplayMenu.ShowNotification("npcinfinitehealth: on");
+            }
+            else
+            {
+                person.NoEnergyLoss = false;
+                Main.Instance.GameplayMenu.ShowNotification("npcinfinitehealth: off");
             }
         }
 
@@ -1621,316 +2430,11 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
-        public static void setNudeStates(Person person, bool realnude = false, bool setallnudestates = false)
-        {
-            person.ClothingCondition = e_ClothingCondition.Nude;
-            person.States[9] = true; // Nude Clothing Vipe
-            person.States[10] = false; // Casual Clothing Vipe
-            person.States[11] = false; // Sexy Clothing Vipe
-
-            if (realnude)
-            {
-                person.States[0] = false; // Dirty -10 Sexy
-                person.States[1] = false; // Horny +10 Sexy
-                person.States[2] = false; // Very Dirty -20 Sexy
-                person.States[3] = false; // Shitten -20 Sexy
-
-                if (setallnudestates)
-                {
-                    person.States[4] = false; // Sleepy - speed
-                    person.States[5] = false; // Needs toilet
-                    person.States[6] = false; // Hungry
-                    person.States[7] = false; // Pregnant
-                }
-
-                person.States[8] = false; // Bloody -10 Sexy
-                person.States[12] = false; // Cum Stains + 1 Sexy 
-                person.States[13] = false; // Cum Stains + 2 Sexy
-                person.States[14] = false; // Cum Stains + 3 Sexy
-                person.States[15] = false; // Cum Stains + 4 Sexy 
-                person.States[16] = false; // Cum Stains + 5 Sexy 
-                person.States[17] = false; // Body Writting + 1 Sexy 
-                person.States[18] = false; // Body Writting + 2 Sexy 
-                person.States[19] = false; // Body Writting + 3 Sexy 
-                person.States[20] = false; // Bruises - 10 Sexy 
-                person.States[21] = false; // Heavy Bruises - 20 Sexy 
-                person.States[22] = false; // Basic Makeup + 10 Sexy
-                person.States[23] = false; // Runny Makeup + 1 Sexy
-                person.States[24] = false; // Runny Makeup + 1 Sexy
-                person.States[25] = false; // Runny Makeup + 1 Sexy
-                person.States[26] = false; // Cum in mouth + 1 Sexy
-
-                if (setallnudestates)
-                {
-                    person.States[27] = false; // Beard
-                    person.States[28] = false; // Lipstick
-                    person.States[29] = false; // Lipstick
-                    person.States[30] = false; // Lipstick
-                    person.States[31] = false; // Skin color lips
-                    person.States[32] = false; // Freckets
-                    person.States[33] = false; // Dirty Mouth
-                }
-            }
-        }
-
-        public static void setNudeClothesPoints(Person person)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            if (person.EquippedClothes == null)
-            {
-                return;
-            }
-
-            for (int i = 0; i < person.EquippedClothes.Count; i++)
-            {
-                person.EquippedClothes[i].SexyPoints = 0;
-                person.EquippedClothes[i].CasualPoints = 0;
-            }
-
-            person.GetClothingCondition();
-        }
-        public static void setSexyStates(Person person, bool realsexy, bool setallsexystates = false)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            person.ClothingCondition = e_ClothingCondition.Sexy;
-            person.States[9] = false; // Nude Clothing Vipe
-            person.States[10] = false; // Casual Clothing Vipe
-            person.States[11] = true; // Sexy Clothing Vipe
-
-            if (realsexy)
-            {
-                person.States[0] = false; // Dirty -10 Sexy
-                person.States[1] = true; // Horny +10 Sexy
-                person.States[2] = false; // Very Dirty -20 Sexy
-                person.States[3] = false; // Shitten -20 Sexy
-
-                if (setallsexystates)
-                {
-                    person.States[4] = false; // Sleepy - speed
-                    person.States[5] = false; // Needs toilet
-                    person.States[6] = false; // Hungry
-                    person.States[7] = false; // Pregnant
-                }
-
-                person.States[8] = false; // Bloody -10 Sexy
-                person.States[12] = true; // Cum Stains + 1 Sexy 
-                person.States[13] = true; // Cum Stains + 2 Sexy
-                person.States[14] = true; // Cum Stains + 3 Sexy
-                person.States[15] = true; // Cum Stains + 4 Sexy 
-                person.States[16] = true; // Cum Stains + 5 Sexy 
-                person.States[17] = true; // Body Writting + 1 Sexy 
-                person.States[18] = true; // Body Writting + 2 Sexy 
-                person.States[19] = true; // Body Writting + 3 Sexy 
-                person.States[20] = false; // Bruises - 10 Sexy 
-                person.States[21] = false; // Heavy Bruises - 20 Sexy 
-                person.States[22] = true; // Basic Makeup + 10 Sexy
-                person.States[23] = true; // Runny Makeup + 1 Sexy
-                person.States[24] = true; // Runny Makeup + 1 Sexy
-                person.States[25] = true; // Runny Makeup + 1 Sexy
-                person.States[26] = true; // Cum in mouth + 1 Sexy
-
-                if (setallsexystates)
-                {
-                    person.States[27] = false; // Beard
-                    person.States[28] = false; // Lipstick
-                    person.States[29] = false; // Lipstick
-                    person.States[30] = false; // Lipstick
-                    person.States[31] = false; // Skin color lips
-                    person.States[32] = false; // Freckets
-                    person.States[33] = false; // Dirty Mouth
-                }
-            }
-        }
-
-        public static void setSexyClothesPoints(Person person)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            if (person.EquippedClothes == null)
-            {
-                return;
-            }
-
-            int add = 100;
-
-            for (int i = 0; i < person.EquippedClothes.Count; i++)
-            {
-                person.EquippedClothes[i].CasualPoints = 0;
-                person.EquippedClothes[i].SexyPoints = add;
-                person.EquippedClothes[i].SexyPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
-            }
-
-            person.GetClothingCondition();
-        }
-
-        public static void setCasualStates(Person person, bool realcasual = false, bool setallcasualstates = false)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            person.ClothingCondition = e_ClothingCondition.Casual;
-            person.States[9] = false; // Nude Clothing Vipe
-            person.States[10] = true; // Casual Clothing Vipe
-            person.States[11] = false; // Sexy Clothing Vipe
-
-            if (realcasual)
-            {
-                person.States[0] = false; // Dirty -10 Sexy
-                person.States[1] = false; // Horny +10 Sexy
-                person.States[2] = false; // Very Dirty -20 Sexy
-                person.States[3] = false; // Shitten -20 Sexy
-
-                if (setallcasualstates)
-                {
-                    person.States[4] = false; // Sleepy - speed
-                    person.States[5] = false; // Needs toilet
-                    person.States[6] = false; // Hungry
-                    person.States[7] = false; // Pregnant
-                }
-
-                person.States[8] = false; // Bloody -10 Sexy
-                person.States[12] = false; // Cum Stains + 1 Sexy 
-                person.States[13] = false; // Cum Stains + 2 Sexy
-                person.States[14] = false; // Cum Stains + 3 Sexy
-                person.States[15] = false; // Cum Stains + 4 Sexy 
-                person.States[16] = false; // Cum Stains + 5 Sexy 
-                person.States[17] = false; // Body Writting + 1 Sexy 
-                person.States[18] = false; // Body Writting + 2 Sexy 
-                person.States[19] = false; // Body Writting + 3 Sexy 
-                person.States[20] = false; // Bruises - 10 Sexy 
-                person.States[21] = false; // Heavy Bruises - 20 Sexy 
-                person.States[22] = false; // Basic Makeup + 10 Sexy
-                person.States[23] = false; // Runny Makeup + 1 Sexy
-                person.States[24] = false; // Runny Makeup + 1 Sexy
-                person.States[25] = false; // Runny Makeup + 1 Sexy
-                person.States[26] = false; // Cum in mouth + 1 Sexy
-
-                if (setallcasualstates)
-                {
-                    person.States[27] = false; // Beard
-                    person.States[28] = false; // Lipstick
-                    person.States[29] = false; // Lipstick
-                    person.States[30] = false; // Lipstick
-                    person.States[31] = false; // Skin color lips
-                    person.States[32] = false; // Freckets
-                    person.States[33] = false; // Dirty Mouth
-                }
-            }
-        }
-
-        public static void setCasualClothesPoints(Person person)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            if (person.EquippedClothes == null)
-            {
-                return;
-            }
-
-            int add = 100;
-
-            for (int i = 0; i < person.EquippedClothes.Count; i++)
-            {
-                person.EquippedClothes[i].SexyPoints = 0;
-                person.EquippedClothes[i].CasualPoints = add;
-                person.EquippedClothes[i].CasualPoints = person.EquippedClothes[i].CasualPoints + person.EquippedClothes[i].SexyPoints + add;
-            }
-
-            person.GetClothingCondition();
-        }
-
-        public static void setCleanSkinStates(Person _this)
-        {
-            if (_this == null)
-            {
-                return;
-            }
-
-            _this.States[0] = false;
-            _this.States[2] = false;
-            _this.States[3] = false;
-            _this.States[8] = false;
-            _this.States[12] = false;
-            _this.States[13] = false;
-            _this.States[14] = false;
-            _this.States[15] = false;
-            _this.States[16 /*0x10*/] = false;
-            _this.States[17] = false;
-            _this.States[18] = false;
-            _this.States[19] = false;
-            _this.States[26] = false;
-            _this.States[33] = false;
-            _this.States[23] = false;
-            _this.States[24] = false;
-            _this.States[25] = false;
-            _this.DirtySkin = false;
-        }
-
-        public static void setPersonaltyToNympho(Person PersonGenerated)
-        {
-            if (PersonGenerated == null)
-            {
-                return;
-            }
-
-            PersonGenerated.Personality = Personality_Type.Nympho;
-            if (PersonGenerated.Fetishes == null)
-            {
-                PersonGenerated.Fetishes = new List<e_Fetish>();
-            }
-            PersonGenerated.Fetishes.Clear();
-            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
-            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
-            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
-            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
-            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Clean);
-            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
-            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
-            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
-            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
-        }
-
-        public static void setReverseWildStates(Person person)
-        {
-            if (person == null)
-            {
-                return;
-            }
-
-            person.States[17] = false;
-            person.States[18] = false;
-            person.States[19] = false;
-            person.States[12] = false;
-            person.States[13] = false;
-            person.States[14] = false;
-            person.States[15] = false;
-            person.States[16 /*0x10*/] = false;
-            person.States[20] = false;
-            person.DirtySkin = false;
-        }
         public static void cleanskin()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: cleanskin");
             Person _this = Main.Instance.Player;
-            setCleanSkinStates(_this);
+            setCleanSkinStates(_this.gameObject);
         }
 
         public static void heal()
@@ -1944,26 +2448,43 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: nude");
 
-            setNudeStates(Main.Instance.Player, realnude, false);
+            setNudeStates(Main.Instance.Player.gameObject, realnude, false);
 
-            setNudeClothesPoints(Main.Instance.Player);
+            setNudeClothesPoints(Main.Instance.Player.gameObject);
         }
         public static void sexy(bool realsexy)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: sexy");
 
-            setSexyStates(Main.Instance.Player, realsexy, false);
+            setSexyStates(Main.Instance.Player.gameObject, realsexy, false);
 
-            setSexyClothesPoints(Main.Instance.Player);
+            setSexyClothesPoints(Main.Instance.Player.gameObject);
+        }
+        public static void npcsexy()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsexy");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            setSexyStates(person.gameObject, true, false);
+
+            setSexyClothesPoints(person.gameObject);
         }
 
         public static void casual(bool realcasual)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: casual");
 
-            setCasualStates(Main.Instance.Player, realcasual, false);
+            setCasualStates(Main.Instance.Player.gameObject, realcasual, false);
 
-            setCasualClothesPoints(Main.Instance.Player);
+            setCasualClothesPoints(Main.Instance.Player .gameObject);
         }
         public static void clearbackpack()
         {
@@ -2418,6 +2939,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcsexy":
+                    {
+                        npcsexy();
+                    }
+                    break;
+
+                case "npcinfinitehealth":
+                    {
+                        npcinfinitehealth();
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -2623,141 +3156,17 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setnpcstate":
+                    {
+                        setnpcstate(key, value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
-            }
-        }
-        private static List<GameObject> getPrefabsByName2(string prefab)
-        {
-            List<GameObject> Prefabs2 = new List<GameObject>();
-
-            try
-            {
-                List<Weapon> Prefabs = null;
-
-                if (prefab == null)
-                {
-                    Prefabs = Main.Instance.Prefabs_Weapons;
-                }
-
-                switch (prefab)
-                {
-                    case "Weapons":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Weapons;
-                        }
-                        break;
-
-                    default:
-                        {
-                            Prefabs = Main.Instance.Prefabs_Weapons;
-                        }
-                        break;
-                }
-
-                if (Prefabs == null)
-                {
-                    return Prefabs2;
-                }
-
-                int length = Prefabs.Count;
-                for (int i = 0; i < length; i++)
-                {
-                    Prefabs2.Add(Prefabs[i].gameObject);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.ToString());
-            }
-
-            return Prefabs2;
-        }
-        private static GameObject getWeaponByName(string prefab, string name)
-        {
-            List<GameObject> Prefabs = getPrefabsByName2(prefab);
-
-            if (Prefabs == null || Prefabs.Count == 0)
-            {
-                return null;
-            }
-
-            if (name == null || name.Length == 0)
-            {
-                return null;
-            }
-
-            name = name.ToLower();
-
-            int length = Prefabs.Count;
-            for (int i = 0; i < length; i++)
-            {
-                if (Prefabs[i].IsNull())
-                {
-                    continue;
-                }
-
-                string wname = Prefabs[i].name;
-                wname = wname.ToLower().Replace(" ", "_");
-                if (wname == name)
-                {
-                    return Prefabs[i];
-                }
-            }
-            return null;
-        }
-
-        private static List<string> getAllWeaponsByPrefab(string prefab)
-        {
-            List<GameObject> Prefabs = getPrefabsByName2(prefab);
-
-            if (Prefabs == null || Prefabs.Count == 0)
-            {
-                return null;
-            }
-
-            List<string> all = new List<string>();
-
-            int length = Prefabs.Count;
-            for (int i = 0; i < length; i++)
-            {
-                if (Prefabs[i].IsNull())
-                {
-                    continue;
-                }
-
-                //bag.PickupWeapon(Main.Spawn(weapon));
-                GameObject item = Prefabs[i];
-                string name = item.name.Replace(" ", "_").ToLower();
-                all.Add(name);
-            }
-
-            return all;
-        }
-
-        private static void showWeaponsInLogByPrefab()
-        {
-            string prefabName = "Weapons";
-
-            List<string> Prefabs = getAllWeaponsByPrefab(null);
-
-            if (Prefabs == null || Prefabs.Count == 0)
-            {
-                return;
-            }
-
-            string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
-            Logger.LogInfo(itemi);
-
-            int length = Prefabs.Count;
-            for (int i = 0; i < length; i++)
-            {
-                string item = Prefabs[i];
-                Logger.LogInfo(item);
             }
         }
         public static void addweapon(string value)
@@ -3118,45 +3527,6 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification(spawnpointsNames[i]);
             }
         }
-
-        private static void showItemsInLogByPrefab(string prefab)
-        {
-            string prefabName = null;
-
-            if (prefab == null)
-            {
-                prefabName = "AllPrefabs";
-            }
-            else
-            {
-                prefabName = prefab;
-            }
-
-            List<GameObject> Prefabs = getPrefabsByName(prefab);
-
-            if (Prefabs == null || Prefabs.Count == 0)
-            {
-                return;
-            }
-
-            string itemi = "-------------------------------------------------------------------" + prefabName + "-------------------------------------------------------------------";
-            Logger.LogInfo(itemi);
-
-            int length = Prefabs.Count;
-            for (int i = 0; i < length; i++)
-            {
-                if (Prefabs[i].IsNull())
-                {
-                    continue;
-                }
-
-                string iname = Prefabs[i].name;
-                iname = iname.ToLower().Replace(" ", "_");
-                string item = iname;
-                Logger.LogInfo(item);
-
-            }
-        }
         public static void itemlist()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: itemlist");
@@ -3173,256 +3543,6 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: weaponlist");
             showWeaponsInLogByPrefab();
             return;
-        }
-
-        private static List<GameObject> getPrefabsByName(string prefab)
-        {
-            List<GameObject> Prefabs = null;
-
-            try
-            {
-                if (prefab == null)
-                {
-                    Prefabs = Main.Instance.AllPrefabs;
-                    return Prefabs;
-                }
-
-                switch (prefab)
-                {
-                    case "Any":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Any;
-                        }
-                        break;
-
-                    case "Shoes":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Shoes;
-                        }
-                        break;
-
-                    case "Pants":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Pants;
-                        }
-                        break;
-
-                    case "Top":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Top;
-                        }
-                        break;
-
-                    case "UnderwearTop":
-                        {
-                            Prefabs = Main.Instance.Prefabs_UnderwearTop;
-                        }
-                        break;
-
-                    case "UnderwearLower":
-                        {
-                            Prefabs = Main.Instance.Prefabs_UnderwearLower;
-                        }
-                        break;
-
-                    case "Garter":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Garter;
-                        }
-                        break;
-
-                    case "Socks":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Socks;
-                        }
-                        break;
-
-                    case "Hat":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Hat;
-                        }
-                        break;
-
-                    case "Hair":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Hair;
-                        }
-                        break;
-
-                    case "MaleHair":
-                        {
-                            Prefabs = Main.Instance.Prefabs_MaleHair;
-                        }
-                        break;
-
-                    case "Bodies":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Bodies;
-                        }
-                        break;
-
-                    case "Heads":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Heads;
-                        }
-                        break;
-
-                    case "Beards":
-                        {
-                            Prefabs = Main.Instance.Prefabs_Beards;
-                        }
-                        break;
-
-                    case "ProstSuit1":
-                        {
-                            Prefabs = Main.Instance.Prefabs_ProstSuit1;
-                        }
-                        break;
-
-                    case "ProstSuit2":
-                        {
-                            Prefabs = Main.Instance.Prefabs_ProstSuit2;
-                        }
-                        break;
-
-                    case "Weapons":
-                        {
-                            Prefabs = null;
-                        }
-                        break;
-
-                    default:
-                        {
-                            Prefabs = Main.Instance.AllPrefabs;
-                        }
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.ToString());
-                Prefabs = new List<GameObject>();
-            }
-
-            return Prefabs;
-        }
-        private static GameObject getItemByName(string prefab, string name)
-        {
-            List<GameObject> Prefabs = getPrefabsByName(prefab);
-
-            if (Prefabs == null || Prefabs.Count == 0)
-            {
-                return null;
-            }
-
-            if (name == null || name.Length == 0)
-            {
-                return null;
-            }
-
-            name = name.ToLower();
-
-            int length = Prefabs.Count;
-            for (int i = 0; i < length; i++)
-            {
-                if (Prefabs[i].IsNull())
-                {
-                    continue;
-                }
-
-                string iname = Prefabs[i].name;
-                iname = iname.ToLower().Replace(" ", "_");
-
-                if (iname == name)
-                {
-                    return Prefabs[i];
-                }
-            }
-            return null;
-        }
-
-        private static GameObject getAllItemByName(string name)
-        {
-            GameObject item = null;
-
-            if (name == null)
-            {
-                return null;
-            }
-
-            for (int i = 0; i < itemPCount; i++)
-            {
-                item = getItemByName(itemsP[i], name);
-                if (item != null)
-                {
-                    return item;
-                }
-            }
-
-            return null;
-        }
-
-        private static List<GameObject> getAllItems()
-        {
-            List<GameObject> itemList = new List<GameObject>();
-
-            for (int i = 0; i < itemPCount; i++)
-            {
-                string prefab = itemsP[i];
-                List<GameObject> items = getPrefabsByName(prefab);
-                if (items == null || items.Count == 0)
-                {
-                    continue;
-                }
-                for (int j = 0; j < items.Count; j++)
-                {
-                    if (items[j] != null)
-                        itemList.Add(items[j]);
-                }
-            }
-
-            return itemList;
-        }
-        private static void addItemReal(GameObject item, int value)
-        {
-            if (Main.Instance.Player.CurrentBackpack == null)
-            {
-                GameObject backpack2 = getItemByName(null, "backpack2");
-                if (backpack2 == null)
-                {
-                    backpack2 = getItemByName(null, "backpack");
-                }
-                if (backpack2 == null)
-                {
-                    return;
-                }
-                Main.Instance.Player.DressClothe(Main.Spawn(backpack2));
-            }
-
-            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
-            {
-                value = value <= 0 ? 1 : value;
-
-                int count = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Count;
-
-                count += value + 10;
-
-                count = count <= 0 ? int.MaxValue : count;
-
-                int storagemax = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax;
-
-                if (count >= storagemax)
-                {
-                    storagemax = count;
-                }
-
-                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = storagemax;
-
-                for (int i = 0; i < value; i++)
-                {
-                    Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(item);
-                }
-            }
         }
         public static void setstate(string key, string value)
         {
@@ -3468,6 +3588,66 @@ namespace BitchlandCheatConsoleBepInEx
 
             Main.Instance.Player.States[index] = state;
             Main.Instance.GameplayMenu.ShowNotification("setstate " + index.ToString() + " to " + (state ? "true" : "false"));
+        }
+        public static void setnpcstate(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setnpcstate");
+
+            GameObject thisPersonGa = getPersonInteract();
+
+            if (thisPersonGa == null)
+            {
+                return;
+            }
+
+            Person thisPerson = thisPersonGa.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            int statesLength = thisPerson.States.Length;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(key);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? 0 : amount;
+            amount = amount >= statesLength ? statesLength - 1 : amount;
+
+            int index = amount;
+
+            try
+            {
+                amount = int.Parse(value);
+                amount = amount >= 1 ? 1 : 0;
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+                bool amount2 = false;
+                try
+                {
+                    amount2 = bool.Parse(value);
+                    amount = amount2 ? 1 : 0;
+                }
+                catch (Exception ex2)
+                {
+                    amount = 0;
+                }
+            }
+
+            bool state = amount >= 1 ? true : false;
+
+            thisPerson.States[index] = state;
+            Main.Instance.GameplayMenu.ShowNotification("setnpcstate " + index.ToString() + " to " + (state ? "true" : "false"));
         }
         public static void additem(string key, string value)
         {
@@ -3582,6 +3762,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static bool onOpenCheat = false;
 
+        /*
         [HarmonyPatch(typeof(Main), "SpawnFromCustomBundle")]
         [HarmonyPrefix]
         public static bool SpawnFromCustomBundle(string assetName, ref GameObject __result, object __instance)
@@ -3614,8 +3795,9 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
             return false;
-        }
+        }*/
 
+        /*
         [HarmonyPatch(typeof(BaseObjectPlacer), "SpawnObject")]
         [HarmonyPrefix]
         public static bool SpawnObject(
@@ -3625,9 +3807,9 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Logger.LogInfo("EXECUTE MME SPAWNOBJECT");
             return true;
-        }
-
-            [HarmonyPatch(typeof(BaseObjectPlacer), "Execute")]
+        }*/
+        /*
+        [HarmonyPatch(typeof(BaseObjectPlacer), "Execute")]
         [HarmonyPrefix]
         public static bool Execute(
             ProcGenConfigSO globalConfig,
