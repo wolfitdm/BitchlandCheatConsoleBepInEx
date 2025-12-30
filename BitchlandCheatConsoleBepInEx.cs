@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.Mono;
+using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
 using HarmonyLib.Tools;
@@ -41,6 +42,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static bool isInit = false;
         private static int itemPCount = 0;
         private static int spawnpointsCount = 0;
+        private static JSONObject warpPointsUser = new JSONObject();
 
         private void Init()
         {
@@ -95,8 +97,8 @@ namespace BitchlandCheatConsoleBepInEx
             spawnpoints.Add("jailyard", new Vector3(-69f, 0.0f, 10f));
             spawnpoints.Add("jail", new Vector3(-49.10827f, 3.067196f, 14.40517f));
             spawnpoints.Add("f8", new Vector3(-69f, 0.0f, 10f));
+            warpPointsUser = readWarpPointsFromFile();
             spawnpointsCount = spawnpoints.Count;
-
             itemsP.Clear();
             itemsP.Add(null);
             itemsP.Add("Any");
@@ -201,6 +203,183 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+        public static JSONObject addWarpPoint(JSONObject json, string name, Vector3 point)
+        {
+            if (json == null)
+            {
+                return null;
+            }
+
+            if (name == null || name.Length == 0)
+            {
+                return json;
+            }
+
+            if (spawnpointsNames.Contains(name))
+            {
+                return json;
+            }
+
+            if (point == null)
+            {
+                return json;
+            }
+
+            float x = point.x;
+            float y = point.y;
+            float z = point.z;
+            string jsonstring = "{\"x\":" + x + ",\"y\":" + y + ",\"z\":" + z + "}";
+            
+            try
+            {
+                json.AddField(name, new JSONObject(jsonstring));
+                spawnpointsNames.Add(name);
+                spawnpoints.Add(name, point);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return json;
+        }
+
+        public static void readWarpPoints(JSONObject json)
+        {
+            if (json == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < json.list.Count; i++)
+            {
+                string key = json.keys[i];
+                
+                if (key == null || key.Length == 0)
+                {
+                    continue;
+                }
+
+                if (spawnpointsNames.Contains(key))
+                {
+                    continue;
+                }
+
+                JSONObject value = json.list[i];
+
+                Vector3 point = new Vector3();
+
+                for (int j = 0; j < value.list.Count; j++)
+                {
+                    string valuekey = value.keys[j];
+                    float valuevalue = value.list[j].floatValue;
+                    switch(valuekey)
+                    {
+                        case "x": point.x = valuevalue; break;
+                        case "y": point.y = valuevalue; break;
+                        case "z": point.z = valuevalue; break;
+                    }
+                }
+
+                spawnpointsNames.Add(key);
+                spawnpoints.Add(key, point);
+            }
+        }
+
+        public static void safeWarpPoints()
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            string filename = $"{objectsFolder}/warps.json";
+
+            if (!File.Exists(filename))
+            {
+                try
+                {
+                    File.WriteAllText(filename, "{}");
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
+            try
+            {
+                File.WriteAllText(filename, warpPointsUser.ToString());
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static JSONObject readWarpPointsFromFile()
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            string filename = $"{objectsFolder}/warps.json";
+
+            if (!File.Exists(filename))
+            {
+                try
+                {
+                    File.WriteAllText(filename, "{}");
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
+            string all = "";
+
+            try
+            {
+
+                string[] textFromFile = File.ReadAllLines(filename);
+
+                foreach (string line in textFromFile)
+                {
+                    all += line;
+                }
+
+            }
+            catch (Exception ex)
+            {
+            }
+
+            JSONObject json = null;
+
+            try
+            {
+                json = new JSONObject(all);
+                readWarpPoints(json);
+            }
+            catch (Exception e)
+            {
+                json = new JSONObject();
+            }
+
+            return json;
+        }
+
         public static void OpenUrl(string url)
         {
             try
@@ -234,8 +413,6 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
-
-
         public static string SaveGameObjectFile(GameObject rootObject, string name)
         {
             if (name == null || name.Length == 0)
@@ -245,7 +422,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
 
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
             Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
 
             string filename = $"{objectsFolder}/{name}.obj";
 
@@ -276,7 +461,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
 
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
             Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
 
             string filename = $"{objectsFolder}/{name}.obj";
 
@@ -418,8 +611,10 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated = spawnFemale ? UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonPrefab).GetComponent<Person>() : UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonGuyPrefab).GetComponent<Person>();
                 string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
                 string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
+                string objectsDir = $"{Main.AssetsFolder}/wolfitdm/objects";
                 Directory.CreateDirectory(femalesDir);
                 Directory.CreateDirectory(malesDir);
+                Directory.CreateDirectory(objectsDir);
                 string maleOrFemale = spawnFemale ? "females" : "males";
                 string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
                 if (!File.Exists(filename))
@@ -3132,6 +3327,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "savewarp":
+                    {
+                        savewarp(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
@@ -3168,6 +3369,29 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+        public static void savewarp(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: savewarp");
+
+            Vector3 point = Main.Instance.Player.transform.position;
+
+            if (spawnpointsNames.Contains(value))
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"savewarp: warppoint {value} already exists!");
+                return;
+            }
+
+            try
+            {
+                warpPointsUser = addWarpPoint(warpPointsUser, value, point);
+                safeWarpPoints();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification($"savewarp: warppoint {value} saved!");
         }
         public static void addweapon(string value)
         {

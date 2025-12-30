@@ -132,12 +132,13 @@ commands with 1 param:
 * s2 name -> saves the object 2 to the file named name
 * loadobject2 name -> loads the object 2 from the file
 * l2 name -> loads the object 2 from the file
+* savewarp name -> Adds a new warp point from your current location, named [name].
 
 commands with 2 params:
 
 * additem name amount -> add the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
-* setstate number -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
-* setnpcstate number -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
+* setstate number true -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
+* setnpcstate number true -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 
 state command examples:
 
