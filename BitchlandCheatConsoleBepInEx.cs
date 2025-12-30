@@ -43,6 +43,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static int itemPCount = 0;
         private static int spawnpointsCount = 0;
         private static JSONObject warpPointsUser = new JSONObject();
+        private static List<string> predefinedUserWarpsNames = new List<string>();
 
         private void Init()
         {
@@ -215,7 +216,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return json;
             }
 
-            if (spawnpointsNames.Contains(name))
+            if (spawnpointsNames.Contains(name) || predefinedUserWarpsNames.Contains(name))
             {
                 return json;
             }
@@ -225,16 +226,18 @@ namespace BitchlandCheatConsoleBepInEx
                 return json;
             }
 
-            float x = point.x;
-            float y = point.y;
-            float z = point.z;
-            string jsonstring = "{\"x\":" + x + ",\"y\":" + y + ",\"z\":" + z + "}";
+            double x = (double)point.x;
+            double y = (double)point.y;
+            double z = (double)point.z;
+            string floatIssue = "G";
+            string jsonstring = "{\"x\":" + x.ToString(floatIssue) + ",\"y\":" + y.ToString(floatIssue) + ",\"z\":" + z.ToString(floatIssue) + "}";
             
             try
             {
                 json.AddField(name, new JSONObject(jsonstring));
                 spawnpointsNames.Add(name);
                 spawnpoints.Add(name, point);
+                predefinedUserWarpsNames.Add(name);
             }
             catch (Exception ex)
             {
@@ -242,6 +245,38 @@ namespace BitchlandCheatConsoleBepInEx
 
             return json;
         }
+
+        public static JSONObject removeWarpPoint(JSONObject json, string name)
+        {
+            if (json == null)
+            {
+                return null;
+            }
+
+            if (name == null || name.Length == 0)
+            {
+                return json;
+            }
+
+            if (!spawnpointsNames.Contains(name) || !predefinedUserWarpsNames.Contains(name))
+            {
+                return json;
+            }
+
+            try
+            {
+                json.RemoveField(name);
+                spawnpointsNames.Remove(name);
+                spawnpoints.Remove(name);
+                predefinedUserWarpsNames.Remove(name);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return json;
+        }
+
 
         public static void readWarpPoints(JSONObject json)
         {
@@ -259,7 +294,7 @@ namespace BitchlandCheatConsoleBepInEx
                     continue;
                 }
 
-                if (spawnpointsNames.Contains(key))
+                if (spawnpointsNames.Contains(key) || predefinedUserWarpsNames.Contains(key))
                 {
                     continue;
                 }
@@ -271,16 +306,17 @@ namespace BitchlandCheatConsoleBepInEx
                 for (int j = 0; j < value.list.Count; j++)
                 {
                     string valuekey = value.keys[j];
-                    float valuevalue = value.list[j].floatValue;
+                    double valuevalue = value.list[j].doubleValue;
                     switch(valuekey)
                     {
-                        case "x": point.x = valuevalue; break;
-                        case "y": point.y = valuevalue; break;
-                        case "z": point.z = valuevalue; break;
+                        case "x": point.x = (float)valuevalue; break;
+                        case "y": point.y = (float)valuevalue; break;
+                        case "z": point.z = (float)valuevalue; break;
                     }
                 }
 
                 spawnpointsNames.Add(key);
+                predefinedUserWarpsNames.Add(key);
                 spawnpoints.Add(key, point);
             }
         }
@@ -3327,9 +3363,16 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "addwarp":
                 case "savewarp":
                     {
                         savewarp(value);
+                    }
+                    break;
+
+                case "removewarp":
+                    {
+                        removewarp(value);
                     }
                     break;
 
@@ -3376,7 +3419,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             Vector3 point = Main.Instance.Player.transform.position;
 
-            if (spawnpointsNames.Contains(value))
+            if (spawnpointsNames.Contains(value) || predefinedUserWarpsNames.Contains(value))
             {
                 Main.Instance.GameplayMenu.ShowNotification($"savewarp: warppoint {value} already exists!");
                 return;
@@ -3392,6 +3435,29 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Main.Instance.GameplayMenu.ShowNotification($"savewarp: warppoint {value} saved!");
+        }
+        public static void removewarp(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removewarp");
+
+            Vector3 point = Main.Instance.Player.transform.position;
+
+            if (!spawnpointsNames.Contains(value) || !predefinedUserWarpsNames.Contains(value))
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"removewarp: warppoint {value} not exists!");
+                return;
+            }
+
+            try
+            {
+                warpPointsUser = removeWarpPoint(warpPointsUser, value);
+                safeWarpPoints();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification($"removewarp: warppoint {value} removed!");
         }
         public static void addweapon(string value)
         {

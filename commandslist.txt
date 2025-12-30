@@ -132,7 +132,9 @@ commands with 1 param:
 * s2 name -> saves the object 2 to the file named name
 * loadobject2 name -> loads the object 2 from the file
 * l2 name -> loads the object 2 from the file
-* savewarp name -> Adds a new warp point from your current location, named [name].
+* savewarp name -> Adds a new warp point from your current location, named [name]
+* addwarp name -> Adds a new warp point from your current location, named [name]
+* removewarp name -> Remove a new warp point named [name]
 
 commands with 2 params:
 
