@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -44,6 +45,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static int spawnpointsCount = 0;
         private static JSONObject warpPointsUser = new JSONObject();
         private static List<string> predefinedUserWarpsNames = new List<string>();
+        private static CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
 
         private void Init()
         {
@@ -76,6 +78,7 @@ namespace BitchlandCheatConsoleBepInEx
             spawnpointsNames.Add("jailyard");
             spawnpointsNames.Add("jail");
             spawnpointsNames.Add("f8");
+            spawnpointsNames.Add("airdefenders");
             spawnpoints.Add("safearea1", new Vector3(-2.949118f, 1.192093E-07f, 39.10889f));
             spawnpoints.Add("safearea2", new Vector3(179.8053f, 0.05544382f, -73.4415f));
             spawnpoints.Add("safearea3", new Vector3(-69f, 0.0f, 10f));
@@ -98,6 +101,7 @@ namespace BitchlandCheatConsoleBepInEx
             spawnpoints.Add("jailyard", new Vector3(-69f, 0.0f, 10f));
             spawnpoints.Add("jail", new Vector3(-49.10827f, 3.067196f, 14.40517f));
             spawnpoints.Add("f8", new Vector3(-69f, 0.0f, 10f));
+            spawnpoints.Add("airdefenders", new Vector3(-125.599f, 0.506795f, 312.4564f));
             warpPointsUser = readWarpPointsFromFile();
             spawnpointsCount = spawnpoints.Count;
             itemsP.Clear();
@@ -204,6 +208,34 @@ namespace BitchlandCheatConsoleBepInEx
             // Allow window dragging
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+
+        public static string vector3ToJsonString(Vector3 point)
+        {
+            if (point == null)
+            {
+                point = new Vector3(0, 0, 0);
+            }
+
+            string x = point.x.ToString("G", culture);
+            string y = point.y.ToString("G", culture);
+            string z = point.z.ToString("G", culture);
+            string jsonstring = "{\"x\":\"" + x + "\",\"y\":\"" + y + "\",\"z\":\"" + z + "\"}";
+            return jsonstring;
+        }
+        public static string vector3ToString(Vector3 point)
+        {
+            if (point == null)
+            {
+                point = new Vector3(0, 0, 0);
+            }
+
+            string x = point.x.ToString("G", culture);
+            string y = point.y.ToString("G", culture);
+            string z = point.z.ToString("G", culture);
+            string vstring = $"x: {x}, y: {y}, z: {z}";
+            return vstring;
+        }
+
         public static JSONObject addWarpPoint(JSONObject json, string name, Vector3 point)
         {
             if (json == null)
@@ -226,12 +258,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return json;
             }
 
-            double x = (double)point.x;
-            double y = (double)point.y;
-            double z = (double)point.z;
-            string floatIssue = "G";
-            string jsonstring = "{\"x\":" + x.ToString(floatIssue) + ",\"y\":" + y.ToString(floatIssue) + ",\"z\":" + z.ToString(floatIssue) + "}";
-            
+            string jsonstring = vector3ToJsonString(point);
             try
             {
                 json.AddField(name, new JSONObject(jsonstring));
@@ -306,15 +333,28 @@ namespace BitchlandCheatConsoleBepInEx
                 for (int j = 0; j < value.list.Count; j++)
                 {
                     string valuekey = value.keys[j];
-                    double valuevalue = value.list[j].doubleValue;
+                    string valuevalue = value.list[j].stringValue;
+
+                    float v = 0;
+
+                    try
+                    {
+                        v = float.Parse(valuevalue, culture);
+                    } catch (Exception ex)
+                    {
+                        v = 0;
+                    }
+
                     switch(valuekey)
                     {
-                        case "x": point.x = (float)valuevalue; break;
-                        case "y": point.y = (float)valuevalue; break;
-                        case "z": point.z = (float)valuevalue; break;
+                        case "x": point.x = v; break;
+                        case "y": point.y = v; break;
+                        case "z": point.z = v; break;
                     }
                 }
 
+                string pointstring = vector3ToJsonString(point);
+                //Logger.LogInfo($"{key}: {pointstring}");
                 spawnpointsNames.Add(key);
                 predefinedUserWarpsNames.Add(key);
                 spawnpoints.Add(key, point);
@@ -2731,9 +2771,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: showpos");
             Vector3 lastSpawnPoint = Main.Instance.Player.transform.position;
-            Main.Instance.GameplayMenu.ShowNotification(lastSpawnPoint.x.ToString() + " " + lastSpawnPoint.y.ToString() + " " + lastSpawnPoint.z.ToString());
-            Main.Instance.GameplayMenu.ShowNotification(lastSpawnPoint.x.ToString() + " " + lastSpawnPoint.y.ToString() + " " + lastSpawnPoint.z.ToString());
-
+            Main.Instance.GameplayMenu.ShowNotification(vector3ToString(lastSpawnPoint));            
         }
 
         public static void handleCommand(string inputText)

@@ -204,3 +204,4 @@ warplist:
 * jailyard
 * jail
 * f8
+* airdefenders
