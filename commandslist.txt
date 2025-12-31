@@ -101,6 +101,7 @@ commands with no params:
 * collisionoff -> Set the collision from the entire game to off
 * togglecollision -> toggle the collision from a object, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
 * togglecollision2 -> toggle the collision from a object 2, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
+* maxtraining -> Increases clit training, anal training, vaginal training, nipple training and body training by 10
 
 commands with 1 param:
 

@@ -2285,6 +2285,17 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
             }
         }
+
+        public static void maxtraining()
+        {
+            Person player = Main.Instance.Player;
+            player.AnalTraining += 10;
+            player.VaginalTraining += 10;
+            player.NippleTraining += 10;
+            player.ClitTraining += 10;
+            player.BodyTraining += 10;
+            Main.Instance.GameplayMenu.ShowNotification("Increases clit training, anal training, vaginal training, nipple training and body training by 10!");
+        }
         public static void help()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: help");
@@ -4104,6 +4115,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "togglecollision2":
                     {
                         togglecollision2();
+                    }
+                    break;
+
+                case "maxtraining":
+                    {
+                        maxtraining();
                     }
                     break;
 
