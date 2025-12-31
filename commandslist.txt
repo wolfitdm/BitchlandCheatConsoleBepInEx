@@ -95,6 +95,8 @@ commands with no params:
 * npcfullenergy -> sets the energy from the npc the you looked at to maximum
 * npcfullheal -> heals the npc the you looked at
 * npccleanskin -> cleans the skin from the npc the you looked at, and sets his clothing condition to nude
+* listmenus -> List all menus from the game
+* closemenus -> Closes all menus from the game
 
 with toggleactive you can temporarily
 
@@ -147,6 +149,8 @@ commands with 1 param:
 * removewarp name -> Remove a new warp point named [name]
 * changeskin name -> change your skin to name character, its the same behavior like the spawnfemale command
 * changeskinnude name -> change your skin to name character, its the same behavior like the spawnfemalenude command
+* openmenu name -> open menu named name
+* closemenu name -> close menu named name
 
 commands with 2 params:
 

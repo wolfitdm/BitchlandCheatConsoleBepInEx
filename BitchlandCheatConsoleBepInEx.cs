@@ -3345,7 +3345,52 @@ namespace BitchlandCheatConsoleBepInEx
 
             Main.Instance.GameplayMenu.ShowNotification("npcleanskin: npc cleaned");
         }
+        public static void closemenus()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: closemenus");
+            Main.Instance.CloseMenus();
+        }
 
+        public static void listmenus()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openmenu");
+            string menus = "menus: \n";
+            for (int index = 0; index < Main.Instance.Menus.Count; ++index)
+            {
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                menus += menuname + "\n";
+            }
+            Main.Instance.GameplayMenu.ShowNotification(menus);
+            Logger.LogInfo(menus);
+        }
+
+        public static void openmenu(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openmenu");
+            for (int index = 0; index < Main.Instance.Menus.Count; ++index)
+            {
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                if (menuname == value)
+                {
+                    Main.Instance.OpenMenu(Main.Instance.Menus[index].MenuName);
+                    break;
+                }
+            }
+        }
+
+        public static void closemenu(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: closemenu");
+            for (int index = 0; index < Main.Instance.Menus.Count; ++index)
+            {
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                if (menuname == value)
+                {
+                    Main.Instance.Menus[index].Close();
+                    break;
+                }
+            }
+        }
         public static void heal()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: heal");
@@ -3927,6 +3972,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "closemenus":
+                    {
+                        closemenus();
+                    }
+                    break;
+
+                case "listmenus":
+                    {
+                        listmenus();
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -4130,6 +4187,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "changeskinnude":
                     {
                         changeskinnude(value);
+                    }
+                    break;
+
+                case "openmenu":
+                    {
+                        openmenu(value);
+                    }
+                    break;
+
+                case "closemenu":
+                    {
+                        closemenu(value);
                     }
                     break;
 
