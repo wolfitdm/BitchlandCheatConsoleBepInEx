@@ -2210,6 +2210,7 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/statelist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/warplist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/weaponlist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/menulist.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
         }
