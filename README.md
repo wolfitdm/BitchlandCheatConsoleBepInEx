@@ -221,3 +221,15 @@ warplist:
 * jail
 * f8
 * airdefenders
+
+menus:
+
+* mainmenu
+* newgame
+* settings
+* loadgame
+* gameplay
+* customizeplayer
+* inventory
+* sex
+* loadcustomnpc

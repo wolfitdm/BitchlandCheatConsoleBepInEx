@@ -1,0 +1,9 @@
+mainmenu
+newgame
+settings
+loadgame
+gameplay
+customizeplayer
+inventory
+sex
+loadcustomnpc

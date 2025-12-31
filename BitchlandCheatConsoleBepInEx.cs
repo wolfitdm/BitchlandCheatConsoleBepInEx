@@ -3353,7 +3353,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void listmenus()
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: openmenu");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listmenus");
             string menus = "menus: \n";
             for (int index = 0; index < Main.Instance.Menus.Count; ++index)
             {
