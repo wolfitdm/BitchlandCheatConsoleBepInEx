@@ -2063,6 +2063,9 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool active1 = true;
         public static bool active2 = true;
 
+        public static bool collision1 = true;
+        public static bool collision2 = true;
+
         public static void copy()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: copy");
@@ -2094,6 +2097,14 @@ namespace BitchlandCheatConsoleBepInEx
                         catch (Exception ex)
                         {
                         }
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'toggleactive/togglecollision', to toggle active/collision of this object!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
                     }
 
                     if (obj2 != null)
@@ -2111,6 +2122,14 @@ namespace BitchlandCheatConsoleBepInEx
                         try
                         {
                             Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'saveobject2 name', to save the object to file!");
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+
+                        try
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'toggleactive2/togglecollision2', to toggle active/collision of this object!");
                         }
                         catch (Exception ex)
                         {
@@ -2144,6 +2163,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                 }
             }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
         }
 
         public static void paste2()
@@ -2166,6 +2189,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                 }
             }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
         }
 
         public static void toggleactive()
@@ -2183,6 +2210,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                 }
             }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
         }
         public static void toggleactive2()
         {
@@ -2198,6 +2229,60 @@ namespace BitchlandCheatConsoleBepInEx
                 catch (Exception ex)
                 {
                 }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static void togglecollision()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision");
+            if (copyObj != null)
+            {
+                collision1 = !collision1;
+                Collider collider = copyObj.GetComponent<Collider>();
+                if (collider == null)
+                {
+                    return;
+                }
+                collider.enabled = collision1;
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"togglecollision: object collision '{copyObj.name}' is set to " + (collision1 ? "on" : "off"));
+                }
+                catch (Exception ex)
+                {
+                }
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+        public static void togglecollision2()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision2");
+            if (copyObj2 != null)
+            {
+                collision2 = !collision2;
+                Collider collider = copyObj2.GetComponent<Collider>();
+                if (collider == null)
+                {
+                    return;
+                }
+                collider.enabled = collision2;
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"togglecollision2: object collision '{copyObj2.name}' is set to " + (collision2 ? "on" : "off"));
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
             }
         }
         public static void help()
@@ -3321,6 +3406,19 @@ namespace BitchlandCheatConsoleBepInEx
             setCleanSkinStates(_this.gameObject);
         }
 
+        public static void collisionon()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: collisonon");
+            Person _this = Main.Instance.Player;
+            _this._Rigidbody.detectCollisions = true;
+        }
+        public static void collisionoff()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: collisonoff");
+            Person _this = Main.Instance.Player;
+            _this._Rigidbody.detectCollisions = false;
+        }
+
         public static void npccleanskin()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npccleanskin");
@@ -3982,6 +4080,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "listmenus":
                     {
                         listmenus();
+                    }
+                    break;
+
+                case "collisionoff":
+                    {
+                        collisionoff();
+                    }
+                    break;
+
+                case "collisionon":
+                    {
+                        collisionon();
+                    }
+                    break;
+
+                case "togglecollision":
+                    {
+                        togglecollision();
+                    }
+                    break;
+
+                case "togglecollision2":
+                    {
+                        togglecollision2();
                     }
                     break;
 

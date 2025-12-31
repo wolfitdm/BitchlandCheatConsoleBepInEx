@@ -97,8 +97,10 @@ commands with no params:
 * npccleanskin -> cleans the skin from the npc the you looked at, and sets his clothing condition to nude
 * listmenus -> List all menus from the game
 * closemenus -> Closes all menus from the game
-
-with toggleactive you can temporarily
+* collisionon -> Set the collision from the entire game to on
+* collisionoff -> Set the collision from the entire game to off
+* togglecollision -> toggle the collision from a object, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
+* togglecollision2 -> toggle the collision from a object 2, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
 
 commands with 1 param:
 
