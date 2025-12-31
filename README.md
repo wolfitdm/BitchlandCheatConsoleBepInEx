@@ -87,6 +87,16 @@ commands with no params:
 * raycastobjpaste2 -> spawns the object that you previously copied using the command copy
 * npcsexy -> set all sexy states to the npc you are looked at, set all  states from the npc the you looked at to sexy (Cum stains, Body written, clean, and so on)
 * npcinfinitehealth -> toggle infinite health and infinite energy on the npc the you looked at, the npc the you looked at, have infinite health and energy (you can fuck 24/7 without exchausted)  , you can toggle it with that command
+* changeskin -> change your skin to nameless character, its the same behavior like the spawnfemale command
+* changeskinnude -> change your skin to brat character, its the same behavior like the spawnfemalenude command
+* toggleactive -> toggle the active state from a object, the you have selected with copy command before,With toggleactive you can set an object in the game to inactive, which means the object is temporarily removed from the game until it is set to active again.
+* toggleactive2 -> toggle the active state from a object 2, the you have selected with copy command before,With toggleactive you can set an object in the game to inactive, which means the object is temporarily removed from the game until it is set to active again.
+* maxhunger -> sets the hunger to maximum
+* npcfullenergy -> sets the energy from the npc the you looked at to maximum
+* npcfullheal -> heals the npc the you looked at
+* npccleanskin -> cleans the skin from the npc the you looked at, and sets his clothing condition to nude
+
+with toggleactive you can temporarily
 
 commands with 1 param:
 
@@ -135,6 +145,8 @@ commands with 1 param:
 * savewarp name -> Adds a new warp point from your current location, named [name]
 * addwarp name -> Adds a new warp point from your current location, named [name]
 * removewarp name -> Remove a new warp point named [name]
+* changeskin name -> change your skin to name character, its the same behavior like the spawnfemale command
+* changeskinnude name -> change your skin to name character, its the same behavior like the spawnfemalenude command
 
 commands with 2 params:
 

@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
+using DitzelGames.FastIK;
 using HarmonyLib;
 using HarmonyLib.Tools;
 using SemanticVersioning;
@@ -16,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization.Json;
 using System.Security.Policy;
@@ -23,6 +25,8 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using UMA.Examples;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UIElements;
 using UnityStandardAssets.Water;
 using static Mono.Security.X509.X520;
 using static UnityEngine.InputSystem.Controls.DiscreteButtonControl;
@@ -264,6 +268,7 @@ namespace BitchlandCheatConsoleBepInEx
                 json.AddField(name, new JSONObject(jsonstring));
                 spawnpointsNames.Add(name);
                 spawnpoints.Add(name, point);
+                spawnpointsCount = spawnpoints.Count;
                 predefinedUserWarpsNames.Add(name);
             }
             catch (Exception ex)
@@ -358,6 +363,7 @@ namespace BitchlandCheatConsoleBepInEx
                 spawnpointsNames.Add(key);
                 predefinedUserWarpsNames.Add(key);
                 spawnpoints.Add(key, point);
+                spawnpointsCount = spawnpoints.Count;
             }
         }
 
@@ -698,6 +704,10 @@ namespace BitchlandCheatConsoleBepInEx
                     Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
                     return null;
                 }
+                PersonGenerated.StartingClothes = new List<GameObject>();
+                PersonGenerated.StartingWeapons = new List<GameObject>();
+                PersonGenerated._StartingClothes = new List<string>();
+                PersonGenerated._StartingWeapons = new List<string>();
                 PersonGenerated._DontLoadClothing = true;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
@@ -735,6 +745,382 @@ namespace BitchlandCheatConsoleBepInEx
             setReverseWildStates(PersonGenerated.gameObject);
             PersonGenerated.TheHealth.canDie = false;
             setPersonaltyToNympho(PersonGenerated.gameObject);
+            return PersonGenerated.gameObject;
+        }
+
+     /*   public static GameObject BasicPerson()
+        {
+            bool spawnFemale = Main.Instance.Player is Girl ? true : false;
+            GameObject personPrefab = spawnFemale ? Main.Instance.PersonPrefab : Main.Instance.PersonGuyPrefab;
+
+            if (personPrefab == null)
+            {
+                return Main.Instance.Player.gameObject;
+            }
+
+            Person person = personPrefab.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return Main.Instance.Player.gameObject;
+            }
+
+            Person player = Main.Instance.Player;
+
+            player.DEBUG = person.DEBUG;
+            player.Penis = person.Penis;
+            player.PenisEnabled = person.PenisEnabled;
+            player.HasPenis = person.HasPenis;
+            player.HasCondomPut = person.HasCondomPut;
+            player.UnparentOnStart = person.UnparentOnStart;
+            player.Anim = person.Anim;
+            player.navMesh = person.navMesh;
+            player._Rigidbody = person._Rigidbody;
+            player.Eyes = person.Eyes;
+            player.EyesSpot = person.EyesSpot;
+            player.LOD = person.LOD;
+            player.ProxSeen = person.ProxSeen;
+            player.CantBeHit = person.CantBeHit;
+            player.VoicePitch = person.VoicePitch;
+            player.ViewPoint = person.ViewPoint;
+            player.TorsoViewPoint = person.TorsoViewPoint;
+            player._DontLoadInteraction = person._DontLoadInteraction;
+            player._DontLoadClothing = person._DontLoadClothing;
+            player.MainBodyLowPoly = person.MainBodyLowPoly;
+            player.MainBody = person.MainBody;
+            player.EyesObjects = person.EyesObjects;
+            player.RagdollParts = person.RagdollParts;
+            player.StartingClothes = person.StartingClothes;
+            player._StartingClothes = person._StartingClothes;
+            player.StartingWeapons = person.StartingWeapons;
+            player._StartingWeapons = person._StartingWeapons;
+            player.CurrentShoes = person.CurrentShoes;
+            player.CurrentPants = person.CurrentPants;
+            player.CurrentTop = person.CurrentTop;
+            player.CurrentUnderwearTop = person.CurrentUnderwearTop;
+            player.CurrentUnderwearLower = person.CurrentUnderwearLower;
+            player.CurrentGarter = person.CurrentGarter;
+            player.CurrentSocks = person.CurrentSocks;
+            player.CurrentHat = person.CurrentHat;
+            player.CurrentHair = person.CurrentHair;
+            player.CurrentFeet = person.CurrentFeet;
+            player.CurrentBeard = person.CurrentBeard;
+            player.CurrentFeetMesh = person.CurrentFeetMesh;
+            player.CurrentAnys = person.CurrentAnys;
+            player.CurrentBody = person.CurrentBody;
+            player.CurrentHead = person.CurrentHead;
+            player.NaturalSkinColor = person.NaturalSkinColor;
+            player.NaturalHairColor = person.NaturalHairColor;
+            player.NaturalEyeColor = person.NaturalEyeColor;
+            player.TannedSkinColor = person.TannedSkinColor;
+            player.DyedHairColor = person.DyedHairColor;
+            player.DyedEyeColor = person.DyedEyeColor;
+            player._CustomSkinStates = person._CustomSkinStates;
+            player._CustomFaceSkinStates = person._CustomFaceSkinStates;
+            player._FaceSkinStates = person._FaceSkinStates;
+            player._SkinStates = person._SkinStates;
+            player._States = person._States;
+            player._PersonalityData = person._PersonalityData;
+            player.BoobSize = person.BoobSize;
+            player.AssSize = person.AssSize;
+            player.FatSize = person.FatSize;
+            player.AnalTraining = person.AnalTraining;
+            player.VaginalTraining = person.VaginalTraining;
+            player.NippleTraining = person.NippleTraining;
+            player.ClitTraining = person.ClitTraining;
+            player.BodyTraining = person.BodyTraining;
+            player.EquippedClothes = person.EquippedClothes;
+            player.SPAWN_noUglyHair = person.SPAWN_noUglyHair;
+            player.SPAWN_onlyGoodHair = person.SPAWN_onlyGoodHair;
+            player.SecondWeapon = person.SecondWeapon;            player.PersonType = person.PersonType;            player.Inited = person.Inited;
+            player.Holes = person.Holes;
+            player.PenisBones = person.PenisBones;
+            player._CharacterVisible = person._CharacterVisible;
+            player._StartedMastPP = person._StartedMastPP;
+            player.Do_Schedule_GoingToTargetThread = person.Do_Schedule_GoingToTargetThread;
+            player._PathRedo = person._PathRedo;
+            player._TimeGoingToTarget = person._TimeGoingToTarget;
+            player.RandActionTimer = person.RandActionTimer;
+            player.WhileDoingAction = person.WhileDoingAction;
+            player.RuntimeActions = person.RuntimeActions;
+            player.TEMP_HANDLENEEDS_OFF = person.TEMP_HANDLENEEDS_OFF;
+            player.TEMP_HANDLEANIMS_OFF = person.TEMP_HANDLEANIMS_OFF;
+            player.TEMP_SEXUPDATE_OFF = person.TEMP_SEXUPDATE_OFF;
+            player.TEMP_UPDATE_OFF = person.TEMP_UPDATE_OFF;
+            player.TEMP_RUNTIME_OFF = person.TEMP_RUNTIME_OFF;
+            player.DecideTimer = person.DecideTimer;
+            player._ShootBlind = person._ShootBlind;
+            player.CombatDistance = person.CombatDistance;
+            player.EndingCombat = person.EndingCombat;
+            player.HavingSex_Scene = person.HavingSex_Scene;
+            player.HavingSexWith = person.HavingSexWith;
+            player.Orgasming = person.Orgasming;
+            player.NoEnergyLoss = person.NoEnergyLoss;
+            player._HiddenHead = person._HiddenHead;
+            player._ClothingBatch1Bones = person._ClothingBatch1Bones;
+            player.ObjInHand = person.ObjInHand;
+            player.HeadStuff = person.HeadStuff;
+            player.RightHandStuff = person.RightHandStuff;
+            player.LeftHandStuff = person.LeftHandStuff;
+            player.RightHandWankCenter = person.RightHandWankCenter;
+            player.AllFaceBones = person.AllFaceBones;
+            player.Head = person.Head;
+            player.MouthBase = person.MouthBase;
+            player.MouthLeft = person.MouthLeft;
+            player.MouthRight = person.MouthRight;
+            player.MouthTop = person.MouthTop;
+            player.MouthBottom = person.MouthBottom;
+            player.CheekLowLeft = person.CheekLowLeft;
+            player.CheekLowRight = person.CheekLowRight;
+            player.CheekUpLeft = person.CheekUpLeft;
+            player.CheekUpRight = person.CheekUpRight;
+            player.Jaw = person.Jaw;
+            player.JawLow = person.JawLow;
+            player.Chin = person.Chin;
+            player.EarLeft = person.EarLeft;
+            player.EarLeftLow = person.EarLeftLow;
+            player.EarLeftHigh = person.EarLeftHigh;
+            player.EarRight = person.EarRight;
+            player.EarRightLow = person.EarRightLow;
+            player.EarRightHigh = person.EarRightHigh;
+            player.Nose = person.Nose;
+            player.NoseBridge = person.NoseBridge;
+            player.NoseTip = person.NoseTip;
+            player.NostrilLeft = person.NostrilLeft;
+            player.NostrilRight = person.NostrilRight;
+            player.EyeLeft = person.EyeLeft;
+            player.EyeRight = person.EyeRight;
+            player.EyeBallLeft = person.EyeBallLeft;
+            player.EyeBallRight = person.EyeBallRight;
+            player.EyeLeftTop = person.EyeLeftTop;
+            player.EyeLeftLow = person.EyeLeftLow;
+            player.EyeLeftInner = person.EyeLeftInner;
+            player.EyeLeftOuter = person.EyeLeftOuter;
+            player.EyeRightTop = person.EyeRightTop;
+            player.EyeRightLow = person.EyeRightLow;
+            player.EyeRightInner = person.EyeRightInner;
+            player.EyeRightOuter = person.EyeRightOuter;
+            player.AllBodyBones = person.AllBodyBones;
+            player.BoobLeft = person.BoobLeft;
+            player.BoobRight = person.BoobRight;
+            player.NippleLeft = person.NippleLeft;
+            player.NippleRight = person.NippleRight;
+            player.AssCheekLeft = person.AssCheekLeft;
+            player.AssCheekRight = person.AssCheekRight;
+            player.LegLeft = person.LegLeft;
+            player.LegRight = person.LegRight;
+            player.UpperThighLeft = person.UpperThighLeft;
+            player.UpperThighRight = person.UpperThighRight;
+            player.MidThighLeft = person.MidThighLeft;
+            player.MidThighRight = person.MidThighRight;
+            player.LowerThighLeft = person.LowerThighLeft;
+            player.LowerThighRight = person.LowerThighRight;
+            player.KneeLeft = person.KneeLeft;
+            player.KneeRight = person.KneeRight;
+            player.CalveLeft = person.CalveLeft;
+            player.CalveRight = person.CalveRight;
+            player.FootLeft = person.FootLeft;
+            player.FootRight = person.FootRight;
+            player.ActualHips = person.ActualHips;
+            player.Hips = person.Hips;
+            player.Hips2 = person.Hips2;
+            player.Belly = person.Belly;
+            player.Waist = person.Waist;
+            player.Ribcage = person.Ribcage;
+            player.Torso = person.Torso;
+            player.Neck = person.Neck;
+            player.ShoulderLeft = person.ShoulderLeft;
+            player.UpperArmLeft = person.UpperArmLeft;
+            player.ForeArmLeft = person.ForeArmLeft;
+            player.HandLeft = person.HandLeft;
+            player.ShoulderRight = person.ShoulderRight;
+            player.UpperArmRight = person.UpperArmRight;
+            player.ForeArmRight = person.ForeArmRight;
+            player.HandRight = person.HandRight;
+            player.Height = person.Height;
+            player.CurrentLOD = person.CurrentLOD;
+            player.CinematicCharacter = person.CinematicCharacter;
+            player._CantBeForced = person._CantBeForced;
+            player.CallWhenHighCol = person.CallWhenHighCol;
+            player._DirtySkin = person._DirtySkin;
+            player.MainBodyTex = person.MainBodyTex;
+            player.MainFaceTex = person.MainFaceTex;
+            player.CustomMainBodyTex = person.CustomMainBodyTex;
+            player.CustomMainFaceTex = person.CustomMainFaceTex;
+            player.sBodyTexIndex = person.sBodyTexIndex;
+            player.sFaceTexIndex = person.sFaceTexIndex;
+            player.sCustomBodyTexIndex = person.sCustomBodyTexIndex;
+            player.sCustomFaceTexIndex = person.sCustomFaceTexIndex;
+            player.MaterialTypeNPC = person.MaterialTypeNPC;
+            player.PunchingAnim = person.PunchingAnim;
+            player.PersonThrowingDown = person.PersonThrowingDown;
+            player._CurrentPunchPower = person._CurrentPunchPower;
+            player.MeleeHitBox = person.MeleeHitBox;
+            player.Doing_Punch = person.Doing_Punch;
+            player.Doing_ThrowDown = person.Doing_ThrowDown;
+            player.Doing_MeleeHit = person.Doing_MeleeHit;
+            player.ClothingCondition = person.ClothingCondition;
+            player.transform.position = person.transform.position;
+            player.transform.rotation = person.transform.rotation;
+
+            return player.gameObject;
+        }*/
+
+        public static void UpdatePerson(GameObject DisplayPersonGa, bool spawnFemale, string filename)
+        {
+            if (DisplayPersonGa == null) {
+                return; 
+            }
+
+            Person DisplayPerson = DisplayPersonGa.GetComponent<Person>();
+            DisplayPerson._CustomSkinStates = new bool[Main.Instance._CustomBodySkinsName.Count];
+            DisplayPerson._CustomFaceSkinStates = new bool[Main.Instance._CustomFaceSkinsName.Count];
+
+            for (int i = 0; i <  DisplayPerson._CustomSkinStates.Length; i++)
+            {
+                DisplayPerson._CustomSkinStates[i] = false;
+            }
+
+            for (int i = 0; i < DisplayPerson._CustomFaceSkinStates.Length; i++)
+            {
+                DisplayPerson._CustomFaceSkinStates[i] = false;
+            }
+
+            if (DisplayPerson == null)
+            {
+                return;
+            }
+
+            Person PresetLoaderNPC_F = Main.Spawn(spawnFemale ? Main.Instance.PersonPrefab : Main.Instance.PersonGuyPrefab).gameObject.GetComponent<Person>();
+            
+            if (PresetLoaderNPC_F == null)
+            {
+                return;
+            }
+
+            PresetLoaderNPC_F.StartingClothes.Clear();
+            PresetLoaderNPC_F._StartingClothes.Clear();
+            PresetLoaderNPC_F._SkinStates = new bool[0];
+            PresetLoaderNPC_F._FaceSkinStates = new bool[0];
+            PresetLoaderNPC_F._DontLoadClothing = true;
+            PresetLoaderNPC_F.LoadFromFile(filename);
+            PresetLoaderNPC_F.Inited = false;
+            PresetLoaderNPC_F.Init();
+
+            if (DisplayPerson.CurrentBody != null)
+            {
+                Dressable hair = DisplayPerson.CurrentBody;
+                DisplayPerson.UndressClothe(hair);
+                //UnityEngine.Object.Destroy(hair.gameObject);
+            }
+
+            if (DisplayPerson.CurrentAnys != null && DisplayPerson.CurrentAnys.Count > 0)
+            {
+                List<Dressable> anys = DisplayPerson.CurrentAnys;
+                for (int i = 0; i < anys.Count; i++)
+                {
+                    DisplayPerson.UndressClothe(anys[i]);
+                    //UnityEngine.Object.Destroy(anys[i].gameObject);
+                }
+            }
+
+            if (DisplayPerson.CurrentHair != null)
+            {
+                Dressable hair = DisplayPerson.CurrentHair;
+                DisplayPerson.UndressClothe(hair);
+                UnityEngine.Object.Destroy(hair.gameObject);
+                DisplayPerson.CurrentHair = null;
+            }
+
+            if (PresetLoaderNPC_F.CurrentHair != null)
+            {
+                DisplayPerson.DressClothe(PresetLoaderNPC_F.CurrentHair.gameObject);
+            }
+
+            for (int index = 0; index < PresetLoaderNPC_F.AllFaceBones.Length; ++index)
+            {
+                DisplayPerson.AllFaceBones[index].localPosition = PresetLoaderNPC_F.AllFaceBones[index].localPosition;
+                DisplayPerson.AllFaceBones[index].localEulerAngles = PresetLoaderNPC_F.AllFaceBones[index].localEulerAngles;
+                DisplayPerson.AllFaceBones[index].localScale = PresetLoaderNPC_F.AllFaceBones[index].localScale;
+            }
+
+            for (int index = 0; index < PresetLoaderNPC_F.AllBodyBones.Length; ++index)
+            {
+                DisplayPerson.AllBodyBones[index].localPosition = PresetLoaderNPC_F.AllBodyBones[index].localPosition;
+                DisplayPerson.AllBodyBones[index].localEulerAngles = PresetLoaderNPC_F.AllBodyBones[index].localEulerAngles;
+                DisplayPerson.AllBodyBones[index].localScale = PresetLoaderNPC_F.AllBodyBones[index].localScale;
+            }
+
+            DisplayPerson.Name = "Player";
+
+            UnityEngine.Object.Destroy(PresetLoaderNPC_F.gameObject);
+        }
+        public static GameObject ChangeSkin(string name)
+        {
+            bool LoadSpecificNPC = true;
+            Person PersonGenerated = null;
+            bool spawnFemale = Main.Instance.Player is Girl;
+            Vector3 position = Main.Instance.Player.transform.position;
+            Quaternion rotation = Main.Instance.Player.transform.rotation;
+            if (LoadSpecificNPC)
+            {
+                //PersonGenerated = BasicPerson().gameObject.GetComponent<Person>();
+                PersonGenerated = Main.Instance.Player;
+                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
+                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
+                string objectsDir = $"{Main.AssetsFolder}/wolfitdm/objects";
+                Directory.CreateDirectory(femalesDir);
+                Directory.CreateDirectory(malesDir);
+                Directory.CreateDirectory(objectsDir);
+                string maleOrFemale = spawnFemale ? "females" : "males";
+                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
+                if (!File.Exists(filename))
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
+                    return PersonGenerated.gameObject;
+                }
+                UpdatePerson(PersonGenerated.gameObject, spawnFemale, filename);
+                PersonGenerated.StartingClothes = new List<GameObject>();
+                PersonGenerated.StartingWeapons = new List<GameObject>();
+                PersonGenerated._StartingClothes = new List<string>();
+                PersonGenerated._StartingWeapons = new List<string>();
+                PersonGenerated._DontLoadClothing = true;
+                PersonGenerated._DontLoadInteraction = true;
+                PersonGenerated.LoadFromFile(filename);
+            }
+
+            if (PersonGenerated.WorldSaveID == null)
+            {
+                PersonGenerated.WorldSaveID = Main.GenerateRandomString(25);
+            }
+            if (PersonGenerated.SPAWN_noUglyHair == false && PersonGenerated.SPAWN_onlyGoodHair == false)
+            {
+                PersonGenerated.SPAWN_noUglyHair = false;
+                PersonGenerated.SPAWN_onlyGoodHair = true;
+            }
+            if (PersonGenerated.Home == null)
+            {
+                PersonGenerated.Home = Main.Instance.PossibleStreetHomes[UnityEngine.Random.Range(0, Main.Instance.PossibleStreetHomes.Count)];
+            }
+            //PersonGenerated.CurrentZone = null;
+            PersonGenerated.StartingClothes = new List<GameObject>();
+            PersonGenerated.StartingWeapons = new List<GameObject>();
+            PersonGenerated._StartingClothes = new List<string>();
+            PersonGenerated._StartingWeapons = new List<string>();
+            PersonGenerated.Inited = false;
+            PersonGenerated.PersonType = Main.Instance.PersonTypes[(int)Person_Type.Wild];
+            RandomNPCHere inst = new RandomNPCHere();
+            inst.SpawnClean = true;
+            PersonGenerated.PutFeet();
+            PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
+            if (PersonGenerated.States == null || PersonGenerated.States.Length < 34)
+            {
+                PersonGenerated.States = new bool[34];
+            }
+            PersonGenerated.RefreshColors();
+            PersonGenerated.transform.position = position;
+            PersonGenerated.transform.rotation = rotation;
+            setReverseWildStates(PersonGenerated.gameObject);
             return PersonGenerated.gameObject;
         }
         public static GameObject CreatePersonMaleOld()
@@ -1674,6 +2060,9 @@ namespace BitchlandCheatConsoleBepInEx
         public static GameObject copyObj = null;
         public static GameObject copyObj2 = null;
 
+        public static bool active1 = true;
+        public static bool active2 = true;
+
         public static void copy()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: copy");
@@ -1692,7 +2081,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                         try
                         {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied, now you can use the command 'paste', to spawn the object!");
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'paste' or the command 'toggleactive' to toggle the active state, paste = to spawn the object!");
                         }
                         catch (Exception ex)
                         {
@@ -1700,7 +2089,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                         try
                         {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied, now you can use the command 'saveobject name', to save the object to file!");
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'saveobject name' or the command 'toggleactive' to toggle the active state, saveobject = to save the object to file!");
                         }
                         catch (Exception ex)
                         {
@@ -1713,7 +2102,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                         try
                         {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied, now you can use the command 'paste2', to spawn the object!");
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'paste2', to spawn the object!");
                         }
                         catch (Exception ex)
                         {
@@ -1721,7 +2110,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                         try
                         {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied, now you can use the command 'saveobject2 name', to save the object to file!");
+                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'saveobject2 name', to save the object to file!");
                         }
                         catch (Exception ex)
                         {
@@ -1756,6 +2145,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+
         public static void paste2()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste2");
@@ -1771,6 +2161,39 @@ namespace BitchlandCheatConsoleBepInEx
                 try
                 {
                     Main.Instance.GameplayMenu.ShowNotification($"paste2: object '{newElement.name}' pastied!");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
+        public static void toggleactive()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive");
+            if (copyObj != null)
+            {
+                active1 = !active1;
+                copyObj.SetActive(active1);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"toggleactive: object '{copyObj.name}' is set to " + (active1 ? "active" : "not active"));
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+        public static void toggleactive2()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive2");
+            if (copyObj2 != null)
+            {
+                active2 = !active2;
+                copyObj2.SetActive(active2);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"toggleactive2: object '{copyObj2.name}' is set to " + (active2 ? "active" : "not active"));
                 }
                 catch (Exception ex)
                 {
@@ -1959,6 +2382,129 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
             Person s = CreatePersonNew(value, save).GetComponent<Person>();
+        }
+
+        public static void changeskin(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: changeskin");
+            Person s = null;
+            switch (value)
+            {
+                case "jeanne":
+                    {
+                        s = ChangeSkin("jeanne").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[184]);
+                            s.DressClothe(Main.Instance.AllPrefabs[43]);
+                            s.DressClothe(Main.Instance.AllPrefabs[38]);
+                            s.DressClothe(Main.Instance.AllPrefabs[40]);
+                            s.DressClothe(Main.Instance.AllPrefabs[36]);
+                        }
+                    }
+                    break;
+
+                case "sarahoffwork":
+                    {
+                        s = ChangeSkin("sarahoffwork").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[14]);
+                        }
+                    }
+                    break;
+
+                case "uniformedsarah":
+                    {
+                        s = ChangeSkin("uniformedsarah").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[14]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[1]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[2]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[3]);
+                            s.DressClothe(Main.Instance.Prefabs_ProstSuit2[4]);
+                            s.DressClothe(Main.Instance.Prefabs_Hair[63]);
+                        }
+                    }
+                    break;
+
+                case "nameless":
+                    {
+                        s = ChangeSkin("nameless").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            GameObject[] uniform = new GameObject[6];
+                            uniform[0] = Main.Spawn(Main.Instance.AllPrefabs[36], Main.Instance.DisabledObjects);
+                            uniform[1] = Main.Spawn(Main.Instance.AllPrefabs[144], Main.Instance.DisabledObjects);
+                            uniform[2] = Main.Spawn(Main.Instance.AllPrefabs[161], Main.Instance.DisabledObjects);
+                            uniform[3] = Main.Spawn(Main.Instance.AllPrefabs[165], Main.Instance.DisabledObjects);
+                            uniform[4] = Main.Spawn(Main.Instance.AllPrefabs[197], Main.Instance.DisabledObjects);
+                            uniform[5] = Main.Spawn(Main.Instance.AllPrefabs[198], Main.Instance.DisabledObjects);
+                            int_PickableClothingPackage componentInChildren = uniform[3].GetComponentInChildren<int_PickableClothingPackage>(true);
+                            if (componentInChildren != null)
+                            {
+                                componentInChildren.ClothingData = ":RGBA(0.000, 0.000, 0.000, 1.000):RGBA(0.000, 0.000, 0.000, 0.000)";
+                            }
+                            s.ChangeUniform(uniform);
+                        }
+                    }
+                    break;
+
+                case "rit":
+                    {
+                        s = ChangeSkin("rit").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[184]);
+                            s.DressClothe(Main.Instance.AllPrefabs[193]);
+                            s.DressClothe(Main.Instance.AllPrefabs[38]);
+                            s.DressClothe(Main.Instance.AllPrefabs[40]);
+                        }
+                    }
+                    break;
+
+                case "carol":
+                    {
+                        s = ChangeSkin("carol").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[7]);
+                            s.DressClothe(Main.Instance.AllPrefabs[31]);
+                            s.DressClothe(Main.Instance.AllPrefabs[3]);
+                            s.DressClothe(Main.Instance.AllPrefabs[55]);
+                            s.DressClothe(Main.Instance.AllPrefabs[4]);
+                        }
+                    }
+                    break;
+
+                case "beth":
+                    {
+                        s = ChangeSkin("beth").GetComponent<Person>();
+                        if (s != null)
+                        {
+                            s.DressClothe(Main.Instance.AllPrefabs[197]);
+                            s.DressClothe(Main.Instance.AllPrefabs[198]);
+                            s.DressClothe(Main.Instance.AllPrefabs[33]);
+                            s.DressClothe(Main.Instance.AllPrefabs[174]);
+                            s.DressClothe(Main.Instance.AllPrefabs[177]);
+                        }
+                    }
+                    break;
+
+                default:
+                    {
+                        s = ChangeSkin(value).GetComponent<Person>();
+                    }
+                    break;
+            }
+        }
+        public static void changeskinnude(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: changeskinnude");
+            Person s = ChangeSkin(value).GetComponent<Person>();
         }
         public static void completeallquests()
         {
@@ -2231,6 +2777,45 @@ namespace BitchlandCheatConsoleBepInEx
         public static void unstuckme()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unstuckme");
+
+            try
+            {
+                GameObject personGa = getPersonInteract();
+                if (personGa != null)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("unstuck me from the chat");
+                    Person person = personGa.GetComponent<Person>();
+                    if (person != null)
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("unstuck me from the chat really");
+                        int_Person personInt = person.ThisPersonInt;
+                        if (personInt != null)
+                        {
+                            Main.Instance.GameplayMenu.ShowNotification("unstuck me from the chat really really");
+                            personInt.EndTheChat();
+                        }
+                    }
+                }
+            } catch(Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.enabled = true;
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                Main.Instance.Player.UserControl.ThirdCamPositionType = Main.Instance.Player.UserControl.ThirdCamPositionTypeOnSettings;
+            }
+            catch
+            {
+            }
+           
             try
             {
                 Main.Instance.Player.RunBlockers.Clear();
@@ -2597,6 +3182,11 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: nohunger");
             Main.Instance.Player.Hunger = 0;
         }
+        public static void maxhunger()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxhunger");
+            Main.Instance.Player.Hunger = Main.Instance.Player.HungerMax;
+        }
 
         public static void notoilet()
         {
@@ -2608,6 +3198,28 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fullenergy");
             Main.Instance.Player.Energy = Main.Instance.Player.EnergyMax;
+        }
+        public static void npcfullenergy()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcfullenergy");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.Energy = person.EnergyMax;
+
+            Main.Instance.GameplayMenu.ShowNotification("npcfullenergy: set the npc to full energy");
         }
 
         public static void maxarousal(int level)
@@ -2708,11 +3320,58 @@ namespace BitchlandCheatConsoleBepInEx
             setCleanSkinStates(_this.gameObject);
         }
 
+        public static void npccleanskin()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npccleanskin");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            setNudeStates(person.gameObject);
+
+            setNudeClothesPoints(person.gameObject);
+
+            setCleanSkinStates(person.gameObject);
+
+            Main.Instance.GameplayMenu.ShowNotification("npcleanskin: npc cleaned");
+        }
+
         public static void heal()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: heal");
             Main.Instance.Player.TheHealth.currentHealth = Main.Instance.Player.TheHealth.maxHealth;
             Main.Instance.GameplayMenu.UpdateHealth();
+        }
+
+        public static void npcfullheal()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcfullheal");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.TheHealth.currentHealth = person.TheHealth.maxHealth;
+            Main.Instance.GameplayMenu.ShowNotification("npcfullheal: npc healed");
         }
 
         public static void nude(bool realnude)
@@ -3220,6 +3879,54 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "changeskin":
+                    {
+                        changeskin("nameless");
+                    }
+                    break;
+
+                case "changeskinnude":
+                    {
+                        changeskinnude("brat");
+                    }
+                    break;
+
+                case "toggleactive":
+                    {
+                        toggleactive();
+                    }
+                    break;
+
+                case "toggleactive2":
+                    {
+                        toggleactive2();
+                    }
+                    break;
+
+                case "npcfullenergy":
+                    {
+                        npcfullenergy();
+                    }
+                    break;
+
+                case "maxhunger":
+                    {
+                        maxhunger();
+                    }
+                    break;
+
+                case "npccleanskin":
+                    {
+                        npccleanskin();
+                    }
+                    break;
+
+                case "npcfullheal":
+                    {
+                        npcfullheal();
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -3411,6 +4118,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "removewarp":
                     {
                         removewarp(value);
+                    }
+                    break;
+
+                case "changeskin":
+                    {
+                        changeskin(value);
+                    }
+                    break;
+
+                case "changeskinnude":
+                    {
+                        changeskinnude(value);
                     }
                     break;
 
