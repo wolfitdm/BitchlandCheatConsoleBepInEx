@@ -102,6 +102,17 @@ commands with no params:
 * togglecollision -> toggle the collision from a object, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
 * togglecollision2 -> toggle the collision from a object 2, the you have selected with copy command before,With togglecollision you can remove/add temporarily the collision from the object
 * maxtraining -> Increases clit training, anal training, vaginal training, nipple training and body training by 10
+* analtraining -> Increases anal training by 10
+* vaginaltraining -> Increases vaginal training by 10
+* nippletraining -> Increases nipple by 10
+* clittraining -> Increases clit training by 10
+* bodytraining -> Increases body training by 10
+* npcmaxtraining -> Increases clit training, anal training, vaginal training, nipple training and body training from the npc the you looked at by 10
+* npcanaltraining -> Increases anal training from the npc the you looked at by 10
+* npcvaginaltraining -> Increases vaginal training from the npc the you looked at by 10
+* npcnippletraining -> Increases nipple training from the npc the you looked at by 10
+* npcclittraining-> Increases clit training from the npc the you looked at by 10
+* npcbodytraining-> Increases body training from the npc the you looked at by 10
 
 commands with 1 param:
 
@@ -109,17 +120,17 @@ commands with 1 param:
 * setstoragesizebackpack amount > change the storage size of your backpack to amount
 * setstoragesizebp amount -> change the storage size of your backpack to amount
 * setstoragesize amount -> change the storage size of the container you are looking at
-* addmoney value
-* addweapon name
-* getstate number
-* setfavor number
-* setsexmultiplier number
-* setsexmaddictionmultiplier number
-* setsexskills number
-* setarmyskills number
-* setworkskills number
-* setallskills number
-* setarousal number
+* addmoney value -> give you money by number value
+* addweapon name -> give your a weapon named name
+* getstate number -> get the effect name from a state
+* setfavor number -> set all relationships level to number 
+* setsexmultiplier number -> set arousal heart sex multiplier to number (your arousal heart is now faster increased)
+* setsexmaddictionmultiplier number -> set arousal heart sexm addiction multiplier to number (your arousal heart is now faster increased)
+* setsexskills number -> set sex skills level to number
+* setarmyskills number -> set army skills level to number
+* setworkskills number -> set work skills level to number
+* setallskills number -> set all skills level to number
+* setarousal number -> set your arousal heart to number
 * spawnmale name -> spawn a male npc on your position, every image is spawnable at Assets\wolfitdm\males\name.png
 * spawnfemale name -> spawn a female npc on your position, every image is spawnable at Assets\wolfitdm\females\name.png
 * spawnmalenude name -> spawn a male npc on your position (naked version), every image is spawnable at Assets\wolfitdm\males\name.png
@@ -128,17 +139,6 @@ commands with 1 param:
 * spawnfemalesave name -> spawn a female npc on your position, and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\females\name.png
 * spawnmalenudesave name -> spawn a male npc on your position (naked version), and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\males\name.png
 * spawnfemalenudesave name -> spawn a female npc on your position (naked version), and saves the npc to your next save game, every image is spawnable at Assets\wolfitdm\females\name.png
-* addmoney value
-* addweapon name
-* getstate number
-* setfavor number
-* setsexmultiplier number
-* setsexmaddictionmultiplier number
-* setsexskills number
-* setarmyskills number
-* setworkskills number
-* setallskills number
-* setarousal number
 * saveobject name -> saves the object to the file named name
 * s name -> saves the object to the file named name
 * loadobject name -> loads the object from the file
@@ -154,6 +154,16 @@ commands with 1 param:
 * changeskinnude name -> change your skin to name character, its the same behavior like the spawnfemalenude command
 * openmenu name -> open menu named name
 * closemenu name -> close menu named name
+* analtraining number -> Increases anal training by number
+* vaginaltraining number -> Increases vaginal training by number
+* nippletraining number -> Increases nipple by number
+* clittraining number -> Increases clit training by number
+* bodytraining number -> Increases body training by number
+* npcanaltraining number -> Increases anal training from the npc the you looked at by number
+* npcvaginaltraining number -> Increases vaginal training from the npc the you looked at by number
+* npcnippletraining number -> Increases nipple training from the npc the you looked at by number
+* npcclittraining number -> Increases clit training from the npc the you looked at by number
+* npcbodytraining number -> Increases body training from the npc the you looked at by number
 
 commands with 2 params:
 

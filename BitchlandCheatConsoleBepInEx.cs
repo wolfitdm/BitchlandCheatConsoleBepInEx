@@ -2296,6 +2296,294 @@ namespace BitchlandCheatConsoleBepInEx
             player.BodyTraining += 10;
             Main.Instance.GameplayMenu.ShowNotification("Increases clit training, anal training, vaginal training, nipple training and body training by 10!");
         }
+
+        public static void npcmaxtraining()
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            player.AnalTraining += 10;
+            player.VaginalTraining += 10;
+            player.NippleTraining += 10;
+            player.ClitTraining += 10;
+            player.BodyTraining += 10;
+            Main.Instance.GameplayMenu.ShowNotification("Increases clit training, anal training, vaginal training, nipple training and body training from the npc the you are looked at by 10!");
+        }
+
+        public static void analtraining(string value)
+        {
+            Person player = Main.Instance.Player;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.AnalTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.AnalTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases anal training by amount: " + amount);
+        }
+        public static void vaginaltraining(string value)
+        {
+            Person player = Main.Instance.Player;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.VaginalTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.VaginalTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases vaginal training by amount: " + amount);
+        }
+        public static void nippletraining(string value)
+        {
+            Person player = Main.Instance.Player;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.NippleTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.NippleTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases nipple training by amount: " + amount);
+        }
+
+        public static void clittraining(string value)
+        {
+            Person player = Main.Instance.Player;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.ClitTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.ClitTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases clit training by amount: " + amount);
+        }
+        public static void bodytraining(string value)
+        {
+            Person player = Main.Instance.Player;
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.BodyTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.BodyTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases body training by amount: " + amount);
+        }
+
+
+        public static void npcanaltraining(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.AnalTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.AnalTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases anal training from the npc the you are looked at by amount: " + amount);
+        }
+        public static void npcvaginaltraining(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.VaginalTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.VaginalTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases vaginal training from the npc the you are looked at by amount: " + amount);
+        }
+        public static void npcnippletraining(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.NippleTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.NippleTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases nipple training from the npc the you are looked at by amount: " + amount);
+        }
+
+        public static void npcclittraining(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.ClitTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.ClitTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases clit training from the npc the you are looked at by amount: " + amount);
+        }
+        public static void npcbodytraining(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            amount = amount <= 0 ? int.MaxValue : amount;
+            amount = amount >= int.MaxValue ? int.MaxValue : amount;
+
+            float training = player.BodyTraining;
+            training = amount + training;
+            training = training <= 0 ? int.MaxValue : training;
+            player.BodyTraining = training;
+            Main.Instance.GameplayMenu.ShowNotification("Increases body training from the npc the you are looked at by amount: " + amount);
+        }
         public static void help()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: help");
@@ -4124,6 +4412,72 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcmaxtraining":
+                    {
+                        maxtraining();
+                    }
+                    break;
+
+                case "analtraining":
+                    {
+                        analtraining("10");
+                    }
+                    break;
+
+                case "npcanaltraining":
+                    {
+                        npcanaltraining("10");
+                    }
+                    break;
+
+                case "vaginaltraining":
+                    {
+                        vaginaltraining("10");
+                    }
+                    break;
+
+                case "npcvaginaltraining":
+                    {
+                        npcvaginaltraining("10");
+                    }
+                    break;
+
+                case "nippletraining":
+                    {
+                        nippletraining("10");
+                    }
+                    break;
+
+                case "npcnippletraining":
+                    {
+                        npcnippletraining("10");
+                    }
+                    break;
+
+                case "clittraining":
+                    {
+                        clittraining("10");
+                    }
+                    break;
+
+                case "npcclittraining":
+                    {
+                        npcclittraining("10");
+                    }
+                    break;
+
+                case "bodytraining":
+                    {
+                        bodytraining("10");
+                    }
+                    break;
+
+                case "npcbodytraining":
+                    {
+                        npcbodytraining("10");
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -4339,6 +4693,66 @@ namespace BitchlandCheatConsoleBepInEx
                 case "closemenu":
                     {
                         closemenu(value);
+                    }
+                    break;
+
+                case "analtraining":
+                    {
+                        analtraining(value);
+                    }
+                    break;
+
+                case "npcanaltraining":
+                    {
+                        npcanaltraining(value);
+                    }
+                    break;
+
+                case "vaginaltraining":
+                    {
+                        vaginaltraining(value);
+                    }
+                    break;
+
+                case "npcvaginaltraining":
+                    {
+                        npcvaginaltraining(value);
+                    }
+                    break;
+
+                case "nippletraining":
+                    {
+                        nippletraining(value);
+                    }
+                    break;
+
+                case "npcnippletraining":
+                    {
+                        npcnippletraining(value);
+                    }
+                    break;
+
+                case "clittraining":
+                    {
+                        clittraining(value);
+                    }
+                    break;
+
+                case "npcclittraining":
+                    {
+                        npcclittraining(value);
+                    }
+                    break;
+
+                case "bodytraining":
+                    {
+                        bodytraining(value);
+                    }
+                    break;
+
+                case "npcbodytraining":
+                    {
+                        npcbodytraining(value);
                     }
                     break;
 
