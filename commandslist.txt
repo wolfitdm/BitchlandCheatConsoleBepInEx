@@ -117,6 +117,14 @@ removeallwarps -> removes all user predefined warps
 kill -> kills the npc the you looked at
 forcekill -> kills the npc the you looked at, on everytime (forced), the person is also killed even if the game don't want that you kill this person
 die -> kills the npc the you looked at, on everytime (forced), the person is also killed even if the game don't want that you kill this person
+shit -> set the toilet to maximum
+sleep -> set the energy to 0
+infiniteammo -> toggle infiniteammo from your current weapon in your main hand
+npcshit -> set the npc the you looked at , his toilet to maximum
+npcsleep -> set the npc the you looked at, his energy to 0
+npcnohunger -> set the npc the you looked at, his hunger to 0
+npcmaxhunger -> set the npc the you looked at his hunger to maximum
+npcinfiniteammo -> toggle infiniteammo from the npc the you looked at
 
 commands with 1 param:
 
@@ -168,9 +176,11 @@ npcvaginaltraining number -> Increases vaginal training from the npc the you loo
 npcnippletraining number -> Increases nipple training from the npc the you looked at by number
 npcclittraining number -> Increases clit training from the npc the you looked at by number
 npcbodytraining number -> Increases body training from the npc the you looked at by number
+npcaddweapon name -> add the npc the you are looked at the weapon named name
 
 commands with 2 params:
 
 additem name amount -> add the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
 setstate number true -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 setnpcstate number true -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
+npcadditem name amount -> add the npc the you are looked at this item (amount) to your backpack, if the npc don't have a backpack, it gives him a backpack

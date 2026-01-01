@@ -11,8 +11,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -1060,6 +1062,13 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 //PersonGenerated = BasicPerson().gameObject.GetComponent<Person>();
                 PersonGenerated = Main.Instance.Player;
+                int money = PersonGenerated.Money;
+                int sexlevel = PersonGenerated.SexXpThisLvl;
+                int sexlevelmax = PersonGenerated.SexXpThisLvlMax;
+                int worklevel = PersonGenerated.WorkXpThisLvl;
+                int worklevelmax = PersonGenerated.WorkXpThisLvlMax;
+                int armylevel = PersonGenerated.ArmyXpThisLvl;
+                int armylevelmax = PersonGenerated.ArmyXpThisLvlMax;
                 int_Person personInt = Main.Instance.Player.ThisPersonInt;
                 Person thisPersonInt = null;
                 if (personInt != null && personInt.ThisPerson != null)
@@ -1094,6 +1103,13 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     PersonGenerated.ThisPersonInt.ThisPerson = thisPersonInt;
                 }
+                PersonGenerated.Money = money;
+                PersonGenerated.SexXpThisLvl = sexlevel;
+                PersonGenerated.SexXpThisLvlMax = sexlevelmax;
+                PersonGenerated.WorkXpThisLvl = worklevel;
+                PersonGenerated.WorkXpThisLvlMax = worklevelmax;
+                PersonGenerated.ArmyXpThisLvl = armylevel;
+                PersonGenerated.ArmyXpThisLvlMax = armylevelmax;
             }
 
             if (PersonGenerated.WorldSaveID == null)
@@ -1885,9 +1901,21 @@ namespace BitchlandCheatConsoleBepInEx
 
             return itemList;
         }
-        private static void addItemReal(GameObject item, int value)
+        private static void addItemReal(GameObject playerGa, GameObject item, int value)
         {
-            if (Main.Instance.Player.CurrentBackpack == null)
+            if (playerGa == null)
+            {
+                return;
+            }
+
+            Person player = playerGa.GetComponent<Person>();
+
+            if (player == null)
+            {
+                return;
+            }
+
+            if (player.CurrentBackpack == null)
             {
                 GameObject backpack2 = getItemByName(null, "backpack2");
                 if (backpack2 == null)
@@ -1898,31 +1926,31 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
-                Main.Instance.Player.DressClothe(Main.Spawn(backpack2));
+                player.DressClothe(Main.Spawn(backpack2));
             }
 
-            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            if (player.CurrentBackpack != null && player.CurrentBackpack.ThisStorage != null)
             {
                 value = value <= 0 ? 1 : value;
 
-                int count = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Count;
+                int count = player.CurrentBackpack.ThisStorage.StorageItems.Count;
 
                 count += value + 10;
 
                 count = count <= 0 ? int.MaxValue : count;
 
-                int storagemax = Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax;
+                int storagemax = player.CurrentBackpack.ThisStorage.StorageMax;
 
                 if (count >= storagemax)
                 {
                     storagemax = count;
                 }
 
-                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = storagemax;
+                player.CurrentBackpack.ThisStorage.StorageMax = storagemax;
 
                 for (int i = 0; i < value; i++)
                 {
-                    Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(item);
+                    player.CurrentBackpack.ThisStorage.AddItem(item);
                 }
             }
         }
@@ -2635,6 +2663,194 @@ namespace BitchlandCheatConsoleBepInEx
             training = training <= 0 ? int.MaxValue : training;
             player.BodyTraining = training;
             Main.Instance.GameplayMenu.ShowNotification("Increases body training from the npc the you are looked at by amount: " + amount);
+        }
+
+        public static void npcsleep()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsleep");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            player.Energy = 0;
+        }
+
+        public static void shit()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: shit");
+            Person player = Main.Instance.Player;
+            player.Toilet = player.ToiletMax;
+        }
+
+        public static void sleep()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: sleep");
+            Person player = Main.Instance.Player;
+            player.Energy = 0;
+        }
+
+        public static bool infiniteammovar = false;
+        public static void infiniteammo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: infiniteammo");
+            Person player = Main.Instance.Player;
+            Weapon weapon = player.WeaponInv.CurrentWeapon;
+            if (weapon != null)
+            {
+                infiniteammovar = !infiniteammovar;
+                weapon.infiniteAmmo = infiniteammovar;
+                weapon.infiniteBeam = infiniteammovar;
+                if (infiniteammovar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("infiniteammo: on");
+                } else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("infiniteammo: off");
+                }
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("infiniteammo: you need a weapon in your main hand in order to use this command!");
+            }
+        }
+
+        public static void npcshit()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcshit");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            player.Toilet = player.ToiletMax;
+        }
+
+        public static void npcinfiniteammo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcinfiniteammo");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            Weapon weapon = player.WeaponInv.CurrentWeapon;
+            if (weapon != null)
+            {
+                bool infiniteammovar = weapon.infiniteAmmo || weapon.infiniteBeam;
+                infiniteammovar = !infiniteammovar;
+                weapon.infiniteAmmo = infiniteammovar;
+                weapon.infiniteBeam = infiniteammovar;
+                if (infiniteammovar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npcinfiniteammo: on");
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npcinfiniteammo: off");
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("npcinfiniteammo: the npc need a weapon in your main hand in order to use this command!");
+            }
+        }
+
+        public static void npcaddweapon(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddweapon");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            GameObject weapon = getWeaponByName(null, value);
+
+            if (weapon != null)
+            {
+                GameObject weaponx = Main.Spawn(weapon);
+
+                if (weaponx == null)
+                {
+                    return;
+                }
+
+                player.WeaponInv.DropAllWeapons();
+                player.WeaponInv.PickupWeapon(weaponx);
+            }
+        }
+
+        public static void npcadditem(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcadditem");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            int amount = 1;
+            GameObject item = getAllItemByName(key);
+
+            if (item != null)
+            {
+                try
+                {
+                    amount = int.Parse(value);
+                    amount = amount > 0 ? amount : 1;
+                }
+                catch (Exception e)
+                {
+                    amount = 1;
+                }
+                addItemReal(player.gameObject, item, amount);
+                Main.Instance.GameplayMenu.ShowNotification("npcadditem: " + item.name.ToString() + " " + amount.ToString() + " added");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("npcadditem: No item found");
+            }
+        }
+
+
+        public static void npcmaxhunger()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxhunger");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            player.Hunger = player.HungerMax;
+        }
+        public static void npcnohunger()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcnohunger");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            player.Hunger = 0;
         }
 
         public static void kill(bool forcekill)
@@ -4588,6 +4804,54 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcshit":
+                    {
+                        npcshit();
+                    }
+                    break;
+
+                case "npcsleep":
+                    {
+                        npcsleep();
+                    }
+                    break;
+
+                case "npcnohunger":
+                    {
+                        npcnohunger();
+                    }
+                    break;
+
+                case "npcmaxhunger":
+                    {
+                        npcmaxhunger();
+                    }
+                    break;
+
+                case "npcinfiniteammo":
+                    {
+                        npcinfiniteammo();
+                    }
+                    break;
+
+                case "shit":
+                    {
+                        shit();
+                    }
+                    break;
+
+                case "sleep":
+                    {
+                        sleep();
+                    }
+                    break;
+
+                case "infiniteammo":
+                    {
+                        infiniteammo();
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -4866,6 +5130,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcaddweapon":
+                    {
+                        npcaddweapon(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
@@ -4893,6 +5163,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setnpcstate":
                     {
                         setnpcstate(key, value);
+                    }
+                    break;
+
+                case "npcadditem":
+                    {
+                        npcadditem(key, value);
                     }
                     break;
 
@@ -5446,7 +5722,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     amount = 1;
                 }
-                addItemReal(item, amount);
+                addItemReal(Main.Instance.Player.gameObject, item, amount);
                 Main.Instance.GameplayMenu.ShowNotification("additem: " + item.name.ToString() + " " + amount.ToString() + " added");
             }
             else
