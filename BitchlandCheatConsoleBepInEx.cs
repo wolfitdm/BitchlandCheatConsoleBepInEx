@@ -35,6 +35,15 @@ namespace BitchlandCheatConsoleBepInEx
         private static List<string> predefinedUserWarpsNames = new List<string>();
         private static CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
 
+        // flightSettings
+        public static float fly_moveSpeed = 10f;       // Base movement speed
+        public static float fly_sprintMultiplier = 2f; // Speed multiplier when holding Shift
+        public static bool fly_disableGravityWhileFlying = true;
+        public static bool is_free_fly_setup = false;
+        public static bool default_useGravity = false;
+        public static bool fly_on = false;
+        public static Rigidbody fly_rb = null;
+
         private void Init()
         {
             if (isInit)
@@ -132,9 +141,66 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        private void HandleFlight()
+        {
+            if (fly_on == false || fly_rb == null)
+            {
+                return;
+            }
+
+            Rigidbody rb = fly_rb;
+            // Get input axes
+            float horizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right
+            float vertical = Input.GetAxis("Vertical");     // W/S or Up/Down (forward/back)
+
+            // Vertical movement (Space = up, LeftControl = down)
+            float ascend = 0f;
+           // Vector3 v = rb.velocity;
+            if (Input.GetKey(KeyCode.Space)) {
+                ascend = 1f;
+               // v.y += 1f;
+            }
+            else if (Input.GetKey(KeyCode.LeftControl)) {
+                ascend = -1f;
+               // v.y -= 1f;
+            }
+
+           /* if (Input.GetKey(KeyCode.W))
+            {
+                v.x -= 1;
+            } else if(Input.GetKey(KeyCode.S))
+            {
+                v.x += 1;
+            }
+
+            if (Input.GetKey(KeyCode.D))
+            {
+                v.z += 1;
+            }
+            else if (Input.GetKey(KeyCode.A))
+            {
+                v.z -= 1;
+            }*/
+
+            // Sprint modifier
+            float currentSpeed = fly_moveSpeed;
+            if (Input.GetKey(KeyCode.LeftShift))
+                currentSpeed *= fly_sprintMultiplier;
+
+            // Calculate movement direction relative to camera
+            Vector3 moveDirection = (transform.forward * vertical) +
+                                    (transform.right * horizontal) +
+                                    (transform.up * ascend);
+
+            // Apply velocity directly for smooth movement
+            rb.velocity = moveDirection.normalized * currentSpeed;
+            //rb.velocity = v;
+        }
+
         private void Update()
         {
             TriggerUpdate();
+            HandleFlight();
         }
         private void OnGUI()
         {
@@ -1047,7 +1113,7 @@ namespace BitchlandCheatConsoleBepInEx
                 DisplayPerson.AllBodyBones[index].localScale = PresetLoaderNPC_F.AllBodyBones[index].localScale;
             }
 
-            DisplayPerson.Name = "Player";
+            DisplayPerson.Name = "";
             DisplayPerson.PlayerKnowsName = false;
             UnityEngine.Object.Destroy(PresetLoaderNPC_F.gameObject);
         }
@@ -1096,7 +1162,7 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated._DontLoadClothing = true;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
-                PersonGenerated.Name = "Player";
+                PersonGenerated.Name = "";
                 PersonGenerated.PlayerKnowsName = false;
                 PersonGenerated.ThisPersonInt = personInt;
                 if (PersonGenerated.ThisPersonInt != null && thisPersonInt != null)
@@ -4954,6 +5020,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "fly":
+                    {
+                        fly();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -5293,6 +5365,33 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
+        public static void fly()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: fly");
+            if (fly_rb == null)
+            {
+                if (!is_free_fly_setup)
+                {
+                    default_useGravity = Main.Instance.Player._Rigidbody.useGravity;
+                    is_free_fly_setup = true;
+                }
+                fly_rb = Main.Instance.Player._Rigidbody;
+            }
+            fly_on = !fly_on;
+            if (fly_on)
+            {
+                if (fly_disableGravityWhileFlying)
+                {
+                    fly_rb.useGravity = false;
+                }
+                Main.Instance.GameplayMenu.ShowNotification("fly: on");
+            } else
+            {
+                fly_rb.useGravity = default_useGravity;
+                Main.Instance.GameplayMenu.ShowNotification("fly: off");
+            }
+        }
+
         public static void savewarp(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: savewarp");

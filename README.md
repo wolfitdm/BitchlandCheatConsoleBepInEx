@@ -134,6 +134,7 @@ commands with no params:
 * forcekillme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
 * dieme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
 * helloworld -> shows a messagebox with the text hello world
+* fly -> toggle fly
 
 commands with 1 param:
 
