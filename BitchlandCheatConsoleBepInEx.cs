@@ -2890,7 +2890,36 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-
+        public static void killme(bool forcekill)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: killme");
+            Person player = Main.Instance.Player;
+            if (player.TheHealth != null)
+            {
+                bool canDie = player.TheHealth.canDie;
+                bool alwaysDie = player.TheHealth.AlwaysDie;
+                if (!forcekill && !player.TheHealth.canDie)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(player.Name + " can not be killed!");
+                    return;
+                }
+                else
+                {
+                    player.TheHealth.AlwaysDie = true;
+                    player.TheHealth.canDie = true;
+                }
+                player.Hunger = player.HungerMax;
+                player.Toilet = player.ToiletMax;
+                player.Energy = 0;
+                player.TheHealth.dead = false;
+                player.TheHealth.currentHealth = 0.0f;
+                player.TheHealth.ChangeHealth(0, true, null);
+                player.TheHealth.Die();
+                player.TheHealth.canDie = canDie;
+                player.TheHealth.AlwaysDie = alwaysDie;
+                Main.Instance.GameplayMenu.ShowNotification(player.Name + " killed!");
+            }
+        }
         public static void help()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: help");
@@ -3828,6 +3857,43 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void npcpregnancy()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcpregnancy");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            bool isNotAGirl = person is Girl;
+            isNotAGirl = !isNotAGirl;
+
+            if (isNotAGirl)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("NPC is a male!");
+                return;
+            }
+
+            float fertility = person.Fertility;
+            float storymodefertility = person.StoryModeFertility;
+            person.Fertility *= 1000;
+            person.StoryModeFertility *= 1000;
+            (person as Girl).BecomePreg();
+            person.Fertility = fertility;
+            person.StoryModeFertility = storymodefertility;
+        }
+
+
         public static void infinitehealth()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: infinitehealth");
@@ -3835,11 +3901,19 @@ namespace BitchlandCheatConsoleBepInEx
             if (Main.Instance.Player.CantBeHit)
             {
                 Main.Instance.Player.NoEnergyLoss = true;
+                if (Main.Instance.Player.TheHealth != null)
+                {
+                    Main.Instance.Player.TheHealth.canDie = false;
+                }
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: on");
             }
             else
             {
                 Main.Instance.Player.NoEnergyLoss = false;
+                if (Main.Instance.Player.TheHealth != null)
+                {
+                    Main.Instance.Player.TheHealth.canDie = true;
+                }
                 Main.Instance.GameplayMenu.ShowNotification("infinitehealth: off");
             }
         }
@@ -4371,6 +4445,7 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "becomepreg":
                 case "realpregnancy":
                     {
                         pregnancy(true);
@@ -4852,6 +4927,39 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcbecomepreg":
+                case "npcrealpregnancy":
+                case "npcpregnancy":
+                    {
+                        npcpregnancy();
+                    }
+                    break;
+
+                case "npcsetfavor":
+                    {
+                        npcsetfavor("10000000");
+                    }
+                    break;
+
+                case "killme":
+                    {
+                        killme(false);
+                    }
+                    break;
+
+                case "forcekillme":
+                case "dieme":
+                    {
+                        killme(true);
+                    }
+                    break;
+
+                case "helloworld":
+                    {
+                        Main.Instance.GameplayMenu.ShowMessageBox("hello world");
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -5133,6 +5241,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcaddweapon":
                     {
                         npcaddweapon(value);
+                    }
+                    break;
+
+                case "npcsetfavor":
+                    {
+                        npcsetfavor(value);
                     }
                     break;
 
@@ -5506,10 +5620,49 @@ namespace BitchlandCheatConsoleBepInEx
                 amount = 0;
             }
 
-            amount = amount <= 0 ? 0 : amount;
-            amount = amount >= int.MaxValue ? int.MaxValue : amount;
-
             Main.Instance.Player.Favor = amount;
+
+            if (Main.Instance.GameplayMenu.Relationships != null)
+            {
+                int length = Main.Instance.GameplayMenu.Relationships.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    Main.Instance.GameplayMenu.Relationships[i].Favor = amount;
+                }
+            }
+        }
+
+        public static void npcsetfavor(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsetfavor");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.CreatePersonRelationship();
+
+            int amount = 0;
+            try
+            {
+                amount = int.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                amount = 0;
+            }
+
+            person.Favor = amount;
         }
 
         public static void getstate(string value)

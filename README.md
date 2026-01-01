@@ -31,6 +31,7 @@ commands with no params:
 * addallitems  -> add all items from the game (current 300)
 * pregnancy -> set fertility to on (1) or off (0)
 * realpregnancy -> set fertility to on (1) or off (0) and you are really pregnant now
+* becomepreg -> set fertility to on (1) or off (0) and you are really pregnant now
 * invincible -> toggle infinite health (nobody can not longer hit you
 * infinitehealth -> toggle infinite health (nobody can not longer hit you
 * maxrs -> sets all relationsships to maximum
@@ -125,6 +126,14 @@ commands with no params:
 * npcnohunger -> set the npc the you looked at, his hunger to 0
 * npcmaxhunger -> set the npc the you looked at his hunger to maximum
 * npcinfiniteammo -> toggle infiniteammo from the npc the you looked at
+* npcsetfavor -> creates a relationship with the npc the you looked at and set his relationship to 10000000, positive number is here the case, is positive relationship, negative number is negative relationship
+* npcbecomepreg -> the npc the you looked at is now pregnant
+* npcrealpregnancy -> the npc the you looked at is now pregnant
+* npcpregnancy -> the npc the you looked at is now pregnant
+* killme -> kills you
+* forcekillme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
+* dieme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
+* helloworld -> shows a messagebox with the text hello world
 
 commands with 1 param:
 
@@ -177,6 +186,7 @@ commands with 1 param:
 * npcclittraining number -> Increases clit training from the npc the you looked at by number
 * npcbodytraining number -> Increases body training from the npc the you looked at by number
 * npcaddweapon name -> add the npc the you are looked at the weapon named name
+* npcsetfavor number -> creates a relationship with the npc the you looked at and set his relationship to number, positive number, is positive relationship, negative number is negative relationship
 
 commands with 2 params:
 
