@@ -114,6 +114,7 @@ commands with no params:
 * npcclittraining-> Increases clit training from the npc the you looked at by 10
 * npcbodytraining-> Increases body training from the npc the you looked at by 10
 * removeallwarps -> removes all user predefined warps
+* kill -> kills the npc the you looked at
 
 commands with 1 param:
 

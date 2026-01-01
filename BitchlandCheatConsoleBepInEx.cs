@@ -955,8 +955,20 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Person DisplayPerson = DisplayPersonGa.GetComponent<Person>();
+            DisplayPerson._SkinStates = new bool[15];
+            DisplayPerson._FaceSkinStates = new bool[16];
             DisplayPerson._CustomSkinStates = new bool[Main.Instance._CustomBodySkinsName.Count];
             DisplayPerson._CustomFaceSkinStates = new bool[Main.Instance._CustomFaceSkinsName.Count];
+
+            for (int i = 0; i < DisplayPerson._SkinStates.Length; i++)
+            {
+                DisplayPerson._SkinStates[i] = false;
+            }
+
+            for (int i = 0; i < DisplayPerson._FaceSkinStates.Length; i++)
+            {
+                DisplayPerson._FaceSkinStates[i] = false;
+            }
 
             for (int i = 0; i <  DisplayPerson._CustomSkinStates.Length; i++)
             {
@@ -1034,7 +1046,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             DisplayPerson.Name = "Player";
-
+            DisplayPerson.PlayerKnowsName = false;
             UnityEngine.Object.Destroy(PresetLoaderNPC_F.gameObject);
         }
         public static GameObject ChangeSkin(string name)
@@ -1048,6 +1060,12 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 //PersonGenerated = BasicPerson().gameObject.GetComponent<Person>();
                 PersonGenerated = Main.Instance.Player;
+                int_Person personInt = Main.Instance.Player.ThisPersonInt;
+                Person thisPersonInt = null;
+                if (personInt != null && personInt.ThisPerson != null)
+                {
+                    thisPersonInt = personInt.ThisPerson;
+                }
                 string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
                 string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
                 string objectsDir = $"{Main.AssetsFolder}/wolfitdm/objects";
@@ -1069,6 +1087,13 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated._DontLoadClothing = true;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
+                PersonGenerated.Name = "Player";
+                PersonGenerated.PlayerKnowsName = false;
+                PersonGenerated.ThisPersonInt = personInt;
+                if (PersonGenerated.ThisPersonInt != null && thisPersonInt != null)
+                {
+                    PersonGenerated.ThisPersonInt.ThisPerson = thisPersonInt;
+                }
             }
 
             if (PersonGenerated.WorldSaveID == null)
@@ -2611,6 +2636,31 @@ namespace BitchlandCheatConsoleBepInEx
             player.BodyTraining = training;
             Main.Instance.GameplayMenu.ShowNotification("Increases body training from the npc the you are looked at by amount: " + amount);
         }
+
+        public static void kill()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: kill");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+
+            player.Hunger = player.HungerMax;
+            player.Toilet = player.ToiletMax;
+            player.Energy = 0;
+            if (player.TheHealth != null)
+            {
+                player.TheHealth.currentHealth = 0f;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification(player.Name + " killed!");
+        }
+
+
         public static void help()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: help");
@@ -4508,6 +4558,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "removeallwarps":
                     {
                         removeallwarps();
+                    }
+                    break;
+
+                case "kill":
+                    {
+                        kill();
                     }
                     break;
 
