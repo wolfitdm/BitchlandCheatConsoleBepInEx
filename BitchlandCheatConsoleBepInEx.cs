@@ -4,33 +4,15 @@ using BepInEx.Logging;
 using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
-using DitzelGames.FastIK;
 using HarmonyLib;
-using HarmonyLib.Tools;
-using SemanticVersioning;
 using System;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Remoting.Messaging;
-using System.Runtime.Serialization.Json;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
-using UMA.Examples;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.UIElements;
-using UnityStandardAssets.Water;
-using static Mono.Security.X509.X520;
-using static UnityEngine.InputSystem.Controls.DiscreteButtonControl;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -2288,6 +2270,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void maxtraining()
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxtraining");
             Person player = Main.Instance.Player;
             player.AnalTraining += 10;
             player.VaginalTraining += 10;
@@ -2299,6 +2282,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void npcmaxtraining()
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxtraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -2314,9 +2298,43 @@ namespace BitchlandCheatConsoleBepInEx
             player.BodyTraining += 10;
             Main.Instance.GameplayMenu.ShowNotification("Increases clit training, anal training, vaginal training, nipple training and body training from the npc the you are looked at by 10!");
         }
+        public static void removeallwarps()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removeallwarps");
+            int length = predefinedUserWarpsNames.Count;
+
+            List<string> predefinedUserWarpsNamesTemp = new List<string>();
+
+            for (int i = 0; i < length; i++)
+            {
+                predefinedUserWarpsNamesTemp.Add(predefinedUserWarpsNames[i]);
+            }
+
+            length = predefinedUserWarpsNamesTemp.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                string value = predefinedUserWarpsNamesTemp[i];
+                if (!spawnpointsNames.Contains(value) || !predefinedUserWarpsNames.Contains(value))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    warpPointsUser = removeWarpPoint(warpPointsUser, value);
+                    safeWarpPoints();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            Main.Instance.GameplayMenu.ShowNotification($"removeallwarps: all predefined user warp points removed!");
+        }
 
         public static void analtraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: analtraining");
             Person player = Main.Instance.Player;
 
             int amount = 0;
@@ -2340,6 +2358,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void vaginaltraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: vaginaltraining");
             Person player = Main.Instance.Player;
 
             int amount = 0;
@@ -2363,6 +2382,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void nippletraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: nippletraining");
             Person player = Main.Instance.Player;
 
             int amount = 0;
@@ -2387,6 +2407,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void clittraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: clittraining");
             Person player = Main.Instance.Player;
 
             int amount = 0;
@@ -2410,6 +2431,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void bodytraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: bodytraining");
             Person player = Main.Instance.Player;
 
             int amount = 0;
@@ -2435,6 +2457,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void npcanaltraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcanaltraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -2465,6 +2488,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void npcvaginaltraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcvaginaltraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -2495,6 +2519,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void npcnippletraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcnippletraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -2526,6 +2551,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void npcclittraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcclittraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -2556,6 +2582,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void npcbodytraining(string value)
         {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcbodytraining");
             GameObject personGa = getPersonInteract();
 
             if (personGa == null)
@@ -4475,6 +4502,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcbodytraining":
                     {
                         npcbodytraining("10");
+                    }
+                    break;
+
+                case "removeallwarps":
+                    {
+                        removeallwarps();
                     }
                     break;
 

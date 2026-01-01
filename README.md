@@ -113,6 +113,7 @@ commands with no params:
 * npcnippletraining -> Increases nipple training from the npc the you looked at by 10
 * npcclittraining-> Increases clit training from the npc the you looked at by 10
 * npcbodytraining-> Increases body training from the npc the you looked at by 10
+* removeallwarps -> removes all user predefined warps
 
 commands with 1 param:
 
