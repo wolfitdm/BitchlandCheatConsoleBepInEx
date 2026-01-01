@@ -2637,7 +2637,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("Increases body training from the npc the you are looked at by amount: " + amount);
         }
 
-        public static void kill()
+        public static void kill(bool forcekill)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: kill");
             GameObject personGa = getPersonInteract();
@@ -2648,16 +2648,30 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Person player = personGa.GetComponent<Person>();
-
-            player.Hunger = player.HungerMax;
-            player.Toilet = player.ToiletMax;
-            player.Energy = 0;
             if (player.TheHealth != null)
             {
-                player.TheHealth.currentHealth = 0f;
+                bool canDie = player.TheHealth.canDie;
+                bool alwaysDie = player.TheHealth.AlwaysDie;
+                if (!forcekill && !player.TheHealth.canDie)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(player.Name + " can not be killed!");
+                    return;
+                } else
+                {
+                    player.TheHealth.AlwaysDie = true;
+                    player.TheHealth.canDie = true;
+                }
+                player.Hunger = player.HungerMax;
+                player.Toilet = player.ToiletMax;
+                player.Energy = 0;
+                player.TheHealth.dead = false;
+                player.TheHealth.currentHealth = 0.0f;
+                player.TheHealth.ChangeHealth(0, true, null);
+                player.TheHealth.Die();
+                player.TheHealth.canDie = canDie;
+                player.TheHealth.AlwaysDie = alwaysDie;
+                Main.Instance.GameplayMenu.ShowNotification(player.Name + " killed!");
             }
-
-            Main.Instance.GameplayMenu.ShowNotification(player.Name + " killed!");
         }
 
 
@@ -4563,7 +4577,14 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "kill":
                     {
-                        kill();
+                        kill(false);
+                    }
+                    break;
+
+                case "forcekill":
+                case "die":
+                    {
+                        kill(true);
                     }
                     break;
 

@@ -115,6 +115,8 @@ npcclittraining-> Increases clit training from the npc the you looked at by 10
 npcbodytraining-> Increases body training from the npc the you looked at by 10
 removeallwarps -> removes all user predefined warps
 kill -> kills the npc the you looked at
+forcekill -> kills the npc the you looked at, on everytime (forced), the person is also killed even if the game don't want that you kill this person
+die -> kills the npc the you looked at, on everytime (forced), the person is also killed even if the game don't want that you kill this person
 
 commands with 1 param:
 
