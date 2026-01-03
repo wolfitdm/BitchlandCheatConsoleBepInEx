@@ -135,6 +135,16 @@ commands with no params:
 * dieme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
 * helloworld -> shows a messagebox with the text hello world
 * fly -> toggle fly
+* equip -> Equip the item the you looked at
+* equiptohand -> Equip the item the you looked at to your hands
+* dropallhand -> Drop all items the you have in your hands 
+* equiptovagina -> Equip the item the you looked at to your vagina
+* equiptovag -> Equip the item the you looked at to your vagina
+* dropallvagina  -> Drop all items the you have in your vagina
+* equiptoass -> Equip the item the you looked at to your ass
+* dropallass -> Drop all items the you have in your ass
+* addbp ->  Gives you a backpack
+* addbackpack -> Gives you a backpack
 
 commands with 1 param:
 

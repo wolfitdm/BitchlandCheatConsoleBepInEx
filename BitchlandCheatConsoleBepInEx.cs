@@ -5,6 +5,7 @@ using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
+using SemanticVersioning;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -729,6 +730,26 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Int_Storage int_St = (Int_Storage)la;
                 return int_St.gameObject;
+            }
+
+            return null;
+        }
+
+        public static GameObject getPickupToHandInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la is int_PickupToHand)
+            {
+                int_PickupToHand int_Pu = (int_PickupToHand)la;
+                return int_Pu.gameObject;
             }
 
             return null;
@@ -3001,6 +3022,198 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
         }
 
+        public static void dropallass()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallass");
+
+            if (!Main.Instance.Player.Perks.Contains("Anal Storage"))
+            {
+                Main.Instance.Player.Perks.Add("Anal Storage");
+            }
+
+            Person person = Main.Instance.Player;
+            Int_Storage ass = person.Storage_Anal;
+
+            if (ass == null)
+            {
+                return;
+            }
+
+            int length = ass.StorageItems.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                GameObject ga = ass.StorageItems[i];
+                Main.Spawn(ga);
+            }
+
+            ass.RemoveAllItems();
+            person.Storage_Anal = ass;
+        }
+
+        public static void equiptoass()
+        {
+            if (!Main.Instance.Player.Perks.Contains("Anal Storage"))
+            {
+                Main.Instance.Player.Perks.Add("Anal Storage");
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("executed command: equiptoass");
+            GameObject pi = getPickupToHandInteract();
+
+            if (pi == null)
+            {
+                return;
+            }
+
+            int_PickupToHand pih = pi.GetComponent<int_PickupToHand>();
+
+            if (pih == null)
+            {
+                return;
+            }
+
+            Person person = Main.Instance.Player;
+            if (person.Storage_Anal.Full) {
+                dropallass();
+            }
+            pih.EquipToAss(person);
+        }
+        public static void dropallvag()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallvag");
+
+            if (!Main.Instance.Player.Perks.Contains("Vaginal Storage"))
+            {
+                Main.Instance.Player.Perks.Add("Vaginal Storage");
+            }
+
+            Person person = Main.Instance.Player;
+            Int_Storage vag = person.Storage_Vag;
+
+            if (vag == null)
+            {
+                return;
+            }
+
+            int length = vag.StorageItems.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                GameObject ga = vag.StorageItems[i];
+                Main.Spawn(ga);
+            }
+
+            vag.RemoveAllItems();
+            person.Storage_Vag = vag;
+        }
+        public static void equiptovag()
+        {
+            if (!Main.Instance.Player.Perks.Contains("Vaginal Storage"))
+            {
+                Main.Instance.Player.Perks.Add("Vaginal Storage");
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("executed command: equiptovag");
+            GameObject pi = getPickupToHandInteract();
+
+            if (pi == null)
+            {
+                return;
+            }
+
+            int_PickupToHand pih = pi.GetComponent<int_PickupToHand>();
+
+            if (pih == null)
+            {
+                return;
+            }
+
+            Person person = Main.Instance.Player;
+
+            if (person.Storage_Vag.Full)
+            {
+                dropallvag();
+            }
+
+            pih.EquipToVag(Main.Instance.Player);
+        }
+        public static void dropallhand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallhand");
+
+            Person person = Main.Instance.Player;
+            Int_Storage hand = person.Storage_Hands;
+
+            if (hand == null)
+            {
+                return;
+            }
+
+            int length = hand.StorageItems.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                GameObject ga = hand.StorageItems[i];
+                Main.Spawn(ga);
+            }
+
+            hand.RemoveAllItems();
+            person.Storage_Hands = hand;
+        }
+
+        public static void equiptohand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: equiptohand");
+            GameObject pi = getPickupToHandInteract();
+
+            if (pi == null)
+            {
+                return;
+            }
+
+            int_PickupToHand pih = pi.GetComponent<int_PickupToHand>();
+
+            if (pih == null)
+            {
+                return;
+            }
+
+            Person person = Main.Instance.Player;
+            
+            if (person.Storage_Hands.Full)
+            {
+                dropallhand();
+            }
+
+            pih.EquipToHand(Main.Instance.Player);
+        }
+        public static void equip()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: equip");
+            GameObject pi = getInteract();
+
+            if (pi == null)
+            {
+                return;
+            }
+
+            Interactible pih = pi.GetComponent<Interactible>();
+
+            if (pih == null)
+            {
+                return;
+            }
+
+            Main.Instance.Player.DressClothe(pih.gameObject);
+        }
+
+        public static void addbackpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addbackpack");
+            additem("jeans", "1");
+        }
+
         public static void spawnbirthintopod()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnbirthintopod");
@@ -5023,6 +5236,57 @@ namespace BitchlandCheatConsoleBepInEx
                 case "fly":
                     {
                         fly();
+                    }
+                    break;
+
+                case "equip":
+                    {
+                        equip();
+                    }
+                    break;
+
+                case "equiptohand":
+                    {
+                        equiptohand();
+                    }
+                    break;
+
+                case "dropallhand":
+                    {
+                        dropallhand();
+                    }
+                    break;
+
+                case "equiptovagina":
+                case "equiptovag":
+                    {
+                        equiptovag();
+                    }
+                    break;
+
+                case "dropallvagina":
+                case "dropallvag":
+                    {
+                        dropallvag();
+                    }
+                    break;
+
+                case "equiptoass":
+                    {
+                        equiptoass();
+                    }
+                    break;
+
+                case "dropallass":
+                    {
+                        dropallass();
+                    }
+                    break;
+
+                case "addbp":
+                case "addbackpack":
+                    {
+                        addbackpack();
                     }
                     break;
 
