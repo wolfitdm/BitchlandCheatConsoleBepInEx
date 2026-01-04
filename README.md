@@ -157,6 +157,12 @@ commands with no params:
 * stuckland -> unstucks you really, open the load game menu
 * autoupdate -> updates the cheat plugin
 * checkupdate -> check for a new update
+* playaudio -> plays audio file named slave.mp3, location is Assets\wolfitdm\audio
+* playaudioloop -> plays audio file loop named slave.mp3, location is Assets\wolfitdm\audio
+* stopaudio -> stops to play audio
+* pauseaudio -> pause to play audio
+* unpauseaudio -> unpause to play audio
+* listaudio -> list audio files, location is Assets\wolfitdm\audio
 
 commands with 1 param:
 
@@ -210,7 +216,8 @@ commands with 1 param:
 * npcbodytraining number -> Increases body training from the npc the you looked at by number
 * npcaddweapon name -> add the npc the you are looked at the weapon named name
 * npcsetfavor number -> creates a relationship with the npc the you looked at and set his relationship to number, positive number, is positive relationship, negative number is negative relationship
-* playaudio name -> plays audio file named name, location is Assets\Resources\wolfitdm\audio
+* playaudio name -> plays audio file named name, location is Assets\wolfitdm\audio
+* playaudioloop name -> plays audio file loop named name, location is Assets\wolfitdm\audio
 
 commands with 2 params:
 

@@ -7,6 +7,7 @@ using Den.Tools;
 using HarmonyLib;
 using SemanticVersioning;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
@@ -20,6 +21,7 @@ using System.Security.Policy;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Networking;
 using static Den.Tools.MatrixAsset;
 
 namespace BitchlandCheatConsoleBepInEx
@@ -78,6 +80,8 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return;
             }
+
+            initAudioSource();
 
             isInit = true;
 
@@ -454,11 +458,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
             Directory.CreateDirectory(objectsFolder);
 
             Directory.CreateDirectory(malesFolder);
 
             Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
 
             string filename = $"{objectsFolder}/warps.json";
 
@@ -490,11 +498,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
             Directory.CreateDirectory(objectsFolder);
 
             Directory.CreateDirectory(malesFolder);
 
             Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
 
             string filename = $"{objectsFolder}/warps.json";
 
@@ -587,11 +599,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
             Directory.CreateDirectory(objectsFolder);
 
             Directory.CreateDirectory(malesFolder);
 
             Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
 
             string filename = $"{objectsFolder}/{name}.obj";
 
@@ -619,18 +635,21 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return null;
             }
-
             string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
 
             string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
             Directory.CreateDirectory(objectsFolder);
 
             Directory.CreateDirectory(malesFolder);
 
             Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
 
             string filename = $"{objectsFolder}/{name}.obj";
 
@@ -1018,12 +1037,14 @@ namespace BitchlandCheatConsoleBepInEx
             if (LoadSpecificNPC)
             {
                 PersonGenerated = spawnFemale ? UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonPrefab).GetComponent<Person>() : UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PersonGuyPrefab).GetComponent<Person>();
-                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
-                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
-                string objectsDir = $"{Main.AssetsFolder}/wolfitdm/objects";
-                Directory.CreateDirectory(femalesDir);
-                Directory.CreateDirectory(malesDir);
-                Directory.CreateDirectory(objectsDir);
+                string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+                Directory.CreateDirectory(objectsFolder);
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+                Directory.CreateDirectory(audioFolder);
                 string maleOrFemale = spawnFemale ? "females" : "males";
                 string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
                 if (!File.Exists(filename))
@@ -1418,12 +1439,14 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     thisPersonInt = personInt.ThisPerson;
                 }
-                string femalesDir = $"{Main.AssetsFolder}/wolfitdm/females";
-                string malesDir = $"{Main.AssetsFolder}/wolfitdm/males";
-                string objectsDir = $"{Main.AssetsFolder}/wolfitdm/objects";
-                Directory.CreateDirectory(femalesDir);
-                Directory.CreateDirectory(malesDir);
-                Directory.CreateDirectory(objectsDir);
+                string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+                Directory.CreateDirectory(objectsFolder);
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+                Directory.CreateDirectory(audioFolder);
                 string maleOrFemale = spawnFemale ? "females" : "males";
                 string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
                 if (!File.Exists(filename))
@@ -5945,7 +5968,37 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "playaudio":
                     {
-                        playaudio("test.mp3");
+                        playaudio("slave.mp3");
+                    }
+                    break;
+
+                case "playaudioloop":
+                    {
+                        playaudio("slave.mp3", true);
+                    }
+                    break;
+
+                case "stopaudio":
+                    {
+                        stopaudio();
+                    }
+                    break;
+
+                case "listaudio":
+                    {
+                        listaudio();
+                    }
+                    break;
+
+                case "pauseaudio":
+                    {
+                        pauseaudio();
+                    }
+                    break;
+
+                case "unpauseaudio":
+                    {
+                        unpauseaudio();
                     }
                     break;
 
@@ -6264,6 +6317,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "playaudioloop":
+                    {
+                        playaudio(value, true);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
@@ -6313,7 +6372,84 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
-        public static void playaudio(string value)
+
+        public static IEnumerator GetAudioClip(string url, Action<AudioClip> callback, AudioType type)
+        {
+            Logger.LogInfo("execute GetAudioClip");
+            if (callback == null) { yield break; }
+            Logger.LogInfo("execute GetAudioClip 1");
+            using (var uwr = UnityWebRequestMultimedia.GetAudioClip(url, type))
+            {
+                Logger.LogInfo("execute GetAudioClip 2");
+                yield return uwr.SendWebRequest();
+                if (uwr.result != UnityWebRequest.Result.Success)
+                {
+                    Logger.LogError(uwr.error);
+                    yield break;
+                }
+                Logger.LogInfo("execute GetAudioClip 3");
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(uwr);
+                Logger.LogInfo("Loaded clip");
+                // use audio clip
+                callback(clip);
+            }
+        }
+        public static void unpauseaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unpauseaudio");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                audioSource.UnPause();
+
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("unpauseaudio: no audio source to unpause audio!");
+            }
+        }
+        public static void pauseaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: pauseaudio");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                audioSource.Pause();
+
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("pauseaudio: no audio source to pause audio!");
+            }
+        }
+        public static void stopaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stopaudio");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                audioSource.Stop();
+
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stopaudio: no audio source to stop audio!");
+            }
+        }
+
+        public static void listaudio()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: playaudio");
 
@@ -6323,9 +6459,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
-            string audioPartFolder = "wolfitdm/audio";
-
-            string audioFolder = $"{Main.AssetsFolder}/Resources/{audioPartFolder}";
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
 
             Directory.CreateDirectory(objectsFolder);
 
@@ -6335,42 +6469,103 @@ namespace BitchlandCheatConsoleBepInEx
 
             Directory.CreateDirectory(audioFolder);
 
-            string path = $"{audioPartFolder}/{value}";
+            string[] files = Directory.GetFiles(audioFolder);
 
-            Logger.LogInfo("playaudio: path: " +  path);
-
-            AudioClip clip = Resources.Load<AudioClip>(path);
-
-            if (clip == null)
+            if (files == null || files.Length == 0)
             {
-                Resources.Load<AudioClip>("/"+path);
+                string fullFile = "listaudio: No files found in Assets/wolfitdm/audio";
+                Main.Instance.GameplayMenu.ShowNotification(fullFile);
+                Logger.LogInfo(fullFile);
+                return;
             }
 
-            if (clip == null)
+            int length = files.Length;
+
+            for (int i = 0; i < length; i++)
             {
-                Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio file found!");
+                string file = Path.GetFileName(files[i]);
+
+                string fullFile = "listaudio: Assets/wolfitdm/audio/" + file;
+                Main.Instance.GameplayMenu.ShowNotification(fullFile);
+                Logger.LogInfo(fullFile);
             }
+        }
+        public static void playaudio(string value, bool loop = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playaudio");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            string audioFile = $"{audioFolder}/{value}";
+
+            string realAudioFile = audioFile;
+
+            AudioType audioType = AudioType.MPEG;
+
+            if (!File.Exists(realAudioFile))
+            {
+                realAudioFile = audioFile + ".mp3";
+                audioType = AudioType.MPEG;
+            }
+
+            if (!File.Exists(realAudioFile))
+            {
+                realAudioFile = audioFile + ".ogg";
+                audioType = AudioType.OGGVORBIS;
+            }
+
+            if (!File.Exists(realAudioFile))
+            {
+                realAudioFile = audioFile + ".wav";
+                audioType = AudioType.WAV;
+            }
+
+            if (!File.Exists(realAudioFile))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playaudio: audio file not found!");
+            }
+
+            string fileUri = $"file:///{realAudioFile}";
+
+            Logger.LogInfo("playaudio: path: " +  fileUri);
 
             initAudioSource();
-
+       
             AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
-
-            using (var www = new WWW(url))
-            {
-                yield return www;
-                source.clip = www.GetAudioClip();
-            }
 
             if (audioSource != null)
             {
-                audioSource.loop = false;
-                audioSource.playOnAwake = false;
-                audioSource.clip = clip;
-                audioSource.Play();
-            } else
-            {
-                Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio source to play audio!");
+                Logger.LogInfo("playaudio: execute GetAudioClip");
+                Action<AudioClip> onAudioLoad = (loadedClip) => {
+                    Logger.LogInfo("Clip geladen:  " + loadedClip.name);
+                  // Jetzt kannst du etwas mit dem geladenen Clip machen
+                  audioSource.loop = loop;
+                  audioSource.playOnAwake = false;
+                  audioSource.clip = loadedClip;
+                  audioSource.Play();
+              };
+              Main.Instance.Player.StartCoroutine(GetAudioClip(fileUri, onAudioLoad, audioType));
+
             }
+            else
+            {
+              Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio source to play audio!");
+            }
+               
         }
 
         public static void fly()
