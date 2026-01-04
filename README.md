@@ -152,6 +152,7 @@ commands with no params:
 * addallperks -> Add you all perks
 * npcaddallperks -> Adds the npc the you looked at all perks
 * use -> use the item the you looked at
+* stuckland -> unstucks you really
 
 commands with 1 param:
 

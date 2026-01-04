@@ -4095,7 +4095,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 catch (Exception ex)
                 {
-                    psState = 0;
+                    psState = 1;
                 }
                 thisPerson.State = Person_State.Work;
                 Main.Instance.GameplayMenu.ShowNotification($"setpersonstatetowork: person state was '{psState}', now person state is work");
@@ -4975,12 +4975,13 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listmenus");
             string menus = "menus: \n";
+            Main.Instance.GameplayMenu.ShowNotification(menus);
             for (int index = 0; index < Main.Instance.Menus.Count; ++index)
             {
-                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower().Replace(" ", "_");
                 menus += menuname + "\n";
+                Main.Instance.GameplayMenu.ShowNotification(menuname);
             }
-            Main.Instance.GameplayMenu.ShowNotification(menus);
             Logger.LogInfo(menus);
         }
 
@@ -4989,7 +4990,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: openmenu");
             for (int index = 0; index < Main.Instance.Menus.Count; ++index)
             {
-                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower().Replace(" ", "_");
                 if (menuname == value)
                 {
                     Main.Instance.OpenMenu(Main.Instance.Menus[index].MenuName);
@@ -5003,7 +5004,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: closemenu");
             for (int index = 0; index < Main.Instance.Menus.Count; ++index)
             {
-                string menuname = Main.Instance.Menus[index].MenuName.ToLower();
+                string menuname = Main.Instance.Menus[index].MenuName.ToLower().Replace(" ", "_");
                 if (menuname == value)
                 {
                     Main.Instance.Menus[index].Close();
@@ -5880,6 +5881,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "use":
                     {
                         use();
+                    }
+                    break;
+
+                case "stuckland":
+                    {
+                        openmenu("loadgame");
                     }
                     break;
 
