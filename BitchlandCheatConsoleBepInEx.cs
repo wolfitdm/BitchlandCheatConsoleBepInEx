@@ -4006,6 +4006,19 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Main.Instance.GameplayMenu.ShowNotification("getpersonstate: person state is work");
                 Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is not fuckable, soo bad ): ");
+            } else
+            {
+                int psState = 0;
+                try
+                {
+                    psState = (int)thisPerson.State;
+                } catch(Exception ex)
+                {
+                    psState = 0;
+                }
+
+                Main.Instance.GameplayMenu.ShowNotification($"getpersonstate: person state is '{psState}'");
+                Main.Instance.GameplayMenu.ShowNotification("getpersonstate: that mean, npc is not fuckable, soo bad ): ");
             }
                    
         }
@@ -4033,6 +4046,20 @@ namespace BitchlandCheatConsoleBepInEx
                  thisPerson.State = Person_State.Free;
                  Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: person state was work, now person state is free");
                  Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is fuckable now great!, yeah :)");
+            } else
+            {
+                int psState = 0;
+                try
+                {
+                    psState = (int)thisPerson.State;
+                }
+                catch (Exception ex)
+                {
+                    psState = 0;
+                }
+                thisPerson.State = Person_State.Free;
+                Main.Instance.GameplayMenu.ShowNotification($"togglepersonstate: person state was '{psState}', now person state is free");
+                Main.Instance.GameplayMenu.ShowNotification("togglepersonstate: that mean, npc is fuckable now great!, yeah :)");
             }
         }
         public static void setpersonstatetowork()
@@ -4061,9 +4088,17 @@ namespace BitchlandCheatConsoleBepInEx
             }
             else
             {
-                int number = (int)thisPerson.State;
+                int psState = 0;
+                try
+                {
+                    psState = (int)thisPerson.State;
+                }
+                catch (Exception ex)
+                {
+                    psState = 0;
+                }
                 thisPerson.State = Person_State.Work;
-                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state was '" + number.ToString() + "', now person state is work");
+                Main.Instance.GameplayMenu.ShowNotification($"setpersonstatetowork: person state was '{psState}', now person state is work");
                 Main.Instance.GameplayMenu.ShowNotification("setpersonstatetowork: that mean, npc is not fuckable, soo bad ): ");
             }
         }
@@ -4092,9 +4127,17 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
             } else
             {
-                int number = (int)thisPerson.State;
+                int psState = 0;
+                try
+                {
+                    psState = (int)thisPerson.State;
+                }
+                catch (Exception ex)
+                {
+                    psState = 0;
+                }
                 thisPerson.State = Person_State.Free;
-                Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: person state was '" + number.ToString() + "', now person state is free");
+                Main.Instance.GameplayMenu.ShowNotification($"setpersonstatetofree: person state was '{psState}', now person state is free");
                 Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
             }
         }
