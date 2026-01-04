@@ -16,9 +16,11 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static Den.Tools.MatrixAsset;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -50,12 +52,33 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static BitchlandCheatConsoleBepInEx instance = new BitchlandCheatConsoleBepInEx();
 
+        public static AudioSource audioSource = null;
+
+        private static void initAudioSource()
+        {
+            try
+            {
+                if (BitchlandCheatConsoleBepInEx.audioSource == null)
+                {
+                    BitchlandCheatConsoleBepInEx.audioSource =  Main.Instance.Player.gameObject.AddComponent<AudioSource>();
+                }
+                if (BitchlandCheatConsoleBepInEx.audioSource == null)
+                {
+                    throw new Exception("audioSource == null");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+        }
         private void Init()
         {
             if (isInit)
             {
                 return;
             }
+
             isInit = true;
 
             spawnpoints.Clear();
@@ -6300,9 +6323,9 @@ namespace BitchlandCheatConsoleBepInEx
 
             string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
 
-            string audioFolder = $"{Main.AssetsFolder}/Resources/wolfitdm/audio";
-
             string audioPartFolder = "wolfitdm/audio";
+
+            string audioFolder = $"{Main.AssetsFolder}/Resources/{audioPartFolder}";
 
             Directory.CreateDirectory(objectsFolder);
 
@@ -6312,21 +6335,15 @@ namespace BitchlandCheatConsoleBepInEx
 
             Directory.CreateDirectory(audioFolder);
 
-            AudioClip clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}");
+            string path = $"{audioPartFolder}/{value}";
+
+            Logger.LogInfo("playaudio: path: " +  path);
+
+            AudioClip clip = Resources.Load<AudioClip>(path);
 
             if (clip == null)
             {
-                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.mp3");
-            }
-
-            if (clip == null)
-            {
-                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.wav");
-            }
-
-            if (clip == null)
-            {
-                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.ogg");
+                Resources.Load<AudioClip>("/"+path);
             }
 
             if (clip == null)
@@ -6334,15 +6351,26 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio file found!");
             }
 
-            AudioSource audioSource = BitchlandCheatConsoleBepInEx.instance.GetComponent<AudioSource>();
+            initAudioSource();
 
-            audioSource.loop = false;
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
 
-            audioSource.playOnAwake = false;
+            using (var www = new WWW(url))
+            {
+                yield return www;
+                source.clip = www.GetAudioClip();
+            }
 
-            audioSource.clip = clip;
-
-            audioSource.Play();
+            if (audioSource != null)
+            {
+                audioSource.loop = false;
+                audioSource.playOnAwake = false;
+                audioSource.clip = clip;
+                audioSource.Play();
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio source to play audio!");
+            }
         }
 
         public static void fly()

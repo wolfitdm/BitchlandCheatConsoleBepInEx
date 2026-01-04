@@ -155,6 +155,8 @@ commands with no params:
 * npcaddallperks -> Adds the npc the you looked at all perks
 * use -> use the item the you looked at
 * stuckland -> unstucks you really, open the load game menu
+* autoupdate -> updates the cheat plugin
+* checkupdate -> check for a new update
 
 commands with 1 param:
 
