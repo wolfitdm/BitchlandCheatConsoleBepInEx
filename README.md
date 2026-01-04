@@ -145,6 +145,13 @@ commands with no params:
 * dropallass -> Drop all items the you have in your ass
 * addbp ->  Gives you a backpack
 * addbackpack -> Gives you a backpack
+* equiptobp -> Equip the item the you looked at to your backpack
+* equiptobackpack -> Equip the item the you looked at to your backpack
+* dropallbp -> Drop all items the you have in your backpack
+* dropallbackpack -> Drop all items the you have in your backpack
+* addallperks -> Add you all perks
+* npcaddallperks -> Adds the npc the you looked at all perks
+* use -> use the item the you looked at
 
 commands with 1 param:
 
@@ -205,6 +212,7 @@ commands with 2 params:
 * setstate number true -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 * setnpcstate number true -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 * npcadditem name amount -> add the npc the you are looked at this item (amount) to your backpack, if the npc don't have a backpack, it gives him a backpack
+* spawnitem name amount -> spawns the item (amount) on the ground where you are standing
 
 state command examples:
 

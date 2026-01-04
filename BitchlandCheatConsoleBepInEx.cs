@@ -9,10 +9,13 @@ using SemanticVersioning;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -645,6 +648,60 @@ namespace BitchlandCheatConsoleBepInEx
             }
             return null;
         }
+        public static GameObject getMultiInteract()
+        {
+            GameObject interact = getInteract();
+            
+            if (interact == null)
+            {
+                return null;
+            }
+
+            Interactible interactible = interact.GetComponent<Interactible>();
+
+            if (interactible == null)
+            {
+                return null;
+            }
+
+            MultiInteractible multi = null;
+            
+            if (interactible is MultiInteractible)
+            {
+                multi = (MultiInteractible)interactible;
+                return multi.gameObject;
+            }
+
+            return null;
+        }
+
+        public static Dictionary<string,GameObject> getMultiPartsInteract()
+        {
+            GameObject multi = getMultiInteract();
+
+            if (multi == null)
+            {
+                return null;
+            }
+
+            MultiInteractible multiInteractible = multi.GetComponent<MultiInteractible>();
+
+            if (multiInteractible.Parts == null)
+            {
+                return null;
+            }
+            
+            Dictionary<string,GameObject> list = new Dictionary<string, GameObject>();
+
+            for (int i = 0; i < multiInteractible.Parts.Length; i++)
+            {
+                string interactText = multiInteractible.Parts[i].InteractText;
+                interactText = interactText != null ? interactText.ToLower().Replace(" ", "_") : "";
+                list.Add(interactText, multiInteractible.Parts[i].gameObject);
+            }
+
+            return list;
+        }
         public static GameObject getPersonInteract()
         {
             GameObject ga = getInteract();
@@ -746,13 +803,187 @@ namespace BitchlandCheatConsoleBepInEx
 
             Interactible la = ga.GetComponent<Interactible>();
 
-            if (la is int_PickupToHand)
+            int_PickupToHand pi = null;
+
+            if (la != null)
             {
-                int_PickupToHand int_Pu = (int_PickupToHand)la;
+                if (!(la is MultiInteractible))
+                {
+                    return null;
+                }
+
+                GameObject piGa = la.gameObject;
+                if (piGa != null)
+                {
+                    Interactible pis = piGa.GetComponent<Interactible>();
+                    if (pis != null)
+                    {
+                        pi = pis.GetComponentInChildren<int_PickupToHand>(true);
+                    }
+                }
+                
+            }
+
+            if (pi != null && pi is int_PickupToHand)
+            {
+                int_PickupToHand int_Pu = (int_PickupToHand)pi;
                 return int_Pu.gameObject;
             }
 
             return null;
+        }
+
+        public static GameObject getPickupToBagInteract(GameObject ga)
+        {
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            int_PickupToBag pi = null;
+
+            if (la != null)
+            {
+                if (!(la is MultiInteractible))
+                {
+                    return null;
+                }
+
+                GameObject piGa = la.gameObject;
+                if (piGa != null)
+                {
+                    Interactible pis = piGa.GetComponent<Interactible>();
+                    if (pis != null)
+                    {
+                        pi = pis.GetComponentInChildren<int_PickupToBag>(true);
+                    }
+                }
+
+            }
+
+            if (pi != null && pi is int_PickupToBag)
+            {
+                int_PickupToBag int_Pu = (int_PickupToBag)pi;
+                return int_Pu.gameObject;
+            }
+
+            return null;
+        }
+        public static GameObject[] getChildren(GameObject ga)
+        {
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            Interactible[] pi = null;
+
+            if (la != null)
+            {
+                if (!(la is MultiInteractible))
+                {
+                    return null;
+                }
+
+                GameObject piGa = la.gameObject;
+                if (piGa != null)
+                {
+                    Interactible pis = piGa.GetComponent<Interactible>();
+                    if (pis != null)
+                    {
+                        pi = pis.GetComponentsInChildren<Interactible>(true);
+                    }
+                }
+
+            }
+
+            if (pi != null)
+            {
+                GameObject[] gas = new GameObject[pi.Length];
+                for (int i = 0; i < pi.Length; i++)
+                {
+                    gas[i] = pi[i].gameObject;
+                }
+                return gas;
+            }
+
+            return null;
+        }
+
+        public static GameObject SafeSpawn(GameObject go)
+        {
+            if (go == null)
+            {
+                return null;
+            }
+
+            Int_Storage storage_hands = Main.Instance.Player.Storage_Hands;
+            Transform storage_hands_dropspot = storage_hands.DropSpot;
+            if (storage_hands_dropspot != null)
+            {
+                return SafeSpawnFromStorage(go, storage_hands);
+            }
+
+            Int_Storage storage_anal = Main.Instance.Player.Storage_Anal;
+            Transform storage_anal_dropspot = storage_anal.DropSpot;
+            if (storage_anal_dropspot != null)
+            {
+                return SafeSpawnFromStorage(go, storage_anal);
+            }
+
+            Int_Storage storage_vaginal = Main.Instance.Player.Storage_Vag;
+            Transform storage_vaginal_dropspot = storage_vaginal.DropSpot;
+            if (storage_vaginal_dropspot != null)
+            {
+                return SafeSpawnFromStorage(go, storage_vaginal);
+            }
+
+            Int_Storage backpack = Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null ? Main.Instance.Player.CurrentBackpack.ThisStorage : null;
+            Transform backpack_dropspot = backpack != null ? backpack.DropSpot : null;
+            if (backpack_dropspot != null)
+            {
+                return SafeSpawnFromStorage(go, backpack);
+            }
+
+            return SafeSpawnFromStorage(go, null);
+        }
+
+        public static GameObject SafeSpawnFromStorage(GameObject go, Int_Storage storage)
+        {
+            if (go == null)
+            {
+                return null;
+            }
+
+            Transform storageSpot = storage == null ? null : storage.DropSpot;
+            GameObject item = Main.Spawn(go);
+
+            Vector3 position = Vector3.zero;
+            Quaternion rotation = Quaternion.identity;
+
+            if (storageSpot != null)
+            {
+                position = storageSpot.position;
+                rotation = storageSpot.rotation;
+                item.transform.SetPositionAndRotation(position, rotation);
+            } else
+            {
+                item.transform.SetLocalPositionAndRotation(position, rotation);
+            }
+
+            item.transform.SetParent((Transform)null, true);
+            Rigidbody componentInChildren1 = item.GetComponentInChildren<Rigidbody>(false);
+            Collider componentInChildren2 = item.GetComponentInChildren<Collider>(false);
+            if (componentInChildren1 != null)
+                componentInChildren1.isKinematic = false;
+            if (componentInChildren2 != null)
+                componentInChildren2.enabled = true;
+            item.SetActive(true);
+            return item;
         }
 
         public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true)
@@ -1701,6 +1932,8 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
+            addallperkstoperson(personGa);
+
             PersonGenerated.Personality = Personality_Type.Nympho;
             if (PersonGenerated.Fetishes == null)
             {
@@ -2041,6 +2274,17 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+
+        private static void spawnItemReal(GameObject item, int value)
+        {
+            value = value <= 0 ? 1 : value;
+
+            for (int i = 0; i < value; i++)
+            {
+                SafeSpawn(item);
+            }
+        }
+
         public static void patreon()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: patreon");
@@ -3044,9 +3288,10 @@ namespace BitchlandCheatConsoleBepInEx
             for (int i = 0; i < length; i++)
             {
                 GameObject ga = ass.StorageItems[i];
-                Main.Spawn(ga);
+                SafeSpawn(ga);
             }
 
+            ass.StorageItems.Clear();
             ass.RemoveAllItems();
             person.Storage_Anal = ass;
         }
@@ -3101,9 +3346,10 @@ namespace BitchlandCheatConsoleBepInEx
             for (int i = 0; i < length; i++)
             {
                 GameObject ga = vag.StorageItems[i];
-                Main.Spawn(ga);
+                SafeSpawn(ga);
             }
 
+            vag.StorageItems.Clear();
             vag.RemoveAllItems();
             person.Storage_Vag = vag;
         }
@@ -3155,9 +3401,10 @@ namespace BitchlandCheatConsoleBepInEx
             for (int i = 0; i < length; i++)
             {
                 GameObject ga = hand.StorageItems[i];
-                Main.Spawn(ga);
+                SafeSpawn(ga);
             }
 
+            hand.StorageItems.Clear();
             hand.RemoveAllItems();
             person.Storage_Hands = hand;
         }
@@ -3208,10 +3455,162 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.Player.DressClothe(pih.gameObject);
         }
 
+        public static void dropallbackpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallbackpack");
+
+            Person person = Main.Instance.Player;
+
+            if (person.CurrentBackpack == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("dropallbackpack: No backpack equipped!");
+                return;
+            }
+
+            BackPack backpack = person.CurrentBackpack;
+            Int_Storage bp = backpack.ThisStorage;
+
+            if (bp == null)
+            {
+                return;
+            }
+
+            int length = bp.StorageItems.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                GameObject ga = bp.StorageItems[i];
+                SafeSpawn(ga);
+            }
+
+            bp.StorageItems.Clear();
+            bp.RemoveAllItems();
+            backpack.ThisStorage = bp;
+            person.CurrentBackpack = backpack;
+        }
+
+        public static void equiptobackpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: equiptobackpack");
+
+            Person person = Main.Instance.Player;
+
+            if (person.CurrentBackpack == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("equiptobackpack: No backpack equipped!");
+                return;
+            }
+
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return;
+            }
+
+            GameObject pi = getPickupToBagInteract(ga);
+
+            if (pi == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("equiptobackpack: No backpack equipped!");
+                return;
+            }
+
+            int_PickupToBag pih = pi.GetComponent<int_PickupToBag>();
+
+            if (pih == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("equiptobackpack: No backpack equipped!");
+                return;
+            }
+            pih.Interact(person);
+            Main.Instance.GameplayMenu.ShowNotification("equiptobackpack: " + ga.name.ToString() + " 1 added");
+        }
         public static void addbackpack()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: addbackpack");
             additem("jeans", "1");
+        }
+        public static void use()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: use");
+
+            Person person = Main.Instance.Player;
+
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return;
+            }
+
+            GameObject[] gas = getChildren(ga);
+
+            if (gas == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < gas.Length; i++)
+            {
+                GameObject gass = gas[i];
+                if (gass == null)
+                {
+                    continue;
+                }
+
+                Interactible gasInt = gass.GetComponent<Interactible>();
+
+                if (gasInt == null)
+                {
+                    continue;
+                }
+
+                if (gasInt is int_PickupToBag)
+                {
+                    continue;
+                }
+                else if (gasInt is int_PickupToHand)
+                {
+                    continue;
+                }
+                else if (gasInt is int_dildo)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_money)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_food)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is Int_Pickupable)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_PickableClothingPackage)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_Piss)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_basicSit)
+                {
+                    gasInt.Interact(person);
+                }
+                else if (gasInt is int_ResourceItem)
+                {
+                    gasInt.Interact(person);
+                }
+                else
+                {
+                    gasInt.Interact(person);
+                }
+            }
         }
 
         public static void spawnbirthintopod()
@@ -4358,6 +4757,113 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+
+        public static void addallperkstoperson(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (!person.Perks.Contains("Gaping"))
+            {
+                person.Perks.Add("Gaping");
+            }
+
+            if (!person.Perks.Contains("Smell"))
+            {
+                person.Perks.Add("Smell");
+            }
+
+            if (!person.Perks.Contains("Vaginal Storage"))
+            {
+                person.Perks.Add("Vaginal Storage");
+            }
+
+            if (!person.Perks.Contains("Anal Storage"))
+            {
+                person.Perks.Add("Anal Storage");
+            }
+
+            if (!person.Perks.Contains("Mining Skill lvl 2"))
+            {
+                person.Perks.Add("Mining Skill lvl 2");
+            }
+
+            if (!person.Perks.Contains("Sensetivity"))
+            {
+                person.Perks.Add("Sensetivity");
+            }
+
+            if (!person.Perks.Contains("Longer Orgasm"))
+            {
+                person.Perks.Add("Longer Orgasm");
+            }
+
+            if (!person.Perks.Contains("Prostitution skill lvl 1"))
+            {
+                person.Perks.Add("Prostitution skill lvl 1");
+            }
+
+            if (!person.Perks.Contains("Prostitution skill lvl 2"))
+            {
+                person.Perks.Add("Prostitution skill lvl 2");
+            }
+
+            if (!person.Perks.Contains("Prostitution skill lvl 3"))
+            {
+                person.Perks.Add("Prostitution skill lvl 3");
+            }
+
+            if (!person.Perks.Contains("Prostitution skill lvl 4"))
+            {
+                person.Perks.Add("Prostitution skill lvl 4");
+            }
+
+            if (!person.Perks.Contains("Fluid Gather"))
+            {
+                person.Perks.Add("Fluid Gather");
+            }
+
+            if (!person.Perks.Contains("Trash3"))
+            {
+                person.Perks.Add("Trash3");
+            }
+        }
+
+        public static void addallperks()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addallperks");
+            Person person = Main.Instance.Player;
+            addallperkstoperson(person.gameObject);
+        }
+        public static void npcaddallperks()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddallperks");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            addallperkstoperson(person.gameObject);
+        }
+
         public static void cleanskin()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: cleanskin");
@@ -4524,7 +5030,6 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: clearbackpack");
             if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
             {
-
                 Main.Instance.Player.CurrentBackpack.ThisStorage.RemoveAllItems();
             }
         }
@@ -5290,6 +5795,38 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "dropallbp":
+                case "dropallbackpack":
+                    {
+                        equiptobackpack();
+                    }
+                    break;
+
+                case "equiptobp":
+                case "equiptobackpack":
+                    {
+                        equiptobackpack();
+                    }
+                    break;
+
+                case "addallperks":
+                    {
+                        addallperks();
+                    }
+                    break;
+
+                case "npcaddallperks":
+                    {
+                        npcaddallperks();
+                    }
+                    break;
+
+                case "use":
+                    {
+                        use();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -5312,6 +5849,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "additem":
                     {
                         additem(value, "1");
+                    }
+                    break;
+
+                case "spawnitem":
+                    {
+                        spawnitem(value, "1");
                     }
                     break;
                 // not for @Neoton end
@@ -5619,6 +6162,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcadditem":
                     {
                         npcadditem(key, value);
+                    }
+                    break;
+
+                case "spawnitem":
+                    {
+                        spawnitem(key, value);
                     }
                     break;
 
@@ -6247,6 +6796,32 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void spawnitem(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnitem");
+            int amount = 1;
+            GameObject item = getAllItemByName(key);
+
+            if (item != null)
+            {
+                try
+                {
+                    amount = int.Parse(value);
+                    amount = amount > 0 ? amount : 1;
+                }
+                catch (Exception e)
+                {
+                    amount = 1;
+                }
+                spawnItemReal(item, amount);
+                Main.Instance.GameplayMenu.ShowNotification("spawnitem: " + item.name.ToString() + " " + amount.ToString() + " spawned");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("spawnitem: No item found");
+            }
+        }
+
         internal static new ManualLogSource Logger;
 
         private ConfigEntry<bool> configEnableMe;
@@ -6444,6 +7019,333 @@ namespace BitchlandCheatConsoleBepInEx
 
             return true;
         }
+        */
+        /*
+        [HarmonyPatch(typeof(WeaponSystem), "ShowPromptFor")]
+        [HarmonyPrefix]
+        public static bool ShowPromptFor(Interactible interactible, object __instance)
+        {
+            WeaponSystem _this = (WeaponSystem)__instance;
+            _this.IntLookingAt = interactible;
+            Main.Instance.GameplayMenu.Crossair.SetActive(value: true);
+            Main.Instance.GameplayMenu.PickupText.text = interactible.InteractText + " HALLO ";
+            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[interactible.InteractIcon];
+            Main.Instance.GameplayMenu.PromptIcon.enabled = interactible.InteractIcon != 0;
+            Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+            if (interactible is MultiInteractible)
+            {
+                MultiInteractible multiInteractible = (MultiInteractible)interactible;
+                if (multiInteractible.NewMulti)
+                {
+                    Interactible interactible2 = null;
+                    for (int i = 1; i < multiInteractible.Parts.Length; i++)
+                    {
+                        multiInteractible.Parts[i].InteractText = multiInteractible.Parts[i].InteractText + " SUSPS";
+                        if (multiInteractible.Parts[i] != null && multiInteractible.Parts[i].CheckCanInteract(Main.Instance.Player))
+                        {
+                            interactible2 = multiInteractible.Parts[i];
+                            break;
+                        }
+                    }
+
+                    if (interactible2 != null)
+                    {
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: true);
+                        Main.Instance.GameplayMenu.NewMultiOption_text.text = "More options";
+                        if (Input.GetKeyUp(KeyCode.F))
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                            Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+                            interactible2.Interact(_this.ThisPerson);
+                        }
+                    }
+                }
+                else if (Main.Instance.PeopleFollowingPlayer.Count > 0 && multiInteractible.Parts[0].NPCCanUseInFollow)
+                {
+                    if (Main.Instance.PeopleFollowingPlayer[0].InteractingWith != null)
+                    {
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: true);
+                        Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask to stop using";
+                        if (Input.GetKeyUp(KeyCode.F))
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                            Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+                            Interactible interactingWith = Main.Instance.PeopleFollowingPlayer[0].InteractingWith;
+                            interactingWith.InteractingPerson = Main.Instance.PeopleFollowingPlayer[0];
+                            interactingWith.StopInteracting();
+                            interactingWith.InteractingPerson = null;
+                            Main.Instance.PeopleFollowingPlayer[0].InteractingWith = null;
+                        }
+                    }
+                    else
+                    {
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: true);
+                        Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask " + Main.Instance.PeopleFollowingPlayer[0].Name + " to use";
+                        if (Input.GetKeyUp(KeyCode.F))
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                            Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+                            multiInteractible.Parts[0].Interact(Main.Instance.PeopleFollowingPlayer[0]);
+                        }
+                    }
+                }
+            }
+            else if (Main.Instance.PeopleFollowingPlayer.Count > 0 && interactible.NPCCanUseInFollow)
+            {
+                if (Main.Instance.PeopleFollowingPlayer[0].InteractingWith != null)
+                {
+                    Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: true);
+                    Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask to stop using";
+                    if (Input.GetKeyUp(KeyCode.F))
+                    {
+                        Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                        Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                        Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                        Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+                        Interactible interactingWith2 = Main.Instance.PeopleFollowingPlayer[0].InteractingWith;
+                        interactingWith2.InteractingPerson = Main.Instance.PeopleFollowingPlayer[0];
+                        interactingWith2.StopInteracting();
+                        interactingWith2.InteractingPerson = null;
+                        Main.Instance.PeopleFollowingPlayer[0].InteractingWith = null;
+                    }
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: true);
+                    Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask " + Main.Instance.PeopleFollowingPlayer[0].Name + " to use";
+                    if (Input.GetKeyUp(KeyCode.F))
+                    {
+                        Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                        Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                        Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                        Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(value: false);
+                        Main.Instance.PeopleFollowingPlayer[0].InteractingWith = interactible;
+                        interactible.Interact(Main.Instance.PeopleFollowingPlayer[0]);
+                    }
+                }
+            }
+
+            if (Input.GetButtonUp("Interact") || Input.GetMouseButtonUp(UI_Settings.RightMouseButton))
+            {
+                Main.Instance.GameplayMenu.Crossair.SetActive(value: false);
+                Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+
+                if (interactible is MultiInteractible)
+                {
+                    MultiInteractible multiInteractible = (MultiInteractible)interactible;
+                    for (int i = 0; i < multiInteractible.Parts.Length; i++)
+                    {
+                        string interactText = multiInteractible.Parts[i].InteractText;
+                        interactText = interactText != null ? interactText.ToLower().Replace(" ", "_") : "";
+                        if (multiInteractible.Parts[i] is int_PickupToBag)
+                        {
+                            interactText = "int_PickupToBag";
+                        } else if (multiInteractible.Parts[i] is int_PickupToHand)
+                        {
+                            interactText = "int_PickupToHand";
+                        }
+                        else if (multiInteractible.Parts[i] is int_useWeapon)
+                        {
+                            interactText = "int_useWeapon";
+                        } else if (multiInteractible.Parts[i] is Int_Pickupable)
+                        {
+                            interactText = "Int_Pickupable";
+                        }
+                        else if (multiInteractible.Parts[i] is int_dildo)
+                        {
+                            interactText = "int_dildo";
+                        }
+                        else if (multiInteractible.Parts[i] is int_food)
+                        {
+                            interactText = "int_food";
+                        }
+                        else if (multiInteractible.Parts[i] is int_money)
+                        {
+                            interactText = "int_money";
+                        } else if (multiInteractible.Parts[i] is int_ResourceItem)
+                        { 
+                           interactText = "int_ResourceItem";
+                        }
+                        else if (multiInteractible.Parts[i] is int_PickableClothingPackage)
+                        {
+                            interactText = "int_PickableClothingPackage";
+                        }
+                    multiInteractible.Parts[i].InteractText = interactText;
+                    }
+                }
+                interactible.Interact(_this.ThisPerson);
+            }
+            return false;
+        }
+
+        [HarmonyPatch(typeof(WeaponSystem), "Update")]
+        [HarmonyPrefix]
+        public static bool UpdateWeaponSystem(object __instance)
+        {
+            int x = 1;
+            WeaponSystem _this = (WeaponSystem)__instance;
+            if (!_this.isPlayer || _this.ThisPerson.Interacting || !_this.ThisPerson.CanMove)
+                return false;
+            if (Input.GetKeyUp(KeyCode.Alpha1))
+                _this.SetActiveWeapon(0);
+            if (Input.GetKeyUp(KeyCode.Alpha2) && _this.weapons.Count > 1)
+                _this.SetActiveWeapon(1);
+            if (Input.GetKeyUp(KeyCode.Alpha3) && _this.weapons.Count > 2)
+                _this.SetActiveWeapon(2);
+            if (Input.GetButtonUp("Drop"))
+            {
+                _this.DropWeapon(_this.weaponIndex);
+            }
+            else
+            {
+                RaycastHit hitInfo;
+                if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
+                {
+                    int_Dragable component1 = hitInfo.transform.GetComponent<int_Dragable>();
+                    if (component1 != null && component1.CanInteract && Input.GetKeyDown(KeyCode.Z))
+                    {
+                        component1.Interact(Main.Instance.Player);
+                        return false;
+                    }
+                    Weapon component2 = hitInfo.transform.root.GetComponent<Weapon>();
+                    if (component2 == null)
+                        component2 = hitInfo.transform.GetComponent<Weapon>();
+                    if (component2 != null)
+                    {
+                        Main.Instance.GameplayMenu.Crossair.SetActive(true);
+                        Main.Instance.GameplayMenu.PickupText.text = x.ToString() + " " + "Pickup " + component2.transform.name;
+                        x++;
+                        Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                        Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        if (Input.GetButtonUp("Interact") || Input.GetMouseButtonUp(UI_Settings.RightMouseButton))
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                            _this.PickupWeapon(component2.gameObject);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        }
+                        if (!Input.GetKeyDown(KeyCode.Z))
+                            return false;
+                        component2.int_Drag.Interact(Main.Instance.Player);
+                        return false;
+                    }
+                    Interactible component3 = hitInfo.transform.GetComponent<Interactible>();
+                    if (component3 != null && (component3.CanInteract && component3.PlayerCanInteract || Main.Instance.PeopleFollowingPlayer.Count > 0 && component3.InteractingPerson == Main.Instance.PeopleFollowingPlayer[0]))
+                    { 
+                        component3.InteractText = "(2) " + component3.InteractText;
+                        _this.ShowPromptFor(component3);
+                        return false;
+                    }
+                    InteractRedirect component4 = hitInfo.transform.GetComponent<InteractRedirect>();
+                    if (component4 != null && !component4.Disabled && (component4.Redirect.CanInteract && component4.Redirect.PlayerCanInteract || Main.Instance.PeopleFollowingPlayer.Count > 0 && component4.Redirect.InteractingPerson == Main.Instance.PeopleFollowingPlayer[0]))
+                    {
+                        component4.Redirect.InteractText = "(3) " + component4.Redirect.InteractText;
+                        _this.ShowPromptFor(component4.Redirect);
+                        return false;
+                    }
+                    Interactible component5 = hitInfo.transform.root.GetComponent<Interactible>();
+                    if (component5 != null && (component5.CanInteract && component5.PlayerCanInteract || Main.Instance.PeopleFollowingPlayer.Count > 0 && component5.InteractingPerson == Main.Instance.PeopleFollowingPlayer[0]))
+                    {
+                        component5.InteractText = "(4) " + component5.InteractText;
+                        _this.ShowPromptFor(component5);
+                        return false;
+                    }
+                }
+                _this.IntLookingAt = (Interactible)null;
+                Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                Main.Instance.GameplayMenu.NewMultiOption.SetActive(false);
+            }
+            return false;
+        }
+
+       /* [HarmonyPatch(typeof(MultiInteractible), "Interact")]
+        [HarmonyPrefix]
+        public static bool MultiInteract2(Person person, int part, object __instance)
+        {
+            return true;
+        }
+
+        [HarmonyPatch(typeof(MultiInteractible), "Interact")]
+        [HarmonyPrefix]
+        public static bool MultiInteract(Person person, object __instance)
+        {
+            MultiInteractible _this = (MultiInteractible)__instance;
+            _this.PersonGoingToUse = (Person)null;
+            if (_this.AskWhichOption && person.IsPlayer)
+            {
+                _this.PersonWantingToInteract = person;
+                Main.Instance.GameplayMenu.MultiOptions.SetActive(true);
+                Main.Instance.GameplayMenu.PlayerWeaponSystem.PickupText.text = string.Empty;
+                Main.Instance.GameplayMenu.PlayerWeaponSystem.PromptIcon.enabled = false;
+                for (int index = 0; index < Main.Instance.GameplayMenu.ItemOptions.Length; ++index)
+                    Main.Instance.GameplayMenu.ItemOptions[index].SetActive(false);
+                _this._PartsToUse.Clear();
+                _this._PartsUseIndex.Clear();
+                int num = _this.Parts.Length >= 8 ? 8 : _this.Parts.Length;
+                List<(Interactible, int, string)> valueTupleList = new List<(Interactible, int, string)>();
+                for (int index1 = 0; index1 < num; ++index1)
+                {
+                    if (_this.Parts[index1].CanInteract && _this.Parts[index1].CheckCanInteract(Main.Instance.Player))
+                    {
+                        valueTupleList.Add((_this.Parts[index1], 0, _this.Parts[index1].InteractText + " SUSP "));
+                        if (_this.Parts[index1]._AvailableUses != null && _this.Parts[index1]._AvailableUses.Length > 1)
+                        {
+                            for (int index2 = 1; index2 < _this.Parts[index1]._AvailableUses.Length; ++index2)
+                            {
+                                if (_this.Parts[index1]._AvailableUses[index2])
+                                {
+                                    if (index1 + index2 < 8)
+                                        valueTupleList.Add((_this.Parts[index1], index2, _this.Parts[index1]._InteractTexts[index2] + " ALLLLL "));
+                                    else
+                                        goto label_16;
+                                }
+                            }
+                        }
+                    }
+                }
+            label_16:
+                for (int index = 0; index < valueTupleList.Count; ++index)
+                {
+                    Main.Instance.GameplayMenu.ItemOptions[index].SetActive(true);
+                    Main.Instance.GameplayMenu.ItemOptions_text[index].text = valueTupleList[index].Item3 + " Hello ";
+                    _this._PartsToUse.Add(valueTupleList[index].Item1);
+                    _this._PartsUseIndex.Add(valueTupleList[index].Item2);
+                }
+                Main.Instance.Player.AddMoveBlocker("MultiOption");
+                _this.CanInteract = false;
+                Main.Instance.MainThreads.Add(new Action(_this.WaitForOption));
+            }
+            else
+            {
+                for (int part = 0; part < _this.Parts.Length; ++part)
+                {
+                    if (_this.Parts[part].CanInteract && _this.Parts[part].CheckCanInteract(person))
+                    {
+                        _this.Interact(person, part);
+                        break;
+                    }
+                }
+            }
+            return false;
+        }
+
         /*
         [HarmonyPatch(typeof(MainMenu), "PutDisplayGirl")]
         [HarmonyPrefix]
