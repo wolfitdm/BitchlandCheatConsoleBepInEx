@@ -8,7 +8,9 @@ commands:
 
 commands with no params:
 
-* clearbackpack -> clears your backpack
+* clearbackpack -> Drop all items the you have in your backpack
+* clearbackpackold -> clears your backpack
+* clearbackpacknew -> removes all items from your backpack
 * warplist - list telepoint points
 * itemlist -> lists items
 * weaponlist -> lists weapons
@@ -206,6 +208,7 @@ commands with 1 param:
 * npcbodytraining number -> Increases body training from the npc the you looked at by number
 * npcaddweapon name -> add the npc the you are looked at the weapon named name
 * npcsetfavor number -> creates a relationship with the npc the you looked at and set his relationship to number, positive number, is positive relationship, negative number is negative relationship
+* playaudio name -> plays audio file named name, location is Assets\Resources\wolfitdm\audio
 
 commands with 2 params:
 

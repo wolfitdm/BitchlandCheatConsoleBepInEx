@@ -48,6 +48,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool fly_on = false;
         public static Rigidbody fly_rb = null;
 
+        public static BitchlandCheatConsoleBepInEx instance = new BitchlandCheatConsoleBepInEx();
+
         private void Init()
         {
             if (isInit)
@@ -5082,11 +5084,27 @@ namespace BitchlandCheatConsoleBepInEx
 
             setCasualClothesPoints(Main.Instance.Player .gameObject);
         }
-        public static void clearbackpack()
+        public static void clearbackpackold()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: clearbackpack");
             if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
             {
+                Main.Instance.Player.CurrentBackpack.ThisStorage.RemoveAllItems();
+            }
+        }
+
+        public static void clearbackpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: clearbackpack");
+            dropallbackpack();
+        }
+
+        public static void clearbackpacknew()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: clearbackpacknew");
+            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            {
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageItems.Clear();
                 Main.Instance.Player.CurrentBackpack.ThisStorage.RemoveAllItems();
             }
         }
@@ -5151,6 +5169,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "clearbackpack":
                     {
                         clearbackpack();
+                    }
+                    break;
+
+                case "clearbackpackold":
+                    {
+                        clearbackpackold();
+                    }
+                    break;
+
+                case "clearbackpacknew":
+                    {
+                        clearbackpacknew();
                     }
                     break;
 
@@ -5890,6 +5920,19 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "playaudio":
+                    {
+                        playaudio("test.mp3");
+                    }
+                    break;
+
+                case "checkupdate":
+                case "autoupdate":
+                    {
+                        help();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -6192,6 +6235,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "playaudio":
+                    {
+                        playaudio(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command ");
@@ -6241,6 +6290,61 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
+        public static void playaudio(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playaudio");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/Resources/wolfitdm/audio";
+
+            string audioPartFolder = "wolfitdm/audio";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            AudioClip clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}");
+
+            if (clip == null)
+            {
+                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.mp3");
+            }
+
+            if (clip == null)
+            {
+                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.wav");
+            }
+
+            if (clip == null)
+            {
+                clip = Resources.Load<AudioClip>($"{audioPartFolder}/{value}.ogg");
+            }
+
+            if (clip == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playaudio: no audio file found!");
+            }
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.instance.GetComponent<AudioSource>();
+
+            audioSource.loop = false;
+
+            audioSource.playOnAwake = false;
+
+            audioSource.clip = clip;
+
+            audioSource.Play();
+        }
+
         public static void fly()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fly");
