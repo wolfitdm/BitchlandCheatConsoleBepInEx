@@ -163,6 +163,15 @@ commands with no params:
 * pauseaudio -> pause to play audio
 * unpauseaudio -> unpause to play audio
 * listaudio -> list audio files, location is Assets\wolfitdm\audio
+* muteaudio -> mute audio
+* unmuteaudio -> unmute audio
+* pausegameaudio -> pause game audio
+* unpausegameaudio -> unpause game audio
+* mutegameaudio -> mute game audio
+* unmutegameaudio -> unmute game audio
+* audiovolumedefault -> set audio volume to default volume
+* gameaudiovolumedefault -> set game audio to default volume
+* cleargameaudiosources -> clear game audio sources
 
 commands with 1 param:
 
@@ -218,6 +227,8 @@ commands with 1 param:
 * npcsetfavor number -> creates a relationship with the npc the you looked at and set his relationship to number, positive number, is positive relationship, negative number is negative relationship
 * playaudio name -> plays audio file named name, location is Assets\wolfitdm\audio
 * playaudioloop name -> plays audio file loop named name, location is Assets\wolfitdm\audio
+* audiovolume number -> set audio volume to number for example audiovolume 0.5
+* gameaudiovolume number -> set game audio volume number for example gameaudiovolume 0.5
 
 commands with 2 params:
 

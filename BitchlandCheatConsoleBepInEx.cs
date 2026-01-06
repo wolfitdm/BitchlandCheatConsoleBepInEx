@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.Mono;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
@@ -56,6 +57,11 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static AudioSource audioSource = null;
 
+        private static List<AudioSource> audioSources = new List<AudioSource>();
+        private static List<float> audioSourcesVolumes = new List<float>();
+
+        public static bool _gameaudiomute = false;
+
         private static void initAudioSource()
         {
             try
@@ -63,6 +69,10 @@ namespace BitchlandCheatConsoleBepInEx
                 if (BitchlandCheatConsoleBepInEx.audioSource == null)
                 {
                     BitchlandCheatConsoleBepInEx.audioSource =  Main.Instance.Player.gameObject.AddComponent<AudioSource>();
+                    if (BitchlandCheatConsoleBepInEx.audioSource != null)
+                    {
+                        BitchlandCheatConsoleBepInEx.audioSource.name = "BitchlandCheatConsoleBepInEx";
+                    }
                 }
                 if (BitchlandCheatConsoleBepInEx.audioSource == null)
                 {
@@ -80,8 +90,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return;
             }
-
-            initAudioSource();
 
             isInit = true;
 
@@ -6002,6 +6010,60 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "muteaudio":
+                    {
+                        muteaudio();
+                    }
+                    break;
+
+                case "unmuteaudio":
+                    {
+                        unmuteaudio();
+                    }
+                    break;
+
+                case "pausegameaudio":
+                    {
+                        pausegameaudio();
+                    }
+                    break;
+
+                case "unpausegameaudio":
+                    {
+                        unpausegameaudio();
+                    }
+                    break;
+
+                case "mutegameaudio":
+                    {
+                        mutegameaudio();
+                    }
+                    break;
+
+                case "unmutegameaudio":
+                    {
+                        unmutegameaudio();
+                    }
+                    break;
+
+                case "audiovolumedefault":
+                    {
+                        audiovolume("1.0");
+                    }
+                    break;
+
+                case "gameaudiovolumedefault":
+                    {
+                        gameaudiovolumedefault();
+                    }
+                    break;
+
+                case "cleargameaudiosources":
+                    {
+                        cleargameaudiosources();
+                    }
+                    break;
+
                 case "checkupdate":
                 case "autoupdate":
                     {
@@ -6323,9 +6385,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "audiovolume":
+                    {
+                        audiovolume(value);
+                    }
+                    break;
+
+                case "gameaudiovolume":
+                    {
+                        gameaudiovolume(value);
+                    }
+                    break;
+
                 default:
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("No command ");
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
             }
@@ -6430,6 +6504,43 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("pauseaudio: no audio source to pause audio!");
             }
         }
+
+        public static void unmuteaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unmuteaudio");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                audioSource.mute = false;
+
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("unpauseaudio: no audio source to unpause audio!");
+            }
+        }
+        public static void muteaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: muteaudio");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                audioSource.mute = true;
+
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("pauseaudio: no audio source to pause audio!");
+            }
+        }
         public static void stopaudio()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: stopaudio");
@@ -6490,6 +6601,205 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogInfo(fullFile);
             }
         }
+
+        public static void audiovolume(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: audiovolume");
+
+            initAudioSource();
+
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.audioSource;
+
+            if (audioSource != null)
+            {
+                float volume = 0;
+                try
+                {
+                    volume = float.Parse(value, culture);
+                    volume = volume <= 0 ? 0 : volume;
+                }
+                catch (Exception)
+                {
+                    volume = 1f;
+                }
+                audioSource.volume = volume;
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("audiovolume: no audio source to set volume audio!");
+            }
+        }
+   
+        public static void gameaudiovolume(string value)
+        {
+           Main.Instance.GameplayMenu.ShowNotification("executed command: gameaudiovolume");
+
+           float volume = 0;
+           try
+           {
+                 volume = float.Parse(value, culture);
+                 volume = volume <= 0 ? 0 : volume;
+           }
+           catch (Exception)
+           {
+                 volume = 1f;
+           }
+
+           List<AudioSource> audioSources = new List<AudioSource>();
+
+           int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+           for (int i = 0; i <  length; i++)
+           {
+               audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+           }
+
+           length = audioSources.Count;
+
+           for (int i = 0; i < length; i++)
+           {
+               audioSources[i].volume = volume;
+           }
+        }
+
+        public static void gameaudiovolumedefault()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: gameaudiovolumedefault");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+            List<float> audioSourcesVolumes = new List<float>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+                audioSourcesVolumes.Add(BitchlandCheatConsoleBepInEx.audioSourcesVolumes[i]);
+            }
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].volume = audioSourcesVolumes[i];
+            }
+        }
+        public static void pausegameaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: pausegameaudio");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+            }
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].Pause();
+            }
+        }
+
+        public static void unpausegameaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unpausegameaudio");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+            }
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].UnPause();
+            }
+        }
+
+
+        public static void unmutegameaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unmutegameaudio");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+            }
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].mute = false;
+            }
+
+            BitchlandCheatConsoleBepInEx._gameaudiomute = false;
+        }
+        public static void mutegameaudio()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mutegameaudio");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+            }
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].mute = true;
+            }
+
+            BitchlandCheatConsoleBepInEx._gameaudiomute = true;
+        }
+        public static void cleargameaudiosources()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: cleargameaudiosources");
+
+            List<AudioSource> audioSources = new List<AudioSource>();
+            List<float> audioSourcesVolumes = new List<float>();
+
+            int length = BitchlandCheatConsoleBepInEx.audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources.Add(BitchlandCheatConsoleBepInEx.audioSources[i]);
+                audioSourcesVolumes.Add(BitchlandCheatConsoleBepInEx.audioSources[i].volume);
+            }
+
+            BitchlandCheatConsoleBepInEx._gameaudiomute = false;
+
+            length = audioSources.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                audioSources[i].mute = false;
+                audioSources[i].volume = audioSourcesVolumes[i];
+            }
+
+            BitchlandCheatConsoleBepInEx.audioSources.Clear();
+            BitchlandCheatConsoleBepInEx.audioSourcesVolumes.Clear();
+        }
+
         public static void playaudio(string value, bool loop = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: playaudio");
@@ -6551,11 +6861,11 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Logger.LogInfo("playaudio: execute GetAudioClip");
                 Action<AudioClip> onAudioLoad = (loadedClip) => {
-                    Logger.LogInfo("Clip geladen:  " + loadedClip.name);
-                  // Jetzt kannst du etwas mit dem geladenen Clip machen
+                    Logger.LogInfo("Clip loaded:  " + loadedClip.name);
                   audioSource.loop = loop;
                   audioSource.playOnAwake = false;
                   audioSource.clip = loadedClip;
+                  audioSource.volume = 1f;
                   audioSource.Play();
               };
               Main.Instance.Player.StartCoroutine(GetAudioClip(fileUri, onAudioLoad, audioType));
@@ -7228,6 +7538,11 @@ namespace BitchlandCheatConsoleBepInEx
             return Type.GetType(originalClassName + ",Assembly-CSharp");
         }
 
+        public static Type MyGetTypeUnityEngine(string originalClassName)
+        {
+            return Type.GetType(originalClassName + ",UnityEngine");
+        }
+
         private static string pluginKey = "General.Toggles";
 
         private static string pluginKeyControls = "General.KeyControls";
@@ -7262,7 +7577,7 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeF1 = configKeyCodeOpenTheCheatConsole.Value;
             KeyCodeF2 = configKeyCodeOpenTheCheatConsoleFallback.Value;
 
-            Harmony.CreateAndPatchAll(typeof(BitchlandCheatConsoleBepInEx));
+            PatchAllHarmonyMethods();
 
             Logger.LogInfo($"Plugin BitchlandCheatConsoleBepInEx BepInEx is loaded!");
         }
@@ -7298,6 +7613,114 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         private static bool onOpenCheat = false;
+        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix)
+        {
+            // Create a new Harmony instance with a unique ID
+            var harmony = new Harmony("com.wolfitdm.BitchlandCheatConsoleBepInEx");
+
+            if (originalClass == null)
+            {
+                Logger.LogInfo($"GetType originalClass == null");
+                return;
+            }
+
+            // Or apply patches manually
+            MethodInfo original = AccessTools.Method(originalClass, originalMethodName);
+
+            if (original == null)
+            {
+                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
+                return;
+            }
+
+            MethodInfo patched = AccessTools.Method(typeof(BitchlandCheatConsoleBepInEx), patchedMethodName);
+
+            if (patched == null)
+            {
+                Logger.LogInfo($"AccessTool.Method patched {patchedMethodName} == null");
+                return;
+
+            }
+
+            HarmonyMethod patchedMethod = new HarmonyMethod(patched);
+            var prefixMethod = usePrefix ? patchedMethod : null;
+            var postfixMethod = usePostfix ? patchedMethod : null;
+
+            harmony.Patch(original,
+                prefix: prefixMethod,
+                postfix: postfixMethod);
+        }
+
+        public static void PatchAllHarmonyMethods()
+        {
+            try
+            {
+                //Harmony.CreateAndPatchAll(typeof(BitchlandCheatConsoleBepInEx));
+                PatchHarmonyMethodUnity(typeof(AudioSource), "PlayHelper", "PlayHelper", true, false);
+                PatchHarmonyMethodUnity(typeof(AudioSource), "PlayOneShotHelper", "PlayOneShotHelper", true, false);
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+        }
+
+        public static bool PlayOneShotHelper(AudioSource source, AudioClip clip, float volumeScale)
+        {
+            try
+            {
+                AudioSource _this = source;
+                if (_this != null)
+                {
+                    if (_this.name != null && _this.name == "BitchlandCheatConsoleBepInEx")
+                    {
+                        return true;
+                    }
+
+                    _this.mute = BitchlandCheatConsoleBepInEx._gameaudiomute;
+
+                    if (audioSources.Contains(_this))
+                    {
+                        return true;
+                    }
+                    audioSources.Add(_this);
+                    audioSourcesVolumes.Add(_this.volume);
+                    Logger.LogInfo("Add Audio source");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            return true;
+        }
+        public static bool PlayHelper(AudioSource source, ulong delay)
+        {
+            try
+            {
+                AudioSource _this = source;
+                if (_this != null)
+                {
+                    if (_this.name != null && _this.name == "BitchlandCheatConsoleBepInEx")
+                    {
+                        return true;
+                    }
+
+                    _this.mute = BitchlandCheatConsoleBepInEx._gameaudiomute;
+
+                    if (audioSources.Contains(_this))
+                    {
+                        return true;
+                    }
+                    audioSources.Add(_this);
+                    audioSourcesVolumes.Add(_this.volume);
+                    Logger.LogInfo("Add Audio source");
+                }
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            return true;
+        }
 
         /*
         [HarmonyPatch(typeof(Main), "SpawnFromCustomBundle")]
