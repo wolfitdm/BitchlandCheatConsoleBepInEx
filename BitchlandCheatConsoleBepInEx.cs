@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
@@ -23,6 +24,9 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Networking;
+using UnityEngine.Video;
+using System;
+using System.Threading;
 using static Den.Tools.MatrixAsset;
 
 namespace BitchlandCheatConsoleBepInEx
@@ -62,6 +66,87 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool _gameaudiomute = false;
 
+        public static VideoPlayer videoPlayer = null;
+
+        public static AudioSource videoPlayerAudio = null;
+
+        public static Camera RenderCameraReal = null;
+
+        public static RenderTexture renderTex = null;
+
+        public static RenderTexture fullScreen = null;
+
+        public static int randX = 0;
+        public static int randY = 0;
+
+        public static bool videoPlayerMute = false;
+
+        public static bool fullscreen = false;
+
+        public static int screenWidth = 0;
+        public static int screenHeight = 0;
+
+        public static bool playedVideo = false;
+
+        public static Rect fs = new Rect(randX, randY, screenWidth - randX, screenHeight - randY);
+
+        /*public static string message = "Hello! This is a message box.";
+
+        // Optional style
+        private GUIStyle boxStyle;
+
+        public static bool messageBoxEnabled = false;
+
+        public void Start()
+        {
+            // Create a custom style for better readability
+            boxStyle = new GUIStyle(GUI.skin.box)
+            {
+                fontSize = 16,
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = true
+            };
+        }
+        public void messageBoxOnGui()
+        {
+            if (!messageBoxEnabled)
+            {
+                return;
+            }
+
+            // Center the box on screen
+            GUILayout.BeginArea(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 75, 300, 150));
+
+            GUILayout.BeginVertical("box");
+            GUILayout.Label(message, boxStyle, GUILayout.ExpandHeight(true));
+
+            // Close button
+            if (GUILayout.Button("OK", GUILayout.Height(30)))
+            {
+                // Hide the message box (disable script)
+                messageBoxEnabled = false;
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.EndArea();
+        }*/
+
+        private static void deinitAudioSource()
+        {
+            try
+            {
+                if (audioSource != null)
+                {
+                    audioSource.Stop();
+                }
+                UnityEngine.Object.Destroy(audioSource);
+                audioSource = null;
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
         private static void initAudioSource()
         {
             try
@@ -84,6 +169,350 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogError(ex.ToString());
             }
         }
+
+        private static void OnVideoPrepared(VideoPlayer vp)
+        {
+            Logger.LogInfo("Video prepared. Starting playback...");
+            //vp.Play();
+            //videoPlayerAudio.Play();
+        }
+
+        private static void OnVideoError(VideoPlayer vp, string message)
+        {
+            Logger.LogInfo("Video error. Video error...");
+            //vp.Play();
+            //videoPlayerAudio.Play();
+            Logger.LogInfo(message);
+        }
+
+        private static void renderVideoTexture()
+        {
+            if (renderTex != null)
+            {
+                if (videoPlayerMute)
+                {
+                    return;
+                }
+                GUI.DrawTexture(new Rect(fs.x, fs.y, fs.width, fs.height), renderTex, ScaleMode.StretchToFill);
+            }
+        }
+
+        private static void deinitVideoSource()
+        {
+            if (videoPlayer != null)
+            {
+                try
+                {
+                    videoPlayer.Stop();
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (videoPlayerAudio != null)
+            {
+                try
+                {
+                    videoPlayerAudio.Stop();
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (RenderCameraReal != null)
+            {
+                try
+                {
+                    UnityEngine.Object.Destroy(RenderCameraReal);
+                    RenderCameraReal = null;
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (videoPlayer != null && videoPlayer.targetCamera != null)
+            {
+                try
+                {
+                    UnityEngine.Object.Destroy(videoPlayer.targetCamera);
+                    videoPlayer.targetCamera = null;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (videoPlayer != null)
+            {
+                try
+                {
+                    UnityEngine.Object.Destroy(videoPlayer);
+                    if (videoPlayer.targetCamera == null)
+                    {
+                        videoPlayer = null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (videoPlayerAudio != null)
+            {
+                try
+                {
+                    UnityEngine.Object.Destroy(videoPlayerAudio);
+                    videoPlayerAudio = null;
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (renderTex != null)
+            {
+                try
+                {
+                    renderTex.Release();
+                    renderTex = null;
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            randX = randY = 0;
+
+            videoPlayerMute = false;
+        }
+
+        private static void pauseVideoSource()
+        {
+            if (videoPlayer != null && videoPlayer.targetCamera != null && videoPlayerAudio != null)
+            {
+                videoPlayer.Pause();
+                videoPlayerAudio.Pause();
+                videoPlayerMute = true;
+            }
+        }
+
+        private static void unpauseVideoSource()
+        {
+            if (videoPlayer != null && videoPlayer.targetCamera != null && videoPlayerAudio != null)
+            {
+                videoPlayer.Play();
+                videoPlayerAudio.UnPause();
+                videoPlayerMute = false;
+            }
+        }
+        public static void unmuteVideoSource()
+        {
+            if (videoPlayer != null && videoPlayer.targetCamera != null && videoPlayerAudio != null)
+            {
+                videoPlayerMute = false;
+                videoPlayerAudio.mute = false;
+            }
+        }
+        public static void muteVideoSource()
+        {
+            if (videoPlayer != null && videoPlayer.targetCamera != null && videoPlayerAudio != null)
+            {
+                videoPlayerMute = true;
+                videoPlayerAudio.mute = true;
+            }
+        }
+
+        private static bool initVideoSource(bool looping = false, bool sizeverylittle = false, bool sizelittle = false, bool sizemedium = false, bool fullscreen = false)
+        {
+            if (BitchlandCheatConsoleBepInEx.videoPlayer != null  
+                && BitchlandCheatConsoleBepInEx.videoPlayerAudio != null
+                && BitchlandCheatConsoleBepInEx.RenderCameraReal != null)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (BitchlandCheatConsoleBepInEx.videoPlayerAudio == null)
+                {
+                    BitchlandCheatConsoleBepInEx.videoPlayerAudio = Main.Instance.gameObject.AddComponent<AudioSource>();
+                    if (BitchlandCheatConsoleBepInEx.videoPlayerAudio != null)
+                    {
+                        BitchlandCheatConsoleBepInEx.videoPlayerAudio.name = "BitchlandCheatConsoleBepInEx";
+                    }
+                }
+                if (BitchlandCheatConsoleBepInEx.videoPlayerAudio == null)
+                {
+                    throw new Exception("videoPlayerAudio == null");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return true;
+            }
+
+            try
+            {
+                if (BitchlandCheatConsoleBepInEx.videoPlayer == null)
+                {
+                    BitchlandCheatConsoleBepInEx.videoPlayer = Main.Instance.gameObject.AddComponent<VideoPlayer>();
+                    if (BitchlandCheatConsoleBepInEx.videoPlayer != null)
+                    {
+                        BitchlandCheatConsoleBepInEx.videoPlayer.name = "BitchlandCheatConsoleBepInEx";
+                    }
+                }
+                if (BitchlandCheatConsoleBepInEx.videoPlayer == null)
+                {
+                    throw new Exception("videoPlayer == null");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return true;
+            }
+
+            try
+            {
+                if (BitchlandCheatConsoleBepInEx.RenderCameraReal == null)
+                {
+                    BitchlandCheatConsoleBepInEx.RenderCameraReal = Main.Instance.gameObject.AddComponent<Camera>();
+                    if (BitchlandCheatConsoleBepInEx.RenderCameraReal != null)
+                    {
+                        BitchlandCheatConsoleBepInEx.RenderCameraReal.name = "BitchlandCheatConsoleBepInEx";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return true;
+            }
+
+            try
+            {
+                if (BitchlandCheatConsoleBepInEx.RenderCameraReal == null)
+                {
+                    throw new Exception("RenderCameraReal == null");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return true;
+            }
+
+            // Create a RenderTexture with the desired resolution
+
+            screenWidth = Screen.width;
+            screenHeight = Screen.height;
+            int width = screenWidth;
+            int height = screenHeight;
+
+            int scale = 1; 
+
+            if (sizeverylittle)
+            {
+                scale = 8;
+            } else if (sizelittle)
+            {
+                scale = 4;
+            } else if (sizemedium)
+            {
+                scale = 2;
+            } else if (fullscreen)
+            {
+                scale = 1;
+            }
+
+            randX = fullscreen ? 2 : 5;
+            randY = fullscreen ? 2 : 5;
+
+
+            if (fullscreen)
+            {
+                width = screenWidth - randX * 2;
+                height = screenHeight - randY * 2;
+                fs = new Rect(randX, randY, screenWidth - randX, screenHeight - randY);
+            } else
+            {
+                width = fullscreen ? width : width / scale;
+                height = fullscreen ? height : height / scale;
+
+                width = width - randX;
+                height = height - randY;
+                fs = new Rect(screenWidth - width, screenHeight - height, width, height);
+            }
+                /*if (fullscreen)
+                {
+                    BitchlandCheatConsoleBepInEx.fullscreen = true;
+                    Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                } else if (!BitchlandCheatConsoleBepInEx.fullscreen)
+                {
+                    BitchlandCheatConsoleBepInEx.fullscreen = false;
+                    Screen.fullScreenMode = FullScreenMode.Windowed;
+                } else if (BitchlandCheatConsoleBepInEx.fullscreen)
+                {
+                    Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                }*/
+
+            BitchlandCheatConsoleBepInEx.renderTex = new RenderTexture(width, height, 24);
+            renderTex.filterMode = FilterMode.Point; // Pixel-perfect look (optional)
+                                                     // Assign RenderTexture to the camera
+            RenderCameraReal.targetTexture = renderTex;
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+            Directory.CreateDirectory(videoFolder);
+            string videoPath = $"{videoFolder}/sample.mp4";
+
+            VideoPlayer videoPlayer = BitchlandCheatConsoleBepInEx.videoPlayer;
+            Camera renderCamera = BitchlandCheatConsoleBepInEx.RenderCameraReal;
+            AudioSource videoPlayerAudio = BitchlandCheatConsoleBepInEx.videoPlayerAudio;
+
+            videoPlayerAudio.volume = 1f;
+            videoPlayerAudio.playOnAwake = false;
+            videoPlayerAudio.loop = false;
+
+            // Set camera background to solid color
+            renderCamera.clearFlags = CameraClearFlags.SolidColor;
+            renderCamera.backgroundColor = Color.black;
+
+            // Make video fully transparent (so only solid color shows)
+            videoPlayer.targetCameraAlpha = 1f;
+
+            // 3. Configure VideoPlayer
+            videoPlayer.playOnAwake = false;
+            videoPlayer.isLooping = looping;
+            videoPlayerAudio.playOnAwake = false;
+            videoPlayerAudio.Pause();
+
+            videoPlayer.renderMode = VideoRenderMode.CameraNearPlane;
+            videoPlayer.aspectRatio = VideoAspectRatio.FitVertically; // Adjust fit
+            videoPlayer.targetCamera = renderCamera;
+
+            // If the file is in StreamingAssets, build the full path
+            videoPlayer.url = videoPath;
+            videoPlayer.source = VideoSource.Url;
+
+            // Link VideoPlayer audio output to AudioSource
+            videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
+            videoPlayer.SetTargetAudioSource(0, videoPlayerAudio);
+
+            // 4. Start playback when prepared
+            videoPlayer.prepareCompleted += OnVideoPrepared;
+            videoPlayer.errorReceived += OnVideoError;
+
+            // Prepare and play video
+            videoPlayer.Prepare();
+
+            return false;
+        }
+        private void OnDestroy()
+        {
+            deinitVideoSource();
+
+            deinitAudioSource();
+        }
+
         private void Init()
         {
             if (isInit)
@@ -91,7 +520,20 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
+            screenWidth = Screen.width;
+            screenHeight = Screen.height;
+
             isInit = true;
+
+            /*if (!fullscreen)
+            {
+                BitchlandCheatConsoleBepInEx.fullscreen = true;
+                Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            } else
+            {
+                BitchlandCheatConsoleBepInEx.fullscreen = false;
+                Screen.fullScreenMode = FullScreenMode.Windowed;
+            }*/
 
             spawnpoints.Clear();
             spawnpointsNames.Add("safearea1");
@@ -245,6 +687,9 @@ namespace BitchlandCheatConsoleBepInEx
         }
         private void OnGUI()
         {
+            //messageBoxOnGui();
+            renderVideoTexture();
+
             if (!showGUI) return;
 
             // Draw a draggable window
@@ -6070,6 +6515,97 @@ namespace BitchlandCheatConsoleBepInEx
                         help();
                     }
                     break;
+                    
+                case "playvideovl":
+                    {
+                        playvideo("slave.mp4", false, true, false, false, false);
+                    }
+                    break;
+
+                case "playvideol":
+                    {
+                        playvideo("slave.mp4", false, false, true, false, false);
+                    }
+                    break;
+
+                case "playvideo":
+                case "playvideom":
+                    {
+                        playvideo("slave.mp4", false, false, false, true, false);
+                    }
+                    break;
+
+                case "playvideof":
+                    {
+                        playvideo("slave.mp4", false, false, false, false, true);
+                    }
+                    break;
+
+                case "playvideovll":
+                    {
+                        playvideo("slave.mp4", true, true, false, false, false);
+                    }
+                    break;
+
+                case "playvideoll":
+                    {
+                        playvideo("slave.mp4", true, false, true, false, false);
+                    }
+                    break;
+
+                case "playvideoml":
+                    {
+                        playvideo("slave.mp4", true, false, false, true, false);
+                    }
+                    break;
+
+                case "playvideofl":
+                    {
+                        playvideo("slave.mp4", true, false, false, false, true);
+                    }
+                    break;
+
+                case "stopvideo":
+                    {
+                        stopvideo();
+                    }
+                    break;
+
+                case "pausevideo":
+                    {
+                        pausevideo();
+                    }
+                    break;
+
+                case "unpausevideo":
+                    {
+                        unpausevideo();
+                    }
+                    break;
+
+                case "mutevideo":
+                    {
+                        mutevideo();
+                    }
+                    break;
+
+                case "unmutevideo":
+                    {
+                        unmutevideo();
+                    }
+                    break;
+
+                case "videoaudiovolumedefault":
+                    {
+                        videoaudiovolume("1.0");
+                    }
+                    break;
+
+                case "togglefullscreen":
+                    {
+                        togglefullscreen();
+                    }
+                    break;
 
                 case "helloworld":
                     {
@@ -6397,6 +6933,61 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "playvideovl":
+                    {
+                        playvideo(value, false, true, false, false, false);
+                    }
+                    break;
+
+                case "playvideol":
+                    {
+                        playvideo(value, false, false, true, false, false);
+                    }
+                    break;
+
+                case "playvideo":
+                case "playvideom":
+                    {
+                        playvideo(value, false, false, false, true, false);
+                    }
+                    break;
+
+                case "playvideof":
+                    {
+                        playvideo(value, false, false, false, false, true);
+                    }
+                    break;
+
+                case "playvideovll":
+                    {
+                        playvideo(value, true, true, false, false, false);
+                    }
+                    break;
+
+                case "playvideoll":
+                    {
+                        playvideo(value, true, false, true, false, false);
+                    }
+                    break;
+
+                case "playvideoml":
+                    {
+                        playvideo(value, true, false, false, true, false);
+                    }
+                    break;
+
+                case "playvideofl":
+                    {
+                        playvideo(value, true, false, false, false, true);
+                    }
+                    break;
+
+                case "videoaudiovolume":
+                    {
+                        videoaudiovolume(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -6623,6 +7214,7 @@ namespace BitchlandCheatConsoleBepInEx
                     volume = 1f;
                 }
                 audioSource.volume = volume;
+                Main.Instance.GameplayMenu.ShowNotification("audiovolume: set audio volume to " + value + "!");
             }
             else
             {
@@ -6877,7 +7469,272 @@ namespace BitchlandCheatConsoleBepInEx
             }
                
         }
+        public static void unmutevideo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unmutevideo");
 
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            unmuteVideoSource();
+        }
+        public static void mutevideo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mutevideo");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            muteVideoSource();
+        }
+
+        public static void videoaudiovolume(string value)
+        {
+            AudioSource audioSource = BitchlandCheatConsoleBepInEx.videoPlayerAudio;
+
+            if (audioSource != null)
+            {
+                float volume = 0;
+                try
+                {
+                    volume = float.Parse(value, culture);
+                    volume = volume <= 0 ? 0 : volume;
+                }
+                catch (Exception)
+                {
+                    volume = 1f;
+                }
+                audioSource.volume = volume;
+                Main.Instance.GameplayMenu.ShowNotification("videoaudiovolume: set audio volume to " + value + "!");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("videoaudiovolume: no audio source to set volume audio!");
+            }
+        }
+
+        public static void pausevideo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: pausevideo");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            pauseVideoSource();
+        }
+        public static void unpausevideo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unpausevideo");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            unpauseVideoSource();
+        }
+        public static void stopvideo()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stopvideo");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            playedVideo = false;
+
+            deinitVideoSource();
+        }
+        public static void togglefullscreen()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglefullscreen");
+
+            fullscreen = !fullscreen;
+
+            if (fullscreen)
+            {
+                Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+                Main.Instance.GameplayMenu.ShowNotification("fullscreen: on");
+            }
+            else
+            {
+                Screen.fullScreenMode = FullScreenMode.Windowed;
+                Main.Instance.GameplayMenu.ShowNotification("fullscreen: off");
+            }
+        }
+
+        public static void threadSleep(int millisecondsInSeconds)
+        {
+            try
+            {
+
+                Thread.Sleep(millisecondsInSeconds);
+            }
+            catch (Exception ex) 
+            { 
+            }
+        }
+
+
+        public static void playvideo(string value, bool looping = false, bool sizeverylittle = false, bool sizelittle = false, bool sizemedium = false, bool fullscreen = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playvideo");
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            string videoFile = $"{videoFolder}/{value}";
+
+            string realVideoFile = videoFile;
+
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".mp4";
+            }
+
+            if (!File.Exists(realVideoFile))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playvideo: video file not found!");
+            }
+
+            string fileUri = $"file:///{realVideoFile}";
+
+            Logger.LogInfo("playvideo: path: " + fileUri);
+
+            deinitVideoSource();
+
+            if (playedVideo)
+            {
+                //Main.Instance.GameplayMenu.gameObject.SetActive(true);
+                // Main.Instance.GameplayMenu.ShowMessageBox("playvideo: You are already playing a video, please use the 'stopvideo' command first.");
+                //message = "playvideo: You are already playing a video, please use the 'stopvideo' command first.";
+                //messageBoxEnabled = true;
+                Logger.LogInfo("playvideo: You are already playing a video, please use the 'stopvideo' command first.");
+                playedVideo = false;
+                return;
+            }
+
+            bool ret = initVideoSource(looping, sizeverylittle, sizelittle, sizemedium, fullscreen);
+
+            if (!ret)
+            {
+                playedVideo = true;
+            }
+
+            VideoPlayer videoSource = BitchlandCheatConsoleBepInEx.videoPlayer;
+
+            if (videoPlayer != null)
+            {
+                Logger.LogInfo("playvideo: execute GetVideoClip");
+                videoSource.source = VideoSource.Url;
+                videoSource.url = fileUri;
+                videoPlayer.Play();
+                videoPlayerAudio.Play();
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playvideo: no video source to play video!");
+            }
+        }
         public static void fly()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fly");

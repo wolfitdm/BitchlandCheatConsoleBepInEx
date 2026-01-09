@@ -172,6 +172,22 @@ commands with no params:
 * audiovolumedefault -> set audio volume to default volume
 * gameaudiovolumedefault -> set game audio to default volume
 * cleargameaudiosources -> clear game audio sources
+* playvideovl -> playing video file named slave.mp4, in very little screen size embed format, location is Assets\wolfitdm\video
+* playvideol -> playing video file named slave.mp4, in little screen size embed format, location is Assets\wolfitdm\video
+* playvideo -> playing video file named slave.mp4, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideom -> playing video file named slave.mp4, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideof -> playing video file named slave.mp4, in full screen size format, location is Assets\wolfitdm\video
+* playvideovll -> playing loop video file named slave.mp4, in very little screen size embed format, location is Assets\wolfitdm\video0
+* playvideoll -> playing loop video file named slave.mp4, in little screen size embed format, location is Assets\wolfitdm\video
+* playvideoml -> playing loop video file named slave.mp4, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideofl -> playing loop video file named slave.mp4, in full screen size format, location is Assets\wolfitdm\video
+* stopvideo -> stop video 
+* pausevideo -> pause video
+* unpausevideo -> unpause video
+* mutevideo -> mute video
+* unmutevideo -> unmute video
+* videoaudiovolumedefault -> set video audio volume to default 1.0
+* togglefullscreen -> toggle fullscreen and windowed mode ( you can now play in full screen yeah!!!)
 
 commands with 1 param:
 
@@ -229,6 +245,16 @@ commands with 1 param:
 * playaudioloop name -> plays audio file loop named name, location is Assets\wolfitdm\audio
 * audiovolume number -> set audio volume to number for example audiovolume 0.5
 * gameaudiovolume number -> set game audio volume number for example gameaudiovolume 0.5
+* playvideovl name -> playing video file named name, in very little screen size embed format, location is Assets\wolfitdm\video
+* playvideol name -> playing video file named name, in little screen size embed format, location is Assets\wolfitdm\video
+* playvideo name -> playing video file named name, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideom name -> playing video file named name, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideof name -> playing video file named name, in full screen size format, location is Assets\wolfitdm\video
+* playvideovll name -> playing loop video file named name, in very little screen size embed format, location is Assets\wolfitdm\video
+* playvideoll name -> playing loop video file named name, in little screen size embed format, location is Assets\wolfitdm\video
+* playvideoml name -> playing loop video file named name, in medium screen size embed format, location is Assets\wolfitdm\video
+* playvideofl name -> playing loop video file named name, in full screen size format, location is Assets\wolfitdm\video
+* videoaudiovolume number -> set video audio volume to number, default 1.0
 
 commands with 2 params:
 
