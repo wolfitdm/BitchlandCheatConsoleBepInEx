@@ -1,0 +1,10 @@
+wild
+esb
+prisioner
+worker
+civilian
+highercivilian
+army
+royal
+clean
+fes

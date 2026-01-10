@@ -188,6 +188,15 @@ commands with no params:
 * unmutevideo -> unmute video
 * videoaudiovolumedefault -> set video audio volume to default 1.0
 * togglefullscreen -> toggle fullscreen and windowed mode ( you can now play in full screen yeah!!!)
+* listpersontypes -> list all person types
+* listpersonalities -> list all personalities
+* listpersonstates -> list all person states
+* bitch -> shows a important message
+* bitchland -> shows a important message
+* day -> set the time of day to day
+* night -> set the time of day to night
+* sleeponfloor -> sleep on the floor
+* respawn -> respawn the player
 
 commands with 1 param:
 
@@ -255,6 +264,15 @@ commands with 1 param:
 * playvideoml name -> playing loop video file named name, in medium screen size embed format, location is Assets\wolfitdm\video
 * playvideofl name -> playing loop video file named name, in full screen size format, location is Assets\wolfitdm\video
 * videoaudiovolume number -> set video audio volume to number, default 1.0
+* setpersontype personType -> set the player to person type!
+* npcsetpersontype personType -> Set person the you looked at to person type!
+* setpersonalityto personality -> set the player to a personality, gives him all perks, gives him all fetishes, except dirty!
+* npcsetpersonalityto personality -> Set person the you looked at to personality, gives him all perks, gives him all fetishes, except dirty!
+* setpersonalitydirtyto personality -> set the player to a personality, gives him all perks, gives him all fetishes, except clean!
+* npcsetpersonalitydirtyto personality -> Set person the you looked at to personality, gives him all perks, gives him all fetishes, except clean!
+* setpersonstate personState -> set the player to person state!
+* npcsetpersonstate personState -> Set personstate the you looked at to person state!
+* timeofday value -> set time of day | value > 0.25 and value < 0.75 = night, otherwise = day
 
 commands with 2 params:
 

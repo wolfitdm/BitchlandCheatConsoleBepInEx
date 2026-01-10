@@ -5,29 +5,20 @@ using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
-using SemanticVersioning;
+using sc.terrain.proceduralpainter;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Reflection;
-using System.Runtime;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.Threading;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using UnityEngine.Video;
-using System;
-using System.Threading;
-using static Den.Tools.MatrixAsset;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -666,17 +657,18 @@ namespace BitchlandCheatConsoleBepInEx
             }*/
 
             // Sprint modifier
-            float currentSpeed = fly_moveSpeed;
-            if (Input.GetKey(KeyCode.LeftShift))
-                currentSpeed *= fly_sprintMultiplier;
+            //if (Input.GetKey(KeyCode.LeftShift))
+            //    fly_moveSpeed += 0.01f;
+            //if (Input.GetKey(KeyCode.RightShift))
+            //    fly_moveSpeed -= 0.01f;
 
             // Calculate movement direction relative to camera
-            Vector3 moveDirection = (transform.forward * vertical) +
-                                    (transform.right * horizontal) +
-                                    (transform.up * ascend);
+            Vector3 moveDirection = (rb.transform.forward * vertical) +
+                                    (rb.transform.right * horizontal) +
+                                    (rb.transform.up * ascend);
 
             // Apply velocity directly for smooth movement
-            rb.velocity = moveDirection.normalized * currentSpeed;
+            rb.velocity = moveDirection.normalized * fly_moveSpeed;
             //rb.velocity = v;
         }
 
@@ -1633,7 +1625,9 @@ namespace BitchlandCheatConsoleBepInEx
             player.EquippedClothes = person.EquippedClothes;
             player.SPAWN_noUglyHair = person.SPAWN_noUglyHair;
             player.SPAWN_onlyGoodHair = person.SPAWN_onlyGoodHair;
-            player.SecondWeapon = person.SecondWeapon;            player.PersonType = person.PersonType;            player.Inited = person.Inited;
+            player.SecondWeapon = person.SecondWeapon;
+            player.PersonType = person.PersonType;
+            player.Inited = person.Inited;
             player.Holes = person.Holes;
             player.PenisBones = person.PenisBones;
             player._CharacterVisible = person._CharacterVisible;
@@ -2453,6 +2447,130 @@ namespace BitchlandCheatConsoleBepInEx
             PersonGenerated.Fetishes.Add(e_Fetish.Oral);
             PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
         }
+
+        public static void setPersonaltyTo(GameObject personGa, string personalty, bool cleanOrDirt = true)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            addallperkstoperson(personGa);
+
+            Personality_Type personality = PersonGenerated.Personality;
+
+            if (Enum.TryParse<Personality_Type>(personalty, ignoreCase: true, out Personality_Type personaltyType))
+            {
+                personality = personaltyType;
+            }
+
+            PersonGenerated.Personality = personality;
+            if (PersonGenerated.Fetishes == null)
+            {
+                PersonGenerated.Fetishes = new List<e_Fetish>();
+            }
+            PersonGenerated.Fetishes.Clear();
+            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
+            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
+            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
+            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
+            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
+            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
+            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
+            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
+
+            if (cleanOrDirt)
+            {
+                PersonGenerated.Fetishes.Add(e_Fetish.Clean);
+            } else
+            {
+                PersonGenerated.Fetishes.Add(e_Fetish.Dirty);
+            }
+        }
+        public static void setPersonState(GameObject personGa, string personState)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            Person_State personState_ = PersonGenerated.State;
+
+            if (Enum.TryParse<Person_State>(personState, ignoreCase: true, out Person_State personState__))
+            {
+                personState_ = personState__;
+            }
+
+            PersonGenerated.State = personState_;
+        }
+
+        public static void setPersonType(GameObject personGa, string personType)
+        {
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            BaseType personType_ = PersonGenerated.PersonType;
+
+            int personTypeInt = 0;
+
+            for (int i = 0; i < Main.Instance.PersonTypes.Length; i++)
+            {
+                if (personType_ == Main.Instance.PersonTypes[i])
+                {
+                    personTypeInt = i;
+                    break;
+                }
+            }
+
+            Person_Type personTypeX = Person_Type.Wild;
+
+            try
+            {
+                personTypeX = (Person_Type)personTypeInt;
+            }
+            catch (Exception ex)
+            {
+                personTypeX = Person_Type.Wild;
+            }
+
+            if (Enum.TryParse<Person_Type>(personType, ignoreCase: true, out Person_Type personType__))
+            {
+                personTypeX = personType__;
+            }
+
+            try
+            {
+                PersonGenerated.PersonType = Main.Instance.PersonTypes[(int)personTypeX];
+            } catch (Exception ex)
+            {
+            }
+        }
         public static void setReverseWildStates(GameObject personGa)
         {
             if (personGa == null)
@@ -2922,6 +3040,137 @@ namespace BitchlandCheatConsoleBepInEx
             Person thisPerson = personInteract.GetComponent<Person>();
             setPersonaltyToNympho(thisPerson.gameObject);
             Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
+        }
+        public static void listpersontypes()
+        {
+            string[] names = Enum.GetNames(typeof(Person_Type));
+            int length = names != null ? names.Length : 0;
+            string notify = "person type: ";
+            for (int i = 0; i < length; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(notify + names[i].ToLower());
+                Logger.LogInfo(notify + names[i].ToLower());
+            }
+        }
+
+        public static void listpersonalities()
+        {
+            string[] names = Enum.GetNames(typeof(Personality_Type));
+            int length = names != null ? names.Length : 0;
+            string notify = "personality: ";
+            for (int i = 0; i < length; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(notify + names[i].ToLower());
+                Logger.LogInfo(notify + names[i].ToLower());
+            }
+        }
+
+        public static void listpersonstates()
+        {
+            string[] names = Enum.GetNames(typeof(Person_State));
+            int length = names != null ? names.Length : 0;
+            string notify = "person state: ";
+            for (int i = 0; i < length; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(notify + names[i].ToLower());
+                Logger.LogInfo(notify + names[i].ToLower());
+            }
+        }
+
+        public static void setpersontype(string personType)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpersontype");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                setPersonType(Main.Instance.Player.gameObject, personType);
+                Main.Instance.GameplayMenu.ShowNotification("set the player to person type!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void npcsetpersontype(string personType)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsetpersontype");
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+            setPersonType(thisPerson.gameObject, personType);
+            Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to person type!");
+        }
+
+        public static void setpersonalityto(string personality, bool cleanOrDirt = true)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonalityto");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                setPersonaltyTo(Main.Instance.Player.gameObject, personality, cleanOrDirt);
+                Main.Instance.GameplayMenu.ShowNotification("set the player to a personality!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void npcsetpersonalityto(string personality, bool cleanOrDirt)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsetpersonalityto");
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+            setPersonaltyTo(thisPerson.gameObject, personality, cleanOrDirt);
+            Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to personality!");
+        }
+
+        public static void setpersonstate(string personState)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpersonstate");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                setPersonState(Main.Instance.Player.gameObject, personState);
+                Main.Instance.GameplayMenu.ShowNotification("set the player to person state!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void npcsetpersonstate(string personState)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsetpersonstate");
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+            setPersonState(thisPerson.gameObject, personState);
+            Main.Instance.GameplayMenu.ShowNotification("Set personstate the you looked at to person state!");
         }
 
         public static GameObject copyObj = null;
@@ -3764,6 +4013,7 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/weaponlist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/menulist.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
+            OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
         }
 
@@ -5629,7 +5879,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 if (rg3Match.Success)
                 {
-                    handleCommandLength3(rg3Match.Groups["command"].Value.ToLower(), rg3Match.Groups["key"].Value.ToLower(), rg3Match.Groups["value"].Value.ToLower());
+                    handleCommandLength3(rg3Match.Groups["command"].Value.ToLower(), rg3Match.Groups["key"].Value, rg3Match.Groups["value"].Value);
                     return;
                 }
 
@@ -5639,7 +5889,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 if (rg2Match.Success)
                 {
-                    handleCommandLength2(rg2Match.Groups["command"].Value.ToLower(), rg2Match.Groups["value"].Value.ToLower());
+                    handleCommandLength2(rg2Match.Groups["command"].Value.ToLower(), rg2Match.Groups["value"].Value);
                     return;
                 }
 
@@ -6607,6 +6857,55 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listpersontypes":
+                    {
+                        listpersontypes();
+                    }
+                    break;
+
+                case "listpersonalities":
+                    {
+                        listpersonalities();
+                    }
+                    break;
+
+                case "listpersonstates":
+                    {
+                        listpersonstates();
+                    }
+                    break;
+
+                case "bitch":
+                case "bitchland":
+                    {
+                        bitch();
+                    }
+                    break;
+
+                case "day":
+                    {
+                        day();
+                    }
+                    break;
+
+                case "night":
+                    {
+                        night();
+                    }
+                    break;
+
+                case "sleeponfloor":
+                    {
+                        sleeponfloor();
+                    }
+                    break;
+
+                case "respawn":
+                    {
+                        respawn();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -6623,6 +6922,8 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void handleCommandLength2(string command, string value)
         {
+            string valueOriginal = value;
+            value = value.ToLower();
             switch (command)
             {
                 // not for @Neoton begin
@@ -6911,13 +7212,13 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "playaudio":
                     {
-                        playaudio(value);
+                        playaudio(valueOriginal);
                     }
                     break;
 
                 case "playaudioloop":
                     {
-                        playaudio(value, true);
+                        playaudio(valueOriginal, true);
                     }
                     break;
 
@@ -6935,56 +7236,110 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "playvideovl":
                     {
-                        playvideo(value, false, true, false, false, false);
+                        playvideo(valueOriginal, false, true, false, false, false);
                     }
                     break;
 
                 case "playvideol":
                     {
-                        playvideo(value, false, false, true, false, false);
+                        playvideo(valueOriginal, false, false, true, false, false);
                     }
                     break;
 
                 case "playvideo":
                 case "playvideom":
                     {
-                        playvideo(value, false, false, false, true, false);
+                        playvideo(valueOriginal, false, false, false, true, false);
                     }
                     break;
 
                 case "playvideof":
                     {
-                        playvideo(value, false, false, false, false, true);
+                        playvideo(valueOriginal, false, false, false, false, true);
                     }
                     break;
 
                 case "playvideovll":
                     {
-                        playvideo(value, true, true, false, false, false);
+                        playvideo(valueOriginal, true, true, false, false, false);
                     }
                     break;
 
                 case "playvideoll":
                     {
-                        playvideo(value, true, false, true, false, false);
+                        playvideo(valueOriginal, true, false, true, false, false);
                     }
                     break;
 
                 case "playvideoml":
                     {
-                        playvideo(value, true, false, false, true, false);
+                        playvideo(valueOriginal, true, false, false, true, false);
                     }
                     break;
 
                 case "playvideofl":
                     {
-                        playvideo(value, true, false, false, false, true);
+                        playvideo(valueOriginal, true, false, false, false, true);
                     }
                     break;
 
                 case "videoaudiovolume":
                     {
                         videoaudiovolume(value);
+                    }
+                    break;
+
+                case "setpersontype":
+                    {
+                        setpersontype(value);
+                    }
+                    break;
+
+                case "npcsetpersontype":
+                    {
+                        npcsetpersontype(value);
+                    }
+                    break;
+
+                case "setpersonalityto":
+                    {
+                        setpersonalityto(value, true);
+                    }
+                    break;
+
+                case "npcsetpersonalityto":
+                    {
+                        npcsetpersonalityto(value, true);
+                    }
+                    break;
+
+                case "setpersonalitydirtyto":
+                    {
+                        setpersonalityto(value, false);
+                    }
+                    break;
+
+                case "npcsetpersonalitydirtyto":
+                    {
+                        npcsetpersonalityto(value, false);
+                    }
+                    break;
+
+                case "setpersonstate":
+                    {
+                        setpersonstate(value);
+                    }
+                    break;
+
+                case "npcsetpersonstate":
+                    {
+                        npcsetpersonstate(value);
+                    }
+                    break;
+
+                case "timeofday":
+                    {
+                        timeofday(value);
                     }
                     break;
 
@@ -6998,6 +7353,10 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void handleCommandLength3(string command, string key, string value)
         {
+            string keyOriginal = key;
+            string valueOriginal = value;
+            key = key.ToLower();
+            value = value.ToLower();
             switch (command)
             {
                 case "additem":
@@ -7038,10 +7397,109 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        /// <summary>
+        /// Detects the Unity AudioType from raw audio data.
+        /// </summary>
+        public static AudioType GetAudioType(byte[] data)
+        {
+            try
+            {
+                if (data == null || data.Length < 12)
+                    return AudioType.UNKNOWN;
+
+                // WAV: "RIFF" .... "WAVE"
+                if (data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F' &&
+                    data[8] == 'W' && data[9] == 'A' && data[10] == 'V' && data[11] == 'E')
+                    return AudioType.WAV;
+
+                // OGG: "OggS"
+                if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')
+                    return AudioType.OGGVORBIS;
+
+                // MP3: ID3 tag or MPEG frame sync
+                if ((data[0] == 'I' && data[1] == 'D' && data[2] == '3') ||
+                    (data[0] == 0xFF && (data[1] & 0xE0) == 0xE0))
+                    return AudioType.MPEG;
+
+                // FLAC: "fLaC"
+                if (data[0] == 'f' && data[1] == 'L' && data[2] == 'a' && data[3] == 'C')
+                    return AudioType.UNKNOWN;
+
+                // AIFF: "FORM" .... "AIFF"
+                if (data[0] == 'F' && data[1] == 'O' && data[2] == 'R' && data[3] == 'M' &&
+                    data[8] == 'A' && data[9] == 'I' && data[10] == 'F' && data[11] == 'F')
+                    return AudioType.AIFF;
+
+            } catch (Exception ex)
+            {
+            }
+
+            return AudioType.UNKNOWN;
+        }
+
+        /// <summary>
+        /// Detects AudioType from a file path.
+        /// </summary>
+        public static AudioType GetAudioTypeFromFile(string path)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                    return AudioType.UNKNOWN;
+
+                byte[] header = new byte[12];
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                {
+                    fs.Read(header, 0, header.Length);
+                }
+                return GetAudioType(header);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return AudioType.UNKNOWN;
+        }
+
         public static IEnumerator GetAudioClip(string url, Action<AudioClip> callback, AudioType type)
         {
-            Logger.LogInfo("execute GetAudioClip");
             if (callback == null) { yield break; }
+            Logger.LogInfo("execute GetAudioClip");
+            if (AudioType.UNKNOWN == type)
+            {
+                using (UnityWebRequest request = UnityWebRequest.Get(url))
+                {
+                    // Optional: Set a DownloadHandler to store data in memory
+                    request.downloadHandler = new DownloadHandlerBuffer();
+
+                    // Send request
+                    yield return request.SendWebRequest();
+
+                    // Error handling
+                    if (request.result != UnityWebRequest.Result.Success)
+                    {
+                        Logger.LogError("Download failed: " + request.error);
+                        yield break;
+                    }
+
+                    // Get total bytes downloaded
+                    ulong totalBytes = request.downloadedBytes;
+                    Logger.LogInfo($"Downloaded {totalBytes} bytes");
+
+                    // Get the actual byte array
+                    byte[] mediaData = request.downloadHandler.data;
+                    Logger.LogInfo($"Byte array length: {mediaData.Length}");
+
+                    type = GetAudioType(mediaData);
+
+                    if (type != AudioType.UNKNOWN)
+                    {
+                        Main.Instance.Player.StartCoroutine(GetAudioClip(url, callback, type));
+                    }
+
+                    yield break;
+                }
+            }
             Logger.LogInfo("execute GetAudioClip 1");
             using (var uwr = UnityWebRequestMultimedia.GetAudioClip(url, type))
             {
@@ -7059,6 +7517,53 @@ namespace BitchlandCheatConsoleBepInEx
                 callback(clip);
             }
         }
+
+        public static void timeofday(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("value > 0.25 and value < 0.75 = night, otherwise = day");
+            float volume = 0;
+            //isNight => (double)this.timeOfDay > 0.25 && (double)this.timeOfDay < 0.75;
+            try
+            {
+                volume = float.Parse(value, culture);
+                volume = volume <= 0 ? 0 : volume;
+            }
+            catch (Exception)
+            {
+                volume = 1f;
+            }
+        }
+        public static void day()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: day");
+            Main.Instance.DayCycle.timeOfDay = 0.0f;
+        }
+        public static void night()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: night");
+            Main.Instance.DayCycle.timeOfDay = 0.26f;
+        }
+        public static void sleeponfloor()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: sleeponfloor");
+            Main.Instance.Player.SleepOnFloor();
+        }
+
+        public static void respawn()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: respawn");
+            Main.Instance.Player.TheHealth.NoLoseRespawn = true;
+            Main.Instance.Player.TheHealth.PlayerRespawn();
+        }
+        public static void bitch()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: bitch");
+            if (Main.Instance.GameplayMenu.isActiveAndEnabled)
+            {
+                Main.Instance.GameplayMenu.ShowMessageBox("dnl / PopoPupsigUndSo is not breakfast5 bitch, i am free and independent! (At least i hope so)");
+            }
+        }
+
         public static void unpauseaudio()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unpauseaudio");
@@ -7153,7 +7658,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void listaudio()
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: playaudio");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listaudio");
 
             string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
 
@@ -7416,7 +7921,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             string realAudioFile = audioFile;
 
-            AudioType audioType = AudioType.MPEG;
+            AudioType audioType = AudioType.UNKNOWN;
 
             if (!File.Exists(realAudioFile))
             {
@@ -7436,14 +7941,21 @@ namespace BitchlandCheatConsoleBepInEx
                 audioType = AudioType.WAV;
             }
 
+            string fileUri = $"file:///{realAudioFile}";
             if (!File.Exists(realAudioFile))
             {
-                Main.Instance.GameplayMenu.ShowNotification("playaudio: audio file not found!");
+                Main.Instance.GameplayMenu.ShowNotification("playaudio: audio file not found on disk!");
+                fileUri = $"{value}";
+            } else
+            {
+                if (audioType == AudioType.UNKNOWN)
+                {
+                    audioType = GetAudioTypeFromFile(realAudioFile);
+                }
+                fileUri = $"file:///{realAudioFile}";
             }
 
-            string fileUri = $"file:///{realAudioFile}";
-
-            Logger.LogInfo("playaudio: path: " +  fileUri);
+            Logger.LogInfo("playaudio: path: " + fileUri);
 
             initAudioSource();
        
@@ -7454,12 +7966,12 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogInfo("playaudio: execute GetAudioClip");
                 Action<AudioClip> onAudioLoad = (loadedClip) => {
                     Logger.LogInfo("Clip loaded:  " + loadedClip.name);
-                  audioSource.loop = loop;
-                  audioSource.playOnAwake = false;
-                  audioSource.clip = loadedClip;
-                  audioSource.volume = 1f;
-                  audioSource.Play();
-              };
+                    audioSource.loop = loop;
+                    audioSource.playOnAwake = false;
+                    audioSource.clip = loadedClip;
+                    audioSource.volume = 1f;
+                    audioSource.Play(); 
+                };
               Main.Instance.Player.StartCoroutine(GetAudioClip(fileUri, onAudioLoad, audioType));
 
             }
@@ -7693,10 +8205,44 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (!File.Exists(realVideoFile))
             {
-                Main.Instance.GameplayMenu.ShowNotification("playvideo: video file not found!");
+                realVideoFile = videoFile + ".avi";
             }
 
-            string fileUri = $"file:///{realVideoFile}";
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".mov";
+            }
+
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".wmv";
+            }
+
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".mpg";
+            }
+
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".mpeg";
+            }
+
+            if (!File.Exists(realVideoFile))
+            {
+                realVideoFile = videoFile + ".3gp";
+            }
+
+            string fileUri = $"{realVideoFile}";
+
+            if (!File.Exists(realVideoFile))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("playvideo: video file not found on disk!");
+                fileUri = $"{value}";
+            } else
+            {
+                fileUri = $"file:///{realVideoFile}";
+            }
 
             Logger.LogInfo("playvideo: path: " + fileUri);
 
@@ -8182,6 +8728,8 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Main.Instance.Player.Money = money;
+
+            Main.Instance.GameplayMenu.ShowNotification($"money: {money}");
         }
 
         public static void warp(string town)
