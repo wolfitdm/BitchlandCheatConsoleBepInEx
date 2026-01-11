@@ -136,7 +136,7 @@ commands with no params:
 * forcekillme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
 * dieme -> kills you on everytime (forced), the person is also killed even if the game don't want that you kill this person (infinitehealth on)
 * helloworld -> shows a messagebox with the text hello world
-* fly -> toggle fly
+* fly -> toggle fly (left strg down, space up)
 * equip -> Equip the item the you looked at
 * equiptohand -> Equip the item the you looked at to your hands
 * dropallhand -> Drop all items the you have in your hands 
@@ -197,6 +197,30 @@ commands with no params:
 * night -> set the time of day to night
 * sleeponfloor -> sleep on the floor
 * respawn -> respawn the player
+* listfetishes -> lists all fetishes
+* listperks -> lists all perks
+* addallfetishes -> adds all fetishes to the player
+* removeallfetishes -> remove all fetishes to the player
+* npcaddallfetishes -> npc add all fetishes to the npc , the you looked at
+* npcremoveallfetishes -> npc remove all fetishes to the npc, the you looked at
+* npcchangeskin -> change skin from the npc the you looked at to nameless
+* npcchangeskinnude -> change skin from the npc the you looked at to brat
+* strip -> strip all clothes from the player
+* npcstrip -> strip all clothes from the npc the you looked at
+* togglefuta -> toggle futa from player (player must be female or futa)
+* npctogglefuta -> toggle futa from the npc the you looked at (npc must be female or futa)
+* cursorlockmode -> you can see your cursor
+* masturbate -> toggle masturbate the player
+* npcmasturbate -> toggle the npc the you looked at masturbate
+* onlyfemales -> spawn only females
+* bothgenders -> spawn both genders
+* onlymales -> spawn only males
+* mostlyfemales -> spawn mostly females
+* mostlymales -> spawn mostly males
+* futachance -> change the futa chance to 50 percent
+* togglescatcontent -> toggle scat content on or off
+* dropallweapons -> drops all weapons
+* npcdropallweapons -> drops all weapons from the npc the you looked at
 
 commands with 1 param:
 
@@ -273,6 +297,17 @@ commands with 1 param:
 * setpersonstate personState -> set the player to person state!
 * npcsetpersonstate personState -> Set personstate the you looked at to person state!
 * timeofday value -> set time of day | value > 0.25 and value < 0.75 = night, otherwise = day
+* addperk perk -> add the player this perk
+* removeperk perk -> remove the player this perk
+* addfetish fetish -> add the player this fetish
+* removefetish fetish -> remove the player this fetish
+* npcaddperk perk -> add the npc the you looked at this perk
+* npcremoveperk perk -> remove the npc the you looked at this perk
+* npcaddfetish fetish -> add the npc the you looked at this fetish
+* npcremovefetish fetish -> remove the npc the you looked at this fetish
+* npcchangeskin name -> change skin from the npc the you looked at to name
+* npcchangeskinnude name -> change skin from the npc the you looked at to name
+* futachance percent -> change the futa chance to percent number for example 50
 
 commands with 2 params:
 

@@ -6,19 +6,26 @@ using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
 using sc.terrain.proceduralpainter;
+using SemanticVersioning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 using UnityEngine.Video;
+using static MapMagic.Nodes.MatrixGenerators.RTPOutput200;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -80,6 +87,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool playedVideo = false;
 
         public static Rect fs = new Rect(randX, randY, screenWidth - randX, screenHeight - randY);
+
+        public static Vector3 fly_velocity = Vector3.zero;
 
         /*public static string message = "Hello! This is a message box.";
 
@@ -662,21 +671,32 @@ namespace BitchlandCheatConsoleBepInEx
             //if (Input.GetKey(KeyCode.RightShift))
             //    fly_moveSpeed -= 0.01f;
 
+            if (rb.velocity == Vector3.zero)
+            {
+                rb.velocity = fly_velocity;
+            }
+
             // Calculate movement direction relative to camera
             Vector3 moveDirection = (rb.transform.forward * vertical) +
                                     (rb.transform.right * horizontal) +
                                     (rb.transform.up * ascend);
 
+            fly_velocity = moveDirection.normalized * fly_moveSpeed;
+
             // Apply velocity directly for smooth movement
-            rb.velocity = moveDirection.normalized * fly_moveSpeed;
+            rb.velocity = fly_velocity;
             //rb.velocity = v;
         }
 
         private void Update()
         {
             TriggerUpdate();
+        }
+        private void LateUpdate()
+        {
             HandleFlight();
         }
+
         private void OnGUI()
         {
             //messageBoxOnGui();
@@ -1862,17 +1882,22 @@ namespace BitchlandCheatConsoleBepInEx
             DisplayPerson.PlayerKnowsName = false;
             UnityEngine.Object.Destroy(PresetLoaderNPC_F.gameObject);
         }
-        public static GameObject ChangeSkin(string name)
+        public static GameObject ChangeSkin(GameObject Person, string name, bool isPlayer)
         {
+            if (Person == null) return null;
+            Person gettedPerson = Person.GetComponent<Person>();
+            if (gettedPerson == null) return null; 
             bool LoadSpecificNPC = true;
             Person PersonGenerated = null;
-            bool spawnFemale = Main.Instance.Player is Girl;
-            Vector3 position = Main.Instance.Player.transform.position;
-            Quaternion rotation = Main.Instance.Player.transform.rotation;
+            string originalName = gettedPerson.Name;
+            bool playerKnowsName = gettedPerson.PlayerKnowsName;
+            bool spawnFemale = gettedPerson is Girl;
+            Vector3 position = gettedPerson.transform.position;
+            Quaternion rotation = gettedPerson.transform.rotation;
             if (LoadSpecificNPC)
             {
                 //PersonGenerated = BasicPerson().gameObject.GetComponent<Person>();
-                PersonGenerated = Main.Instance.Player;
+                PersonGenerated = gettedPerson;
                 int money = PersonGenerated.Money;
                 int sexlevel = PersonGenerated.SexXpThisLvl;
                 int sexlevelmax = PersonGenerated.SexXpThisLvlMax;
@@ -1909,8 +1934,13 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated._DontLoadClothing = true;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
-                PersonGenerated.Name = "";
-                PersonGenerated.PlayerKnowsName = false;
+                PersonGenerated.Name = originalName;
+                PersonGenerated.PlayerKnowsName = playerKnowsName;
+                if (isPlayer)
+                {
+                    PersonGenerated.Name = "";
+                    PersonGenerated.PlayerKnowsName = false;
+                }
                 PersonGenerated.ThisPersonInt = personInt;
                 if (PersonGenerated.ThisPersonInt != null && thisPersonInt != null)
                 {
@@ -1958,6 +1988,102 @@ namespace BitchlandCheatConsoleBepInEx
             PersonGenerated.transform.rotation = rotation;
             setReverseWildStates(PersonGenerated.gameObject);
             return PersonGenerated.gameObject;
+        }
+
+        public static GameObject ChangeSkin(string name)
+        {
+            return ChangeSkin(Main.Instance.Player.gameObject, name, true);
+        }
+
+        public static void StripPerson(GameObject personGa)
+        {
+            if (personGa == null) return;
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null) return;
+
+            if (person.CurrentTop != null)
+            {
+                person.UndressClothe(person.CurrentTop);
+            }
+
+            if (person.CurrentUnderwearTop != null)
+            {
+                person.UndressClothe(person.CurrentUnderwearTop);
+            }
+
+            if (person.CurrentUnderwearLower != null)
+            {
+                person.UndressClothe(person.CurrentUnderwearLower);
+            }
+
+            if (person.CurrentPants != null)
+            {
+                person.UndressClothe(person.CurrentPants);
+            }
+
+            if (person.CurrentShoes != null)
+            {
+                person.UndressClothe(person.CurrentShoes);
+            }
+
+            if (person.CurrentSocks != null)
+            {
+                person.UndressClothe(person.CurrentSocks);
+            }
+
+            if (person.CurrentHat != null)
+            {
+                person.UndressClothe(person.CurrentHat);
+            }
+
+            if (person.CurrentGarter != null)
+            {
+                person.UndressClothe(person.CurrentGarter);
+            }
+
+            if (person.CurrentAnys != null)
+            {
+                List<Dressable> anys = new List<Dressable>();
+                for (int i = 0; i < person.CurrentAnys.Count; i++)
+                {
+                    anys.Add(person.CurrentAnys[i]);
+                }
+
+                for (int i = 0; i < anys.Count; i++)
+                {
+                    person.UndressClothe(anys[i]);
+                }
+            }
+
+            if (person.CurrentBeard != null)
+            {
+                person.UndressClothe(person.CurrentBeard);
+            }
+        }
+
+        public static void PersonToggleFuta(GameObject personGa)
+        {
+            if (personGa == null) return;
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null) return;
+
+            if (!(person is Girl)) return;
+
+            Girl girl = (Girl)person;
+
+            if (girl.Futa)
+            {
+                girl.Futa = false;
+                girl.RemovePenis();
+            } else
+            {
+                girl.Futa = true;
+                girl.PutPenis();
+            }
         }
         public static GameObject CreatePersonMaleOld()
         {
@@ -2413,6 +2539,84 @@ namespace BitchlandCheatConsoleBepInEx
             _this.DirtySkin = false;
         }
 
+        public static void addAllFetishesToPerson(GameObject personGa, bool cleanOrDirt = true)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            if (PersonGenerated.Fetishes == null)
+            {
+                PersonGenerated.Fetishes = new List<e_Fetish>();
+            }
+
+            PersonGenerated.Fetishes.Clear();
+            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
+            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
+            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
+            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
+            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Clean);
+            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
+            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
+            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
+            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
+            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
+
+            List<e_Fetish> fetishes = Enum.GetValues(typeof(e_Fetish)).Cast<e_Fetish>().ToList();
+
+            for (int i = 0; i < fetishes.Count; i++)
+            {
+                if (fetishes[i] == e_Fetish.Clean || fetishes[i] == e_Fetish.Dirty || fetishes[i] == e_Fetish.MAX)
+                {
+                    continue;
+                }
+
+                if (!PersonGenerated.Fetishes.Contains(fetishes[i]))
+                {
+                    PersonGenerated.Fetishes.Add(fetishes[i]);
+                }
+            }
+
+            if (cleanOrDirt)
+            {
+                if (!PersonGenerated.Fetishes.Contains(e_Fetish.Clean))
+                {
+                    PersonGenerated.Fetishes.Add(e_Fetish.Clean);
+                }
+            } else
+            {
+                if (!PersonGenerated.Fetishes.Contains(e_Fetish.Dirty))
+                {
+                    PersonGenerated.Fetishes.Add(e_Fetish.Dirty);
+                }
+            }
+        }
+
+        public static void removeAllFetishesFromPerson(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+            PersonGenerated.Fetishes.Clear();
+        }
+
         public static void setPersonaltyToNympho(GameObject personGa)
         {
             if (personGa == null)
@@ -2430,22 +2634,7 @@ namespace BitchlandCheatConsoleBepInEx
             addallperkstoperson(personGa);
 
             PersonGenerated.Personality = Personality_Type.Nympho;
-            if (PersonGenerated.Fetishes == null)
-            {
-                PersonGenerated.Fetishes = new List<e_Fetish>();
-            }
-            PersonGenerated.Fetishes.Clear();
-            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
-            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
-            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
-            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
-            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Clean);
-            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
-            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
-            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
-            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
+            addAllFetishesToPerson(personGa);
         }
 
         public static void setPersonaltyTo(GameObject personGa, string personalty, bool cleanOrDirt = true)
@@ -2472,29 +2661,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             PersonGenerated.Personality = personality;
-            if (PersonGenerated.Fetishes == null)
-            {
-                PersonGenerated.Fetishes = new List<e_Fetish>();
-            }
-            PersonGenerated.Fetishes.Clear();
-            PersonGenerated.Fetishes.Add(e_Fetish.Dildo);
-            PersonGenerated.Fetishes.Add(e_Fetish.Pregnant);
-            PersonGenerated.Fetishes.Add(e_Fetish.Anal);
-            PersonGenerated.Fetishes.Add(e_Fetish.Scat);
-            PersonGenerated.Fetishes.Add(e_Fetish.Masochist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Futa);
-            PersonGenerated.Fetishes.Add(e_Fetish.Machine);
-            PersonGenerated.Fetishes.Add(e_Fetish.Sadist);
-            PersonGenerated.Fetishes.Add(e_Fetish.Oral);
-            PersonGenerated.Fetishes.Add(e_Fetish.Outdoors);
-
-            if (cleanOrDirt)
-            {
-                PersonGenerated.Fetishes.Add(e_Fetish.Clean);
-            } else
-            {
-                PersonGenerated.Fetishes.Add(e_Fetish.Dirty);
-            }
+            addAllFetishesToPerson(personGa, cleanOrDirt);
         }
         public static void setPersonState(GameObject personGa, string personState)
         {
@@ -2571,6 +2738,122 @@ namespace BitchlandCheatConsoleBepInEx
             {
             }
         }
+
+        public static void addPersonFetish(GameObject personGa, string fetish)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            e_Fetish fetish_ = e_Fetish.Machine;
+
+            if (Enum.TryParse<e_Fetish>(fetish, ignoreCase: true, out e_Fetish fetish__))
+            {
+                fetish_ = fetish__;
+            }
+
+            if (fetish_ == e_Fetish.MAX)
+            {
+                return;
+            }
+
+            if (fetish_ == e_Fetish.Clean && PersonGenerated.Fetishes.Contains(e_Fetish.Dirty))
+            {
+                return;
+            }
+
+            if (fetish_ == e_Fetish.Dirty && PersonGenerated.Fetishes.Contains(e_Fetish.Clean))
+            {
+                return;
+            }
+
+            if (!PersonGenerated.Fetishes.Contains(fetish_))
+            {
+                PersonGenerated.Fetishes.Add(fetish_);
+            }
+        }
+
+        public static void removePersonFetish(GameObject personGa, string fetish)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            e_Fetish fetish_ = e_Fetish.Machine;
+
+            if (Enum.TryParse<e_Fetish>(fetish, ignoreCase: true, out e_Fetish fetish__))
+            {
+                fetish_ = fetish__;
+            }
+
+            if (PersonGenerated.Fetishes.Contains(fetish_))
+            {
+                PersonGenerated.Fetishes.Remove(fetish_);
+            }
+        }
+
+        public static void addPersonPerk(GameObject personGa, string perk)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            if (!PersonGenerated.Perks.Contains(perk))
+            {
+                PersonGenerated.Perks.Add(perk);
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("Add perk to person " + perk);
+            Logger.LogInfo("Add perk to person " + perk);
+        }
+
+        public static void removePersonPerk(GameObject personGa, string perk)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            if (PersonGenerated.Perks.Contains(perk))
+            {
+                PersonGenerated.Perks.Remove(perk);
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("Remove perk from person " + perk);
+            Logger.LogInfo("Remove perk from person " + perk);
+        }
+
         public static void setReverseWildStates(GameObject personGa)
         {
             if (personGa == null)
@@ -3077,6 +3360,111 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void listfetishes()
+        {
+            string[] names = Enum.GetNames(typeof(e_Fetish));
+            int length = names != null ? names.Length : 0;
+            string notify = "fetish: ";
+            for (int i = 0; i < length; i++)
+            {
+                if (names[i] == "MAX")
+                {
+                    continue;
+                }
+
+                Main.Instance.GameplayMenu.ShowNotification(notify + names[i].ToLower());
+                Logger.LogInfo(notify + names[i].ToLower());
+            }
+        }
+
+        public static List<string> getPerksList()
+        {
+            List<string> perks = new List<string>();
+
+            misc_Perk[] objectsOfType = UnityEngine.Object.FindObjectsOfType<misc_Perk>(true);
+            for (int index = 0; index < objectsOfType.Length; ++index)
+            {
+                perks.Add(objectsOfType[index].PerkID);
+            }
+
+            if (!perks.Contains("Gaping"))
+            {
+                perks.Add("Gaping");
+            }
+
+            if (!perks.Contains("Smell"))
+            {
+                perks.Add("Smell");
+            }
+
+            if (!perks.Contains("Vaginal Storage"))
+            {
+                perks.Add("Vaginal Storage");
+            }
+
+            if (!perks.Contains("Anal Storage"))
+            {
+                perks.Add("Anal Storage");
+            }
+
+            if (!perks.Contains("Mining Skill lvl 2"))
+            {
+                perks.Add("Mining Skill lvl 2");
+            }
+
+            if (!perks.Contains("Sensetivity"))
+            {
+                perks.Add("Sensetivity");
+            }
+
+            if (!perks.Contains("Longer Orgasm"))
+            {
+                perks.Add("Longer Orgasm");
+            }
+
+            if (!perks.Contains("Prostitution skill lvl 1"))
+            {
+                perks.Add("Prostitution skill lvl 1");
+            }
+
+            if (!perks.Contains("Prostitution skill lvl 2"))
+            {
+                perks.Add("Prostitution skill lvl 2");
+            }
+
+            if (!perks.Contains("Prostitution skill lvl 3"))
+            {
+                perks.Add("Prostitution skill lvl 3");
+            }
+
+            if (!perks.Contains("Prostitution skill lvl 4"))
+            {
+                perks.Add("Prostitution skill lvl 4");
+            }
+
+            if (!perks.Contains("Fluid Gather"))
+            {
+                perks.Add("Fluid Gather");
+            }
+
+            if (!perks.Contains("Trash3"))
+            {
+                perks.Add("Trash3");
+            }
+
+            return perks;
+        }
+        public static void listperks()
+        {
+            List<string> perks = getPerksList();
+
+            for (int i = 0; i < perks.Count; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(perks[i]);
+                Logger.LogInfo(perks[i]);
+            }
+        }
+
         public static void setpersontype(string personType)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: setpersontype");
@@ -3171,6 +3559,292 @@ namespace BitchlandCheatConsoleBepInEx
             Person thisPerson = personInteract.GetComponent<Person>();
             setPersonState(thisPerson.gameObject, personState);
             Main.Instance.GameplayMenu.ShowNotification("Set personstate the you looked at to person state!");
+        }
+
+        public static void addperk(string perk)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addperk");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                addPersonPerk(Main.Instance.Player.gameObject, perk);
+                Main.Instance.GameplayMenu.ShowNotification("add the perk to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void removeperk(string perk)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removeperk");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                removePersonPerk(Main.Instance.Player.gameObject, perk);
+                Main.Instance.GameplayMenu.ShowNotification("remove the perk to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void npcaddperk(string perk)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddperk");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+
+            try
+            {
+                addPersonPerk(thisPerson.gameObject, perk);
+                Main.Instance.GameplayMenu.ShowNotification("add the perk to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void npcremoveperk(string perk)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcremoveperk");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                removePersonPerk(thisPerson.gameObject, perk);
+                Main.Instance.GameplayMenu.ShowNotification("remove the perk to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void addfetish(string fetish)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addfetish");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                addPersonFetish(Main.Instance.Player.gameObject, fetish);
+                Main.Instance.GameplayMenu.ShowNotification("add the fetish to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void removefetish(string fetish)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removefetish");
+            try
+            {
+                if (Main.Instance.Player == null)
+                {
+                    return;
+                }
+
+                removePersonFetish(Main.Instance.Player.gameObject, fetish);
+                Main.Instance.GameplayMenu.ShowNotification("remove the fetish to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void npcaddfetish(string fetish)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddfetish");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+
+            try
+            {
+                addPersonFetish(thisPerson.gameObject, fetish);
+                Main.Instance.GameplayMenu.ShowNotification("add the fetish to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void npcremovefetish(string fetish)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcremovefetish");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                removePersonFetish(thisPerson.gameObject, fetish);
+                Main.Instance.GameplayMenu.ShowNotification("remove the fetish to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void addallfetishes()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addallfetishes");
+
+            GameObject personInteract = Main.Instance.Player.gameObject;
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                addAllFetishesToPerson(thisPerson.gameObject);
+                Main.Instance.GameplayMenu.ShowNotification("add all fetishes to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void removeallfetishes()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removeallfetishes");
+
+            GameObject personInteract = Main.Instance.Player.gameObject;
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                removeAllFetishesFromPerson(thisPerson.gameObject);
+                Main.Instance.GameplayMenu.ShowNotification("remove all fetishes to the player!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static void npcaddallfetishes()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddallfetishes");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                addAllFetishesToPerson(thisPerson.gameObject);
+                Main.Instance.GameplayMenu.ShowNotification("add all fetishes to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        public static void npcremoveallfetishes()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcremoveallfetishes");
+
+            GameObject personInteract = getPersonInteract();
+
+            if (personInteract == null)
+            {
+                return;
+            }
+
+            Person thisPerson = personInteract.GetComponent<Person>();
+
+            if (thisPerson == null)
+            {
+                return;
+            }
+
+            try
+            {
+                removeAllFetishesFromPerson(thisPerson.gameObject);
+                Main.Instance.GameplayMenu.ShowNotification("remove all fetishes to the npc!");
+            }
+            catch (Exception e)
+            {
+            }
         }
 
         public static GameObject copyObj = null;
@@ -4537,15 +5211,15 @@ namespace BitchlandCheatConsoleBepInEx
             Person s = CreatePersonNew(value, save).GetComponent<Person>();
         }
 
-        public static void changeskin(string value)
+        public static void changeskintoperson(GameObject changedSkinPerson, string value, bool isPlayer)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: changeskin");
+            if (changedSkinPerson == null) return;
             Person s = null;
             switch (value)
             {
                 case "jeanne":
                     {
-                        s = ChangeSkin("jeanne").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "jeanne", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -4559,7 +5233,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = ChangeSkin("sarahoffwork").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "sarahoffwork", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -4570,7 +5244,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = ChangeSkin("uniformedsarah").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "uniformedsarah", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -4586,7 +5260,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = ChangeSkin("nameless").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "nameless", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -4608,7 +5282,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = ChangeSkin("rit").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "rit", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -4621,7 +5295,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = ChangeSkin("carol").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "carol", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -4635,7 +5309,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = ChangeSkin("beth").GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "beth", isPlayer).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -4649,15 +5323,255 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = ChangeSkin(value).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, value, isPlayer).GetComponent<Person>();
                     }
                     break;
             }
         }
+        public static void changeskinnudetoperson(GameObject changedSkinPerson, string value, bool isPlayer)
+        {
+            Person s = ChangeSkin(changedSkinPerson, value, isPlayer).GetComponent<Person>();
+        }
+
+        public static void changeskin(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: changeskin");
+            changeskintoperson(Main.Instance.Player.gameObject, value, true);
+        }
         public static void changeskinnude(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: changeskinnude");
-            Person s = ChangeSkin(value).GetComponent<Person>();
+            changeskinnudetoperson(Main.Instance.Player.gameObject, value, true);
+        }
+
+        public static void npcchangeskin(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcchangeskin");
+
+            GameObject PersonGenerated = getPersonInteract();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            changeskintoperson(PersonGenerated, value, false);
+        }
+        public static void npcchangeskinnude(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcchangeskinnude");
+
+            GameObject PersonGenerated = getPersonInteract();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            changeskinnudetoperson(PersonGenerated, value, false);
+        }
+
+        public static void togglefuta()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglefuta");
+
+            GameObject PersonGenerated = Main.Instance.Player.gameObject;
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            PersonToggleFuta(PersonGenerated);
+        }
+
+        public static void npctogglefuta()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npctogglefuta");
+
+            GameObject PersonGenerated = getPersonInteract();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            PersonToggleFuta(PersonGenerated);
+        }
+
+        public static void strip()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: strip");
+
+            GameObject PersonGenerated = Main.Instance.Player.gameObject;
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            StripPerson(PersonGenerated);
+        }
+
+        public static void npcstrip()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcstrip");
+
+            GameObject PersonGenerated = getPersonInteract();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            StripPerson(PersonGenerated);
+        }
+        public static void MasturbatePerson(GameObject personGa)
+        {
+            if (personGa == null) return;
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.Masturbating = !person.Masturbating;
+            if (!person.Masturbating)
+            {
+                person.Anim.Play("GainControl");
+            }
+        }
+        public static void cursorlockmode()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: cursorlockmode");
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        public static void masturbate()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: masturbate");
+
+            GameObject PersonGenerated = Main.Instance.Player.gameObject;
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            MasturbatePerson(PersonGenerated);
+        }
+
+        public static void npcmasturbate()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmasturbate");
+
+            GameObject PersonGenerated = getPersonInteract();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            MasturbatePerson(PersonGenerated);
+        }
+
+        public static void onlyfemales()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: onlyfemales");
+            Main.Instance.CustomizeMenu.GenderSettings.value = 1;
+            Main.Instance.GlobalVars.Set("GenderSetttings", "1");
+        }
+        public static void bothgenders()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: bothgenders");
+            Main.Instance.CustomizeMenu.GenderSettings.value = 3;
+            Main.Instance.GlobalVars.Set("GenderSetttings", "3");
+        }
+
+        public static void onlymales()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: onlymales");
+            Main.Instance.CustomizeMenu.GenderSettings.value = 2;
+            Main.Instance.GlobalVars.Set("GenderSetttings", "2");
+        }
+
+        public static void mostlyfemales()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mostlyfemales");
+            Main.Instance.CustomizeMenu.GenderSettings.value = 3;
+            Main.Instance.GlobalVars.Set("GenderSetttings", "3");
+        }
+        public static void mostlymales()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mostlymales");
+            Main.Instance.CustomizeMenu.GenderSettings.value = 4;
+            Main.Instance.GlobalVars.Set("GenderSetttings", "4");
+        }
+
+        public static void togglescatcontent()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglescatcontent");
+            Main.Instance.ScatContent = !Main.Instance.ScatContent;
+
+            if (Main.Instance.ScatContent)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("togglescatcontent: scatcontent on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("togglescatcontent: scatcontent off");
+            }
+        }
+
+        public static void dropallweapons()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallweapons");
+            Main.Instance.Player.WeaponInv.DropAllWeapons();
+        }
+
+        public static void npcdropallweapons()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcdropallweapons");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.WeaponInv.DropAllWeapons();
+        }
+
+
+        public static void futachance(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: futachance");
+            int volume = 0;
+            try
+            {
+                volume = int.Parse(value);
+                volume = volume <= 0 ? 0 : volume;
+                volume = volume >= 100 ? 100 : volume;
+            }
+            catch (Exception)
+            {
+                volume = 100;
+            }
+
+            float percent = ((float)volume / 100.0f);
+
+            UI_Customize.FutaChanceValue = percent;
+
+            Main.Instance.GameplayMenu.ShowNotification("futachance: " + volume + "%");
         }
         public static void completeallquests()
         {
@@ -5646,6 +6560,14 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 person.Perks.Add("Trash3");
             }
+
+            misc_Perk[] objectsOfType = UnityEngine.Object.FindObjectsOfType<misc_Perk>(true);
+            for (int index = 0; index < objectsOfType.Length; ++index)
+            {
+                string perk = objectsOfType[index].PerkID;
+                if (!person.Perks.Contains(perk))
+                     person.Perks.Add(perk);
+            }
         }
 
         public static void addallperks()
@@ -5876,6 +6798,36 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
+                string pattern6 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)$)";
+                Regex rg6 = new Regex(pattern6, RegexOptions.IgnoreCase);
+                Match rg6Match = rg6.Match(inputText);
+
+                if (rg6Match.Success)
+                {
+                    handleCommandLength6(rg6Match.Groups["command"].Value.ToLower(), rg6Match.Groups["key"].Value, rg6Match.Groups["value"].Value, rg6Match.Groups["value2"].Value, rg6Match.Groups["value3"].Value, rg6Match.Groups["value4"].Value);
+                    return;
+                }
+
+                string pattern5 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)$)";
+                Regex rg5 = new Regex(pattern5, RegexOptions.IgnoreCase);
+                Match rg5Match = rg5.Match(inputText);
+
+                if (rg5Match.Success)
+                {
+                    handleCommandLength5(rg5Match.Groups["command"].Value.ToLower(), rg5Match.Groups["key"].Value, rg5Match.Groups["value"].Value, rg5Match.Groups["value2"].Value, rg5Match.Groups["value3"].Value);
+                    return;
+                }
+
+                string pattern4 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)$)";
+                Regex rg4 = new Regex(pattern4, RegexOptions.IgnoreCase);
+                Match rg4Match = rg4.Match(inputText);
+
+                if (rg4Match.Success)
+                {
+                    handleCommandLength4(rg4Match.Groups["command"].Value.ToLower(), rg4Match.Groups["key"].Value, rg4Match.Groups["value"].Value, rg4Match.Groups["value2"].Value);
+                    return;
+                }
+
                 string pattern3 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)$)";
                 Regex rg3 = new Regex(pattern3, RegexOptions.IgnoreCase);
                 Match rg3Match = rg3.Match(inputText);
@@ -6336,6 +7288,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "changeskinnude":
                     {
                         changeskinnude("brat");
+                    }
+                    break;
+
+                case "npcchangeskin":
+                    {
+                        npcchangeskin("nameless");
+                    }
+                    break;
+
+                case "npcchangeskinnude":
+                    {
+                        npcchangeskinnude("brat");
                     }
                     break;
 
@@ -6909,6 +7873,138 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listperks":
+                    {
+                        listperks();
+                    }
+                    break;
+
+                case "addallfetishes":
+                    {
+                        addallfetishes();
+                    }
+                    break;
+
+                case "removeallfetishes":
+                    {
+                        removeallfetishes();
+                    }
+                    break;
+
+                case "npcaddallfetishes":
+                    {
+                        npcaddallfetishes();
+                    }
+                    break;
+
+                case "npcremoveallfetishes":
+                    {
+                        npcremoveallfetishes();
+                    }
+                    break;
+
+                case "listfetishes":
+                    {
+                        listfetishes();
+                    }
+                    break;
+
+                case "strip":
+                    {
+                        strip();
+                    }
+                    break;
+
+                case "npcstrip":
+                    {
+                        npcstrip();
+                    }
+                    break;
+
+                case "togglefuta":
+                    {
+                       togglefuta();
+                    }
+                    break;
+
+                case "npctogglefuta":
+                    {
+                        npctogglefuta();
+                    }
+                    break;
+
+                case "cursorlockmode":
+                    {
+                        cursorlockmode();
+                    }
+                    break;
+
+                case "masturbate":
+                    {
+                        masturbate();
+                    }
+                    break;
+
+                case "npcmasturbate":
+                    {
+                        npcmasturbate();
+                    }
+                    break;
+                
+                case "onlyfemales":
+                    {
+                        onlyfemales();
+                    }
+                    break;
+
+                case "bothgenders":
+                    {
+                        bothgenders();
+                    }
+                    break;
+
+                case "onlymales":
+                    {
+                        onlymales();
+                    }
+                    break;
+
+                case "mostlyfemales":
+                    {
+                        mostlyfemales();
+                    }
+                    break;
+
+                case "mostlymales":
+                    {
+                        mostlymales();
+                    }
+                    break;
+
+                case "futachance":
+                    {
+                        futachance("50");
+                    }
+                    break;
+
+                case "togglescatcontent":
+                    {
+                        togglescatcontent();
+                    }
+                    break;
+
+                case "dropallweapons":
+                    {
+                        dropallweapons();
+                    }
+                    break;
+
+                case "npcdropallweapons":
+                    {
+                        npcdropallweapons();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -7129,6 +8225,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcchangeskin":
+                    {
+                        npcchangeskin(value);
+                    }
+                    break;
+
+                case "npcchangeskinnude":
+                    {
+                        npcchangeskinnude(value);
+                    }
+                    break;
+
                 case "openmenu":
                     {
                         openmenu(value);
@@ -7346,6 +8454,60 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "addperk":
+                    {
+                        addperk(valueOriginal);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(valueOriginal);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(valueOriginal);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(valueOriginal);
+                    }
+                    break;
+
+                case "addfetish":
+                    {
+                        addfetish(value);
+                    }
+                    break;
+
+                case "npcaddfetish":
+                    {
+                        npcaddfetish(value);
+                    }
+                    break;
+
+                case "removefetish":
+                    {
+                        removefetish(value);
+                    }
+                    break;
+
+                case "npcremovefetish":
+                    {
+                        npcremovefetish(value);
+                    }
+                    break;
+
+                case "futachance":
+                    {
+                        futachance(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -7392,6 +8554,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "addperk":
+                    {
+                        addperk(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -7399,6 +8585,114 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
+        public static void handleCommandLength4(string command, string key, string value, string value2)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength5(string command, string key, string value, string value2, string value3)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength6(string command, string key, string value, string value2, string value3, string value4)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
 
         /// <summary>
         /// Detects the Unity AudioType from raw audio data.
@@ -8287,6 +9581,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void fly()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fly");
+            Main.Instance.GameplayMenu.ShowNotification("left strg down, space up");
             if (fly_rb == null)
             {
                 if (!is_free_fly_setup)
