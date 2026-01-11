@@ -221,6 +221,9 @@ commands with no params:
 * togglescatcontent -> toggle scat content on or off
 * dropallweapons -> drops all weapons
 * npcdropallweapons -> drops all weapons from the npc the you looked at
+* flyspeedmore -> increases fly speed (fly must be on)
+* flyspeedless -> decreases fly speed (fly must be on)
+* flyspeednormal -> set fly speed to normal (fly must be on)
 
 commands with 1 param:
 

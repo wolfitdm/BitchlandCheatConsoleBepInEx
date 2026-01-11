@@ -48,6 +48,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         // flightSettings
         public static float fly_moveSpeed = 10f;       // Base movement speed
+        public static float fly_moveSpeedDefault = 10f;
         public static float fly_sprintMultiplier = 2f; // Speed multiplier when holding Shift
         public static bool fly_disableGravityWhileFlying = true;
         public static bool is_free_fly_setup = false;
@@ -4689,6 +4690,8 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/personalities.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/personstatelist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/persontypelist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/fetishlist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/perklist.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
@@ -5550,8 +5553,21 @@ namespace BitchlandCheatConsoleBepInEx
 
             person.WeaponInv.DropAllWeapons();
         }
-
-
+        public static void flyspeedmore()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeedmore");
+            fly_moveSpeed += 5f;
+        }
+        public static void flyspeedless()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeedless");
+            fly_moveSpeed += 5f;
+        }
+        public static void flyspeednormal()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeednormal");
+            fly_moveSpeed = fly_moveSpeedDefault;
+        }
         public static void futachance(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: futachance");
@@ -6798,6 +6814,56 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
+                string pattern11 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)\s+(?<value7>\S+)\s+(?<value8>\S+)\s+(?<value9>\S+)$)";
+                Regex rg11 = new Regex(pattern11, RegexOptions.IgnoreCase);
+                Match rg11Match = rg11.Match(inputText);
+
+                if (rg11Match.Success)
+                {
+                    handleCommandLength11(rg11Match.Groups["command"].Value.ToLower(), rg11Match.Groups["key"].Value, rg11Match.Groups["value"].Value, rg11Match.Groups["value2"].Value, rg11Match.Groups["value3"].Value, rg11Match.Groups["value4"].Value, rg11Match.Groups["value5"].Value, rg11Match.Groups["value6"].Value, rg11Match.Groups["value7"].Value, rg11Match.Groups["value8"].Value, rg11Match.Groups["value9"].Value);
+                    return;
+                }
+
+                string pattern10 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)\s+(?<value7>\S+)\s+(?<value8>\S+)$)";
+                Regex rg10 = new Regex(pattern10, RegexOptions.IgnoreCase);
+                Match rg10Match = rg10.Match(inputText);
+
+                if (rg10Match.Success)
+                {
+                    handleCommandLength10(rg10Match.Groups["command"].Value.ToLower(), rg10Match.Groups["key"].Value, rg10Match.Groups["value"].Value, rg10Match.Groups["value2"].Value, rg10Match.Groups["value3"].Value, rg10Match.Groups["value4"].Value, rg10Match.Groups["value5"].Value, rg10Match.Groups["value6"].Value, rg10Match.Groups["value7"].Value, rg10Match.Groups["value8"].Value);
+                    return;
+                }
+
+                string pattern9 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)\s+(?<value7>\S+)$)";
+                Regex rg9 = new Regex(pattern9, RegexOptions.IgnoreCase);
+                Match rg9Match = rg9.Match(inputText);
+
+                if (rg9Match.Success)
+                {
+                    handleCommandLength9(rg9Match.Groups["command"].Value.ToLower(), rg9Match.Groups["key"].Value, rg9Match.Groups["value"].Value, rg9Match.Groups["value2"].Value, rg9Match.Groups["value3"].Value, rg9Match.Groups["value4"].Value, rg9Match.Groups["value5"].Value, rg9Match.Groups["value6"].Value, rg9Match.Groups["value7"].Value);
+                    return;
+                }
+
+                string pattern8 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)$)";
+                Regex rg8 = new Regex(pattern8, RegexOptions.IgnoreCase);
+                Match rg8Match = rg8.Match(inputText);
+
+                if (rg8Match.Success)
+                {
+                    handleCommandLength8(rg8Match.Groups["command"].Value.ToLower(), rg8Match.Groups["key"].Value, rg8Match.Groups["value"].Value, rg8Match.Groups["value2"].Value, rg8Match.Groups["value3"].Value, rg8Match.Groups["value4"].Value, rg8Match.Groups["value5"].Value, rg8Match.Groups["value6"].Value);
+                    return;
+                }
+
+                string pattern7 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)$)";
+                Regex rg7 = new Regex(pattern7, RegexOptions.IgnoreCase);
+                Match rg7Match = rg7.Match(inputText);
+
+                if (rg7Match.Success)
+                {
+                    handleCommandLength7(rg7Match.Groups["command"].Value.ToLower(), rg7Match.Groups["key"].Value, rg7Match.Groups["value"].Value, rg7Match.Groups["value2"].Value, rg7Match.Groups["value3"].Value, rg7Match.Groups["value4"].Value, rg7Match.Groups["value5"].Value);
+                    return;
+                }
+
                 string pattern6 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)$)";
                 Regex rg6 = new Regex(pattern6, RegexOptions.IgnoreCase);
                 Match rg6Match = rg6.Match(inputText);
@@ -8005,6 +8071,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "flyspeedmore":
+                    {
+                        flyspeedmore();
+                    }
+                    break;
+
+                case "flyspeedless":
+                    {
+                        flyspeedless();
+                    }
+                    break;
+
+                case "flyspeednormal":
+                    {
+                        flyspeednormal();
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -8693,6 +8777,185 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void handleCommandLength7(string command, string key, string value, string value2, string value3, string value4, string value5)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength8(string command, string key, string value, string value2, string value3, string value4, string value5, string value6)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength9(string command, string key, string value, string value2, string value3, string value4, string value5, string value6, string value7)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength10(string command, string key, string value, string value2, string value3, string value4, string value5, string value6, string value7, string value8)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
+
+        public static void handleCommandLength11(string command, string key, string value, string value2, string value3, string value4, string value5, string value6, string value7, string value8, string value9)
+        {
+            switch (command)
+            {
+                case "addperk":
+                    {
+                        addperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "removeperk":
+                    {
+                        removeperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "npcaddperk":
+                    {
+                        npcaddperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "npcremoveperk":
+                    {
+                        npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value8);
+                    }
+                    break;
+
+                default:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("No command");
+                    }
+                    break;
+            }
+        }
 
         /// <summary>
         /// Detects the Unity AudioType from raw audio data.
@@ -9582,6 +9845,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fly");
             Main.Instance.GameplayMenu.ShowNotification("left strg down, space up");
+            fly_moveSpeed = fly_moveSpeedDefault;
             if (fly_rb == null)
             {
                 if (!is_free_fly_setup)
