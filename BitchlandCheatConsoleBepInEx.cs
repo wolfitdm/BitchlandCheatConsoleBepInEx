@@ -4704,6 +4704,7 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/persontypelist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/fetishlist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/perklist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/skinlistclothedversion.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");

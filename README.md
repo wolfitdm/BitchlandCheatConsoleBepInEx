@@ -494,3 +494,13 @@ perks:
 * Less weapon jam
 * Stamina lvl 1
 * Trash3
+
+skinlistclothedversion:
+
+* jeanne
+* sarahoffwork
+* uniformedsarah
+* nameless
+* rit
+* carol
+* beth
