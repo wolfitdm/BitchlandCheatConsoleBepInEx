@@ -5574,7 +5574,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void flyspeedless()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeedless");
-            fly_moveSpeed += 5f;
+            fly_moveSpeed -= 5f;
         }
         public static void flyspeednormal()
         {
