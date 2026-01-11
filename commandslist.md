@@ -224,6 +224,8 @@ commands with no params:
 * flyspeedmore -> increases fly speed (fly must be on)
 * flyspeedless -> decreases fly speed (fly must be on)
 * flyspeednormal -> set fly speed to normal (fly must be on)
+* mystats -> show all stats from the player
+* npcstats -> show all stats from the npc the you looked at
 
 commands with 1 param:
 

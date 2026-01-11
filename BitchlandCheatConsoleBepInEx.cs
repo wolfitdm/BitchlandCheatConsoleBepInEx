@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -2727,6 +2728,11 @@ namespace BitchlandCheatConsoleBepInEx
                 personTypeX = Person_Type.Wild;
             }
 
+            if (personTypeX != personType_.ThisType)
+            {
+                personTypeX = personType_.ThisType;
+            }
+
             if (Enum.TryParse<Person_Type>(personType, ignoreCase: true, out Person_Type personType__))
             {
                 personTypeX = personType__;
@@ -3385,7 +3391,13 @@ namespace BitchlandCheatConsoleBepInEx
             misc_Perk[] objectsOfType = UnityEngine.Object.FindObjectsOfType<misc_Perk>(true);
             for (int index = 0; index < objectsOfType.Length; ++index)
             {
-                perks.Add(objectsOfType[index].PerkID);
+                string perk = objectsOfType[index].PerkID;
+                
+                if (perks.Contains(perk)) {
+                    continue;
+                }
+                
+                perks.Add(perk);
             }
 
             if (!perks.Contains("Gaping"))
@@ -5568,6 +5580,58 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeednormal");
             fly_moveSpeed = fly_moveSpeedDefault;
         }
+        public static void stats(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            string full = "---stats---\n";
+            full += "---fetishes---\n";
+
+            for (int i = 0; i < person.Fetishes.Count; i++)
+            {
+                full += person.Fetishes[i].ToString().ToLower() + "\n";
+            }
+
+            full += "---person-state---\n";
+            full += person.State.ToString().ToLower() + "\n";
+            full += "---personality---\n";
+            full += person.Personality.ToString().ToLower() + "\n";
+            full += "---perks---\n";
+
+            for (int i = 0; i < person.Perks.Count; i++)
+            {
+                full += person.Perks[i].ToString() + "\n";
+            }
+            full += "---person-type---\n";
+            full += person.PersonType.ThisType.ToString().ToLower() + "\n";
+            Logger.LogInfo(full);
+            Main.Instance.GameplayMenu.ShowMessageBox(full);
+        }
+
+        public static void mystats()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mystats");
+            stats(Main.Instance.Player.gameObject);
+        }
+        public static void npcstats()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcstats");
+
+            GameObject personGa = getPersonInteract();
+
+            stats(personGa);
+        }
+
         public static void futachance(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: futachance");
@@ -8086,6 +8150,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "flyspeednormal":
                     {
                         flyspeednormal();
+                    }
+                    break;
+
+                case "mystats":
+                    {
+                        mystats();
+                    }
+                    break;
+
+                case "npcstats":
+                    {
+                        npcstats();
                     }
                     break;
 

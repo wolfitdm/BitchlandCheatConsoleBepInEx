@@ -224,6 +224,8 @@ commands with no params:
 * flyspeedmore -> increases fly speed (fly must be on)
 * flyspeedless -> decreases fly speed (fly must be on)
 * flyspeednormal -> set fly speed to normal (fly must be on)
+* mystats -> show all stats from the player
+* npcstats -> show all stats from the npc the you looked at
 
 commands with 1 param:
 
@@ -429,3 +431,66 @@ persontypes:
 * royal
 * clean
 * fes
+
+fetishes:
+
+* clean
+* dirty
+* sadist
+* masochist
+* anal
+* oral
+* outdoors
+* pregnant
+* scat
+* machine
+* dildo
+* futa
+
+perks:
+
+* Love Potion
+* Longer Orgasm
+* Crafting Skill lvl 1
+* Prostitution skill lvl 3
+* Anal Storage
+* Prostitution skill lvl 4
+* Stamina lvl 3
+* Mining Skill lvl 1
+* Scat is Best Nutrition
+* Gaping
+* Scat Arousal
+* Compressed Scat Meals
+* Sensetivity
+* Prostitution skill lvl 1
+* Ranged Damage lvl 1
+* Scat Nutrition lvl 2
+* Intestinal control
+* Scat from other people is Love
+* Melee Damage lvl 2
+* Vehicle Markings
+* Vehicle Skill lvl 2
+* Mining Skill lvl 2
+* Stamina lvl 2
+* Scat Nutrition lvl 1
+* Trading Skill lvl 1
+* Masochist
+* Ranged Damage lvl 2
+* Trash Comfort
+* Reusable Condoms
+* Smell
+* Stamina lvl 4
+* Prostitution skill lvl 2
+* Camo
+* Heavy carry
+* Trash Usefulness
+* Stealth lvl 1
+* Fluid Gather
+* Vaginal Storage
+* Vehicle Skill lvl 1
+* Carry 2nd weapon
+* Intestinal Pleasure
+* Melee Damage lvl 1
+* Less weapon jam
+* Stamina lvl 1
+* Trash3
