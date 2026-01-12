@@ -313,6 +313,9 @@ commands with 1 param:
 * npcchangeskin name -> change skin from the npc the you looked at to name
 * npcchangeskinnude name -> change skin from the npc the you looked at to name
 * futachance percent -> change the futa chance to percent number for example 50
+* playergetvar name -> get the value of the var, from the player
+* npcgetvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
+* getvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
 
 commands with 2 params:
 
@@ -321,6 +324,9 @@ commands with 2 params:
 * setnpcstate number true -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 * npcadditem name amount -> add the npc the you are looked at this item (amount) to your backpack, if the npc don't have a backpack, it gives him a backpack
 * spawnitem name amount -> spawns the item (amount) on the ground where you are standing
+* playersetvar name value -> set the value of the var, from the player
+* npcsetvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
+* setvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
 
 state command examples:
 

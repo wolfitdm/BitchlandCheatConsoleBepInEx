@@ -5,28 +5,24 @@ using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
-using sc.terrain.proceduralpainter;
-using SemanticVersioning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Rendering;
 using UnityEngine.Video;
-using static MapMagic.Nodes.MatrixGenerators.RTPOutput200;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
+using Component = UnityEngine.Component;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -36,7 +32,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static bool showGUI = false;       // Toggle GUI visibility
         private bool pressEnter = false;
         private string inputText = "";      // Stores user input
-        private Rect windowRect = new Rect(20, 20, 300, 150); // GUI window position
+        private Rect windowRect = new Rect(20, 20, 600, 150); // GUI window position
         private static Dictionary<string, Vector3> spawnpoints = new Dictionary<string, Vector3>();
         private static List<string> itemsP = new List<string>();
         private static List<string> spawnpointsNames = new List<string>();
@@ -718,7 +714,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             GUI.SetNextControlName("TextField");
 
-            inputText = GUILayout.TextField(inputText, 100); // Max 50 chars
+            inputText = GUILayout.TextField(inputText, int.MaxValue); // Max 50 chars
 
             bool nothingHasFocus = GUI.GetNameOfFocusedControl() == string.Empty;
             bool hasFocus = GUI.GetNameOfFocusedControl() == "TextField";
@@ -5575,6 +5571,8 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: flyspeedless");
             fly_moveSpeed -= 5f;
+            if (fly_moveSpeed <= 0)
+                fly_moveSpeed = 1f;
         }
         public static void flyspeednormal()
         {
@@ -8669,6 +8667,25 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "getplayervar":
+                    {
+                        getvar(valueOriginal, true);
+                    }
+                    break;
+
+                case "getvar":
+                case "npcgetvar":
+                    {
+                        getvar(valueOriginal, false);
+                    }
+                    break;
+
+                case "getmainvar":
+                    {
+                        getmainvar(valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8739,6 +8756,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setplayervar":
+                    {
+                        setvar(keyOriginal, valueOriginal, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(keyOriginal, valueOriginal, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(keyOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(keyOriginal, valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8771,6 +8813,31 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcremoveperk":
                     {
                         npcremoveperk(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2);
                     }
                     break;
 
@@ -8810,6 +8877,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8843,6 +8935,31 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcremoveperk":
                     {
                         npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4);
                     }
                     break;
 
@@ -8882,6 +8999,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8915,6 +9057,31 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcremoveperk":
                     {
                         npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
                     }
                     break;
 
@@ -8954,6 +9121,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8990,6 +9182,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -9023,6 +9240,31 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcremoveperk":
                     {
                         npcremoveperk(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value8);
+                    }
+                    break;
+
+                case "setplayervar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9, true);
+                    }
+                    break;
+
+                case "setvar":
+                case "npcsetvar":
+                    {
+                        setvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9, false);
+                    }
+                    break;
+
+                case "setmainvar":
+                    {
+                        setmainvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "setglobalvar":
+                    {
+                        setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
                     }
                     break;
 
@@ -10764,6 +11006,1014 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogError(ex.ToString());
             }
             return true;
+        }
+        public static void setGameObjectVar(string key, string value, bool isPlayer, object gameObject)
+        {
+            FieldInfo fieldInfo = Player_getFieldInfo(key, isPlayer, gameObject);
+
+            PropertyInfo propertyInfo = Player_getPropertyInfo(key, isPlayer, gameObject);
+
+            string varnotfound = $"var {key} not found, can not be set to value {value}";
+
+            Type fieldType = null;
+
+            if (fieldInfo != null || propertyInfo != null)
+            {
+                fieldType = fieldInfo != null ? fieldInfo.FieldType : propertyInfo.PropertyType;
+
+                object objValue = fieldInfo != null ? Player_getVar(key, isPlayer, gameObject) : Player_getProperty(key, isPlayer, gameObject);
+
+                if (objValue == null)
+                {
+                    Logger.LogInfo(varnotfound);
+                    Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                    return;
+                }
+
+                object newvalue = null;
+                Type type = null;
+                bool isList = false;
+
+                if (isGenericList(objValue))
+                {
+                    type = GetListElementType(objValue);
+
+                    if (objValue.GetType() != fieldType)
+                    {
+                        Logger.LogInfo(varnotfound);
+                        Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                        return;
+                    }
+
+                    isList = true;
+                }
+                else
+                {
+                    type = objValue.GetType();
+
+                    if (type != fieldType)
+                    {
+                        Logger.LogInfo(varnotfound);
+                        Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                        return;
+                    }
+
+                    isList = false;
+                }
+
+                if (type == null)
+                {
+                    Logger.LogInfo(varnotfound);
+                    Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                    return;
+                }
+
+                if (type.IsEnum)
+                {
+                    newvalue = getEnumByType(type, value);
+                }
+                else if (type == typeof(decimal))
+                {
+                    if (decimal.TryParse(value, out decimal newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(double))
+                {
+                    if (double.TryParse(value, out double newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(float))
+                {
+                    if (float.TryParse(value, out float newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(int))
+                {
+                    if (int.TryParse(value, out int newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(bool))
+                {
+                    if (bool.TryParse(value, out bool newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(ulong))
+                {
+                    if (ulong.TryParse(value, out ulong newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(uint))
+                {
+                    if (uint.TryParse(value, out uint newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(ushort))
+                {
+                    if (ushort.TryParse(value, out ushort newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(sbyte))
+                {
+                    if (sbyte.TryParse(value, out sbyte newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(long))
+                {
+                    if (long.TryParse(value, out long newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(short))
+                {
+                    if (short.TryParse(value, out short newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(char))
+                {
+                    if (char.TryParse(value, out char newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(byte))
+                {
+                    if (byte.TryParse(value, out byte newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(string))
+                {
+                    newvalue = value;
+                }
+
+                // If T is string or value type, just join directly
+                /*if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal))
+                {
+                    foreach (var item in (IEnumerable)realList)
+                    {
+                        values.Add(item.ToString());
+                    }
+                    ;
+                    return String.Join(separator, realList);
+                }*/
+
+                if (newvalue == null)
+                {
+                    Logger.LogInfo(varnotfound);
+                    Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                    return;
+                }
+
+                bool valueremoved = false;
+                bool valueadded = false;
+                bool valueset = false;
+
+                if (isList)
+                {
+                    MethodInfo containsMethod = fieldType.GetMethod("Contains", new[] { type });
+                    MethodInfo addMethod = fieldType.GetMethod("Add", new[] { type });
+                    MethodInfo removeMethod = fieldType.GetMethod("Remove", new[] { type });
+                    object result = containsMethod.Invoke(objValue, new[] { newvalue });
+                    if (result is bool d1)
+                    {
+                        if (d1)
+                        {
+                            removeMethod.Invoke(objValue, new[] { newvalue });
+                            Logger.LogInfo("value removed");
+                            Main.Instance.GameplayMenu.ShowNotification("value removed");
+                            valueremoved = true;
+                            valueset = true;
+                        }
+                        else
+                        {
+                            addMethod.Invoke(objValue, new[] { newvalue });
+                            Logger.LogInfo("value added");
+                            Main.Instance.GameplayMenu.ShowNotification("value added");
+                            valueadded = true;
+                            valueset = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (fieldInfo != null)
+                    {
+                        if (Player_setVar(key, newvalue, isPlayer, gameObject))
+                        {
+                            Logger.LogInfo("value setted");
+                            Main.Instance.GameplayMenu.ShowNotification("value setted");
+                            valueset = true;
+                        }
+                    }
+                    else
+                    {
+                        if (Player_setProperty(key, newvalue, isPlayer, gameObject))
+                        {
+                            Logger.LogInfo("value setted");
+                            Main.Instance.GameplayMenu.ShowNotification("value setted");
+                            valueset = true;
+                        }
+                    }
+                }
+
+                if (valueset)
+                {
+                    string message = $"{key} is set to {value}";
+                    if (valueadded)
+                    {
+                        message = $"{key} is set to {value}";
+                    }
+                    else if (valueremoved)
+                    {
+                        message = $"{key} is set to null";
+                    }
+                    Logger.LogInfo(message);
+                    Main.Instance.GameplayMenu.ShowNotification(message);
+                } else
+                {
+                    Logger.LogInfo(varnotfound);
+                    Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                }
+
+                return;
+            }
+        }
+        public static void setvar(string key, string value, bool isPlayer)
+        {
+            string varname = isPlayer ? "setplayervar" : "setvar";
+            varname = "executed command " + varname;
+            Main.Instance.GameplayMenu.ShowNotification(varname);
+            Person person = null;
+
+            if (isPlayer)
+            {
+                person = Main.Instance.Player;
+                setGameObjectVar(key, value, isPlayer, person);
+                return;
+            } else
+            {
+                GameObject ga = getInteract();
+
+                if (ga == null)
+                {
+                    return;
+                }
+
+                Interactible interact = ga.GetComponent<Interactible>();
+
+                if (interact == null)
+                {
+                    return;
+                }
+
+                if (interact is int_Person)
+                {
+                    int_Person i = (int_Person)interact;
+                    Person f = i.ThisPerson;
+                    person = f;
+                    setGameObjectVar(key, value, isPlayer, person);
+                    return;
+                }
+                else if (interact is Int_Storage)
+                {
+                    Int_Storage i = (Int_Storage)interact;
+                    setGameObjectVar(key, value, isPlayer, i);
+                    return;
+                } else if (interact is int_Lockable)
+                {
+                    int_Lockable i = (int_Lockable)interact;
+                    setGameObjectVar(key, value, isPlayer, i);
+                    return;
+                } else
+                {
+                    setGameObjectVar(key, value, isPlayer, interact);
+                    return;
+                }
+            }
+        }
+
+        public static void setmainvar(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("excecuted command: setmainvar");
+            setGameObjectVar(key, value, false, Main.Instance);
+        }
+        public static void setglobalvar(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("excecuted command: setglobalvar");
+            string message = $"{key} is set to {value}";
+            if (Main.Instance.GlobalVars.ContainsKey(key))
+            {
+                Main.Instance.GlobalVars.Set(key, value);
+            }
+            else
+            {
+                Main.Instance.GlobalVars.Add(key, value);
+            }
+            Main.Instance.GameplayMenu.ShowNotification(message);
+            Logger.LogInfo(message);
+        }
+
+        public static void getGameObjectVar(string key, bool isPlayer, object gameObject)
+        {
+            string varnotfound = $"var {key} not found, value can not be get";
+
+            FieldInfo fieldInfo = Player_getFieldInfo(key, isPlayer, gameObject);
+
+            PropertyInfo propertyInfo = Player_getPropertyInfo(key, isPlayer, gameObject);
+
+            Type fieldType = null;
+
+            if (fieldInfo != null || propertyInfo != null)
+            {
+                fieldType = fieldInfo != null ? fieldInfo.FieldType : propertyInfo.PropertyType;
+
+                object objValue = fieldInfo != null ? Player_getVar(key, isPlayer, gameObject) : Player_getProperty(key, isPlayer, gameObject);
+
+                if (objValue == null)
+                {
+                    Logger.LogInfo(varnotfound);
+                    Main.Instance.GameplayMenu.ShowNotification(varnotfound);
+                    return;
+                }
+
+                string value = ListToString(objValue);
+
+                Logger.LogInfo(value);
+                Main.Instance.GameplayMenu.ShowNotification(value);
+            }
+
+            return;
+        }
+        public static void getvar(string key, bool isPlayer)
+        {
+            string varname = isPlayer ? "getplayervar" : "getvar";
+            varname = "executed command " + varname;
+            Main.Instance.GameplayMenu.ShowNotification(varname);
+            Person person = null;
+
+            if (isPlayer)
+            {
+                person = Main.Instance.Player;
+                getGameObjectVar(key, isPlayer, person);
+                return;
+            }
+            else
+            {
+                GameObject ga = getInteract();
+
+                if (ga == null)
+                {
+                    return;
+                }
+
+                Interactible interact = ga.GetComponent<Interactible>();
+
+                if (interact == null)
+                {
+                    return;
+                }
+
+                if (interact is int_Person)
+                {
+                    int_Person i = (int_Person)interact;
+                    Person f = i.ThisPerson;
+                    person = f;
+                    getGameObjectVar(key, isPlayer, person);
+                    return;
+                }
+                else if (interact is Int_Storage)
+                {
+                    Int_Storage i = (Int_Storage)interact;
+                    getGameObjectVar(key, isPlayer, i);
+                    return;
+                }
+                else if (interact is int_Lockable)
+                {
+                    int_Lockable i = (int_Lockable)interact;
+                    getGameObjectVar(key, isPlayer, i);
+                    return;
+                }
+                else
+                {
+                    getGameObjectVar(key, isPlayer, interact);
+                    return;
+                }
+            }
+        }
+
+        public static void getmainvar(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("excecuted command: getmainvar");
+            getGameObjectVar(key, false, Main.Instance);
+        }
+        public static void getglobalvar(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("excecuted command: getglobalvar");
+            string value = "null";
+            string message = $"{key} is {value}";
+            if (Main.Instance.GlobalVars.ContainsKey(key))
+            {
+                value = Main.Instance.GlobalVars.Get(key);
+                message = $"{key} is {value}";
+            }
+            Main.Instance.GameplayMenu.ShowNotification(message);
+            Logger.LogInfo(message);
+        }
+        public static Type GetListElementType(object list)
+        {
+            if (list == null)
+            {
+                return null;
+            }
+
+            Type type = list.GetType();
+
+            // Check if it's a generic type and specifically a List<>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return type.GetGenericArguments()[0]; // First generic argument is T
+            }
+
+            return null; // Not a List<T>
+        }
+
+        public static bool isNonGenericList(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Type type = obj.GetType();
+            // Check for non-generic list (ArrayList or implements IList but not generic)
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return false;
+            }
+            else if (obj is IList && !type.IsGenericType)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool isGenericList(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Type type = obj.GetType();
+            // Check for non-generic list (ArrayList or implements IList but not generic)
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return true;
+            }
+            else if (obj is IList && !type.IsGenericType)
+            {
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool isList(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Type type = obj.GetType();
+            // Check for non-generic list (ArrayList or implements IList but not generic)
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return true;
+            }
+            else if (obj is IList && !type.IsGenericType)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static string ListToString(object list, string separator = ", ")
+        {
+            if (list == null)
+                return string.Empty;
+
+            Type type = list.GetType();
+
+            // Check if it's a generic type and specifically a List<>
+            if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(List<>))
+            {
+                return list.ToString(); // First generic argument is T
+            }
+
+            List<string> values = new List<string>();
+
+            foreach (var item in (IEnumerable)list)
+            {
+                values.Add(item.ToString());
+            }
+
+            return String.Join(separator, values.ToArray());
+        }
+
+        static Type getEnumType(string enumtype)
+        {
+            string message = null;
+
+            Type type = null;
+
+            try
+            {
+                // Get the type of the object
+                type = MyGetType(enumtype);
+            }
+            catch (Exception e)
+            {
+                message = e.ToString();
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            string className = enumtype;
+            if (type == null)
+            {
+                message = "enum " + className + " not found, the dev have removed it!";
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            // Validate that the type is actually an enum
+            if (!type.IsEnum)
+            {
+                message = "Provided type is not an enum.";
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            return type;
+        }
+
+        static object getEnumByType(Type type, string enumkey)
+        {
+            string message = null;
+
+            if (type == null)
+            {
+                message = "Provided type is null and is not an enum.";
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            // Validate that the type is actually an enum
+            if (!type.IsEnum)
+            {
+                message = "Provided type is not an enum.";
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            // Validate that the enum value exists
+            bool isDefinedOne = Enum.IsDefined(type, enumkey);
+            bool isDefinedSecond = Enum.GetNames(type).Any(x => x.ToLower() == enumkey);
+            bool isDefined = isDefinedOne || isDefinedSecond;
+
+            if (!isDefined)
+            {
+                message = $"'{enumkey}' is not a valid value for {type.Name}.";
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            try
+            {
+                // Get the enum value object
+                object enumValue = Enum.Parse(type, enumkey, true);
+
+                // Get the underlying numeric value using reflection
+                object numericValue = Convert.ChangeType(enumValue, Enum.GetUnderlyingType(type));
+
+                return numericValue;
+            }
+            catch (Exception e)
+            {
+                message = e.ToString();
+                Logger.LogInfo(message);
+                return null;
+            }
+
+            return null;
+        }
+        static object getEnum(string enumtype, string enumkey)
+        {
+            Type type = getEnumType(enumtype);
+            return getEnumByType(type, enumkey);
+        }
+        static string[] getEnumString(string typeValue)
+        {
+            char separator = '.';
+
+            if (typeValue == null)
+            {
+                return null;
+            }
+
+            if (typeValue.Length == 0)
+            {
+                return null;
+            }
+
+            if (!typeValue.Contains("" + separator))
+            {
+                return null;
+            }
+
+            // Split the string
+            string[] parts = typeValue.Split(separator);
+            if (parts.Length < 2)
+            {
+                return null;
+            }
+
+            string lastpath = parts[1];
+
+            for (int i = 2; i < parts.Length; i++)
+            {
+                lastpath = lastpath + "." + parts[i];
+            }
+
+            parts[1] = lastpath;
+
+            return new string[]
+            {
+                parts[0],
+                parts[1]
+            };
+        }
+        public static FieldInfo getFieldInfo(object obj, string field, BindingFlags flags)
+        {
+            try
+            {
+                if (obj == null)
+                {
+                    Logger.LogInfo("getFieldInfo: 1 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                Type type = obj.GetType();
+
+                if (type == null)
+                {
+                    Logger.LogInfo("getFieldInfo: 2 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                // Get the FieldInfo for the public static field
+                FieldInfo fieldInfo = type.GetField(
+                    field,
+                    flags
+                );
+
+                if (fieldInfo == null)
+                {
+                    Logger.LogInfo("getFieldInfo: 3 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                return fieldInfo;
+            }
+            catch (Exception e)
+            {
+                Logger.LogInfo("getFieldInfo: 4 field " + field + " not found, the dev have removed it!");
+                Logger.LogError(e.ToString());
+                return null;
+            }
+        }
+
+        public static PropertyInfo getPropertyInfo(object obj, string field, BindingFlags flags)
+        {
+            if (obj == null)
+            {
+                Logger.LogInfo("getPropertyInfo: 1 field " + field + " not found, the dev have removed it!");
+                return null;
+            }
+
+            Type myType1 = obj.GetType();
+
+            if (myType1 == null)
+            {
+                Logger.LogInfo("getPropertyInfo: 2 field " + field + " not found, the dev have removed it!");
+                return null;
+            }
+
+            try
+            {
+                // Get the FieldInfo for the public static field
+                PropertyInfo fieldInfo = myType1.GetProperty(
+                    field,
+                    flags
+                );
+
+                if (fieldInfo == null)
+                {
+                    Logger.LogInfo("getPropertyInfo: 3 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                return fieldInfo;
+            }
+            catch (Exception e)
+            {
+                Logger.LogInfo(e.ToString());
+                return null;
+            }
+        }
+        public static object UW_getVarEnum(object obj, string field, BindingFlags flags, string enumkey)
+        {
+            try
+            {
+                FieldInfo fieldInfo = getFieldInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    return null;
+                }
+
+                Type fieldType = fieldInfo.FieldType;
+
+                // Validate that the type is actually an enum
+                if (!fieldType.IsEnum)
+                {
+                    Logger.LogInfo("UW_getVarEnum: 4 Provided type is not an enum.");
+                    return null;
+                }
+
+                object enumvalue = getEnumByType(fieldType, enumkey);
+
+                if (enumvalue == null)
+                {
+                    Logger.LogInfo("UW_getVarEnum: 5 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                return enumvalue;
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return null;
+            }
+        }
+        public static bool UW_setVarEnumByKey(object obj, string field, BindingFlags flags, string enumkey)
+        {
+            object value = UW_getVarEnum(obj, field, flags, enumkey);
+
+            return UW_setVarEnumByValue(obj, field, flags, value);
+        }
+        public static bool UW_setVarEnumByValue(object obj, string field, BindingFlags flags, object value)
+        {
+            try
+            {
+                // Get the FieldInfo for the public static field
+                FieldInfo fieldInfo = getFieldInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    return false;
+                }
+
+                Type fieldType = fieldInfo.FieldType;
+
+                // Validate that the type is actually an enum
+                if (!fieldType.IsEnum)
+                {
+                    Logger.LogInfo("UW_setVarEnumByValue: 1 Provided type is not an enum.");
+                    return false;
+                }
+
+                fieldInfo.SetValue(obj, value);
+                return true;
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return false;
+            }
+        }
+        public static bool UW_setVar(object obj, string field, BindingFlags flags, object value)
+        {
+            try
+            {
+                // Get the FieldInfo for the public static field
+                FieldInfo fieldInfo = getFieldInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    return false;
+                }
+
+                Type fieldType = fieldInfo.FieldType;
+                // Validate that the type is actually an enum
+                if (fieldType.IsEnum)
+                {
+                    Logger.LogInfo("UW_setVar: 1 please use the enum functions!");
+                }
+
+                fieldInfo.SetValue(obj, value);
+                return true;
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return false;
+            }
+        }
+        public static bool UW_setProperty(object obj, string field, BindingFlags flags, object value)
+        {
+            try { 
+                PropertyInfo fieldInfo = getPropertyInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    Logger.LogInfo("UW_setProperty: 1 field " + field + " not found, the dev have removed it!");
+                    return false;
+                }
+
+                fieldInfo.SetValue(obj, value, null);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.LogInfo(e.ToString());
+                return false;
+            }
+        }
+        public static object UW_getVar(object obj, string field, BindingFlags flags)
+        {
+            try
+            {
+                // Get the FieldInfo for the public static field
+                FieldInfo fieldInfo = getFieldInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    return null;
+                }
+
+                Type fieldType = fieldInfo.FieldType;
+
+                object value = fieldInfo.GetValue(obj);
+
+                if (fieldType.IsEnum)
+                {
+                    Logger.LogInfo("UW_getVar: 1 please use the enum functions!");
+                }
+
+                return value;
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                return null;
+            }
+        }
+        public static object UW_getProperty(object obj, string field, BindingFlags flags)
+        {
+            try
+            {
+                PropertyInfo fieldInfo = getPropertyInfo(obj, field, flags);
+
+                if (fieldInfo == null)
+                {
+                    Logger.LogInfo("UW_getProperty: 1 field " + field + " not found, the dev have removed it!");
+                    return null;
+                }
+
+                return fieldInfo.GetValue(obj, null);
+            }
+            catch (Exception e)
+            {
+                Logger.LogInfo(e.ToString());
+                return null;
+            }
+        }
+        public static FieldInfo Player_getFieldInfo(string field, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return null;
+            }
+            object obj = gameObj;
+            return getFieldInfo(obj, field, flags);
+        }
+        public static PropertyInfo Player_getPropertyInfo(string field, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return null;
+            }
+            object obj = gameObj;
+            return getPropertyInfo(obj, field, flags);
+        }
+
+        public static bool Player_setVar(string field, object value, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_setVar(obj, field, flags, value);
+        }
+        public static object Player_getVar(string field, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_getVar(obj, field, flags);
+        }
+        public static bool Player_setVarEnum(string field, string enumkey, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_setVarEnumByKey(obj, field, flags, enumkey);
+        }
+        public static object Player_getVarEnum(string field, string enumkey, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_getVarEnum(obj, field, flags, enumkey);
+        }
+        public static bool Player_setProperty(string field, object value, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_setProperty(obj, field, flags, value);
+        }
+        public static object Player_getProperty(string field, bool isPlayer = true, object personGa = null)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+            object gameObj = isPlayer ? Main.Instance.Player : personGa;
+            if (gameObj == null)
+            {
+                return false;
+            }
+            object obj = gameObj;
+            return UW_getProperty(obj, field, flags);
         }
 
         /*
