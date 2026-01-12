@@ -226,6 +226,7 @@ commands with no params:
 * flyspeednormal -> set fly speed to normal (fly must be on)
 * mystats -> show all stats from the player
 * npcstats -> show all stats from the npc the you looked at
+* version -> shows current version
 
 commands with 1 param:
 

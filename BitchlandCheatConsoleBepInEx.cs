@@ -8164,6 +8164,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "version":
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("version: final");
+                        Logger.LogInfo("version: final");
+                    }
+                    break;
+
                 case "helloworld":
                     {
                         Main.Instance.GameplayMenu.ShowMessageBox("hello world");
@@ -11072,23 +11079,16 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     newvalue = getEnumByType(type, value);
                 }
-                else if (type == typeof(decimal))
-                {
-                    if (decimal.TryParse(value, out decimal newResult))
-                    {
-                        newvalue = newResult;
-                    }
-                }
                 else if (type == typeof(double))
                 {
-                    if (double.TryParse(value, out double newResult))
+                    if (double.TryParse(value, NumberStyles.Float, culture, out double newResult))
                     {
                         newvalue = newResult;
                     }
                 }
                 else if (type == typeof(float))
                 {
-                    if (float.TryParse(value, out float newResult))
+                    if (float.TryParse(value, NumberStyles.Float, culture, out float newResult))
                     {
                         newvalue = newResult;
                     }
@@ -11159,6 +11159,13 @@ namespace BitchlandCheatConsoleBepInEx
                 else if (type == typeof(byte))
                 {
                     if (byte.TryParse(value, out byte newResult))
+                    {
+                        newvalue = newResult;
+                    }
+                }
+                else if (type == typeof(decimal))
+                {
+                    if (decimal.TryParse(value, NumberStyles.Float, culture, out decimal newResult))
                     {
                         newvalue = newResult;
                     }
