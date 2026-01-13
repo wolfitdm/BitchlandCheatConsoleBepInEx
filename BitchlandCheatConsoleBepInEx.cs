@@ -8167,8 +8167,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 1.0");
-                        Logger.LogInfo("version: final 1.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 2.0");
+                        Logger.LogInfo("version: final 2.0");
                     }
                     break;
 
@@ -11586,6 +11586,10 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (!funcCanCalled)
                 {
+                    funcCanCalled = callFunc(key, person.WeaponInv);
+                }
+                if (!funcCanCalled)
+                {
                     funcCanCalled = callFunc(key, person.ThisPersonInt);
                 }
             }
@@ -11614,6 +11618,10 @@ namespace BitchlandCheatConsoleBepInEx
                     if (!funcCanCalled)
                     {
                         funcCanCalled = callFunc(key, person.TheHealth);
+                    }
+                    if (!funcCanCalled)
+                    {
+                        funcCanCalled = callFunc(key, person.WeaponInv);
                     }
                     if (!funcCanCalled)
                     {
