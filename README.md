@@ -317,6 +317,8 @@ commands with 1 param:
 * playergetvar name -> get the value of the var, from the player
 * npcgetvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
 * getvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
+* callp funcname -> call the func name from the player
+* call funcname -> call the func name from the npc,object,container and so on, the you are looked at
 
 commands with 2 params:
 

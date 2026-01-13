@@ -23,6 +23,7 @@ using UnityEngine.Video;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using Component = UnityEngine.Component;
+using System.Runtime.CompilerServices;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -8166,8 +8167,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final");
-                        Logger.LogInfo("version: final");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 1.0");
+                        Logger.LogInfo("version: final 1.0");
                     }
                     break;
 
@@ -8690,6 +8691,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "getmainvar":
                     {
                         getmainvar(valueOriginal);
+                    }
+                    break;
+
+                case "callp":
+                    {
+                        call(valueOriginal, true);
+                    }
+                    break;
+
+                case "call":
+                    {
+                        call(valueOriginal, false);
                     }
                     break;
 
@@ -11014,7 +11027,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
             return true;
         }
-        public static void setGameObjectVar(string key, string value, bool isPlayer, object gameObject)
+        public static bool setGameObjectVar(string key, string value, bool isPlayer, object gameObject)
         {
             FieldInfo fieldInfo = Player_getFieldInfo(key, isPlayer, gameObject);
 
@@ -11034,7 +11047,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     Logger.LogInfo(varnotfound);
                     Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                    return;
+                    return false;
                 }
 
                 object newvalue = null;
@@ -11049,7 +11062,7 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         Logger.LogInfo(varnotfound);
                         Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                        return;
+                        return false;
                     }
 
                     isList = true;
@@ -11062,7 +11075,7 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         Logger.LogInfo(varnotfound);
                         Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                        return;
+                        return false;
                     }
 
                     isList = false;
@@ -11072,7 +11085,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     Logger.LogInfo(varnotfound);
                     Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                    return;
+                    return false;
                 }
 
                 if (type.IsEnum)
@@ -11190,7 +11203,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     Logger.LogInfo(varnotfound);
                     Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                    return;
+                    return false;
                 }
 
                 bool valueremoved = false;
@@ -11202,6 +11215,12 @@ namespace BitchlandCheatConsoleBepInEx
                     MethodInfo containsMethod = fieldType.GetMethod("Contains", new[] { type });
                     MethodInfo addMethod = fieldType.GetMethod("Add", new[] { type });
                     MethodInfo removeMethod = fieldType.GetMethod("Remove", new[] { type });
+                    if (containsMethod == null || addMethod == null || removeMethod == null)
+                    {
+                        Logger.LogInfo("error containsMethod or addMethod or removeMethod is not found!");
+                        Main.Instance.GameplayMenu.ShowNotification("error containsMethod or addMethod or removeMethod is not found!");
+                        return false;
+                    }
                     object result = containsMethod.Invoke(objValue, new[] { newvalue });
                     if (result is bool d1)
                     {
@@ -11258,14 +11277,16 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     Logger.LogInfo(message);
                     Main.Instance.GameplayMenu.ShowNotification(message);
+                    return true;
                 } else
                 {
                     Logger.LogInfo(varnotfound);
                     Main.Instance.GameplayMenu.ShowNotification(varnotfound);
                 }
 
-                return;
+                return false;
             }
+            return false;
         }
         public static void setvar(string key, string value, bool isPlayer)
         {
@@ -11273,11 +11294,19 @@ namespace BitchlandCheatConsoleBepInEx
             varname = "executed command " + varname;
             Main.Instance.GameplayMenu.ShowNotification(varname);
             Person person = null;
-
+            bool varIsFound = false;
             if (isPlayer)
             {
                 person = Main.Instance.Player;
-                setGameObjectVar(key, value, isPlayer, person);
+                varIsFound = setGameObjectVar(key, value, isPlayer, person);
+                if (!varIsFound)
+                {
+                    varIsFound = setGameObjectVar(key, value, isPlayer, person.TheHealth);
+                }
+                if (!varIsFound)
+                {
+                    varIsFound = setGameObjectVar(key, value, isPlayer, person.ThisPersonInt);
+                }
                 return;
             } else
             {
@@ -11300,7 +11329,15 @@ namespace BitchlandCheatConsoleBepInEx
                     int_Person i = (int_Person)interact;
                     Person f = i.ThisPerson;
                     person = f;
-                    setGameObjectVar(key, value, isPlayer, person);
+                    varIsFound = setGameObjectVar(key, value, isPlayer, person);
+                    if (!varIsFound)
+                    {
+                        varIsFound = setGameObjectVar(key, value, isPlayer, person.TheHealth);
+                    }
+                    if (!varIsFound)
+                    {
+                        varIsFound = setGameObjectVar(key, value, isPlayer, person.ThisPersonInt);
+                    }
                     return;
                 }
                 else if (interact is Int_Storage)
@@ -11342,7 +11379,7 @@ namespace BitchlandCheatConsoleBepInEx
             Logger.LogInfo(message);
         }
 
-        public static void getGameObjectVar(string key, bool isPlayer, object gameObject)
+        public static bool getGameObjectVar(string key, bool isPlayer, object gameObject)
         {
             string varnotfound = $"var {key} not found, value can not be get";
 
@@ -11362,16 +11399,17 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     Logger.LogInfo(varnotfound);
                     Main.Instance.GameplayMenu.ShowNotification(varnotfound);
-                    return;
+                    return false;
                 }
 
                 string value = ListToString(objValue);
 
                 Logger.LogInfo(value);
                 Main.Instance.GameplayMenu.ShowNotification(value);
+                return true;
             }
 
-            return;
+            return false;
         }
         public static void getvar(string key, bool isPlayer)
         {
@@ -11447,6 +11485,161 @@ namespace BitchlandCheatConsoleBepInEx
             }
             Main.Instance.GameplayMenu.ShowNotification(message);
             Logger.LogInfo(message);
+        }
+
+        public static bool callFunc(string key, object obj)
+        {
+            bool funcCanCalled = false;
+            try
+            {
+                if (obj == null) return funcCanCalled;
+
+                // Get all public instance methods with that name
+                
+                MethodInfo[] methods = obj.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                MethodInfo[] methods2 = obj.GetType().GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+                MethodInfo[] methods3 = obj.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodInfo[] methods4 = obj.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+
+                
+                if (methods == null) methods = new MethodInfo[0];
+                if (methods2 == null) methods2 = new MethodInfo[0];
+                if (methods3 == null) methods3 = new MethodInfo[0];
+                if (methods4 == null) methods4 = new MethodInfo[0];
+
+
+                List<MethodInfo> allMethods = new List<MethodInfo>();
+
+                for (int i = 0; i < methods.Length; i++)
+                {
+                    allMethods.Add(methods[i]);
+                }
+
+                for (int i = 0; i < methods2.Length; i++)
+                {
+                    allMethods.Add(methods2[i]);
+                }
+
+                for (int i = 0; i < methods3.Length; i++)
+                {
+                    allMethods.Add(methods3[i]);
+                }
+
+                for (int i = 0; i < methods4.Length; i++)
+                {
+                    allMethods.Add(methods4[i]);
+                }
+
+                List<MethodInfo> list = new List<MethodInfo>();
+
+                for (int i  = 0; i < allMethods.Count; i++)
+                {
+                    if (allMethods[i].Name == key)
+                    {
+                        ParameterInfo[] paramsInfos = allMethods[i].GetParameters();
+                        if (paramsInfos == null) continue;
+                        int paramsLength = paramsInfos.Length;
+                        for (int j = 0; j < paramsInfos.Length; j++)
+                        {
+                            if (paramsInfos[j].HasDefaultValue)
+                            {
+                                paramsLength--;
+                            }
+                        }
+                        if (paramsLength == 0)
+                            list.Add(allMethods[i]);
+                    }
+                }
+
+                if (list.Count == 0) return funcCanCalled;
+
+                funcCanCalled = true;
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].Invoke(obj, null);
+                }
+
+                return funcCanCalled;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+            }
+            return funcCanCalled;        
+        }
+        public static void call(string key, bool isPlayer)
+        {
+            string varname = isPlayer ? "callp" : "call";
+            varname = "executed command " + varname;
+            Main.Instance.GameplayMenu.ShowNotification(varname);
+            Person person = null;
+            bool funcCanCalled = false;
+
+            if (isPlayer)
+            {
+                person = Main.Instance.Player;
+                funcCanCalled = callFunc(key, person);
+                if (!funcCanCalled)
+                {
+                    funcCanCalled = callFunc(key, person.TheHealth);
+                }
+                if (!funcCanCalled)
+                {
+                    funcCanCalled = callFunc(key, person.ThisPersonInt);
+                }
+            }
+            else
+            {
+                GameObject ga = getInteract();
+
+                if (ga == null)
+                {
+                    return;
+                }
+
+                Interactible interact = ga.GetComponent<Interactible>();
+
+                if (interact == null)
+                {
+                    return;
+                }
+
+                if (interact is int_Person)
+                {
+                    int_Person i = (int_Person)interact;
+                    Person f = i.ThisPerson;
+                    person = f;
+                    funcCanCalled = callFunc(key, person);
+                    if (!funcCanCalled)
+                    {
+                        funcCanCalled = callFunc(key, person.TheHealth);
+                    }
+                    if (!funcCanCalled)
+                    {
+                        funcCanCalled = callFunc(key, person.ThisPersonInt);
+                    }
+                }
+                else if (interact is Int_Storage)
+                {
+                    Int_Storage i = (Int_Storage)interact;
+                    funcCanCalled = callFunc(key, i);
+                }
+                else if (interact is int_Lockable)
+                {
+                    int_Lockable i = (int_Lockable)interact;
+                    funcCanCalled = callFunc(key, i);
+                }
+                else
+                {
+                    funcCanCalled = callFunc(key, interact);
+                }
+            }
+
+            string executed = funcCanCalled ? " executed" : " can not be found!";
+            string message = $"func: {key} {executed}";
+            Logger.LogInfo(message);
+            Main.Instance.GameplayMenu.ShowNotification(message);
         }
         public static Type GetListElementType(object list)
         {
