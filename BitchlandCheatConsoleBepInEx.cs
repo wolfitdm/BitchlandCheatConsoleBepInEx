@@ -8167,8 +8167,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 2.0");
-                        Logger.LogInfo("version: final 2.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 3.0");
+                        Logger.LogInfo("version: final 3.0");
                     }
                     break;
 
@@ -11305,6 +11305,10 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (!varIsFound)
                 {
+                    varIsFound = setGameObjectVar(key, value, isPlayer, person.WeaponInv);
+                }
+                if (!varIsFound)
+                {
                     varIsFound = setGameObjectVar(key, value, isPlayer, person.ThisPersonInt);
                 }
                 return;
@@ -11333,6 +11337,10 @@ namespace BitchlandCheatConsoleBepInEx
                     if (!varIsFound)
                     {
                         varIsFound = setGameObjectVar(key, value, isPlayer, person.TheHealth);
+                    }
+                    if (!varIsFound)
+                    {
+                        varIsFound = setGameObjectVar(key, value, isPlayer, person.WeaponInv);
                     }
                     if (!varIsFound)
                     {
@@ -11417,11 +11425,24 @@ namespace BitchlandCheatConsoleBepInEx
             varname = "executed command " + varname;
             Main.Instance.GameplayMenu.ShowNotification(varname);
             Person person = null;
+            bool varIsFound = false;
 
             if (isPlayer)
             {
                 person = Main.Instance.Player;
-                getGameObjectVar(key, isPlayer, person);
+                varIsFound = getGameObjectVar(key, isPlayer, person);
+                if (!varIsFound)
+                {
+                    varIsFound = getGameObjectVar(key, isPlayer, person.TheHealth);
+                }
+                if (!varIsFound)
+                {
+                    varIsFound = getGameObjectVar(key, isPlayer, person.WeaponInv);
+                }
+                if (!varIsFound)
+                {
+                    varIsFound = getGameObjectVar(key, isPlayer, person.ThisPersonInt);
+                }
                 return;
             }
             else
@@ -11445,7 +11466,19 @@ namespace BitchlandCheatConsoleBepInEx
                     int_Person i = (int_Person)interact;
                     Person f = i.ThisPerson;
                     person = f;
-                    getGameObjectVar(key, isPlayer, person);
+                    varIsFound = getGameObjectVar(key, isPlayer, person);
+                    if (!varIsFound)
+                    {
+                        varIsFound = getGameObjectVar(key, isPlayer, person.TheHealth);
+                    }
+                    if (!varIsFound)
+                    {
+                        varIsFound = getGameObjectVar(key, isPlayer, person.WeaponInv);
+                    }
+                    if (!varIsFound)
+                    {
+                        varIsFound = getGameObjectVar(key, isPlayer, person.ThisPersonInt);
+                    }
                     return;
                 }
                 else if (interact is Int_Storage)
