@@ -338,6 +338,7 @@ commands with 1 param:
 * getvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
 * callp funcname -> call the func name from the player
 * call funcname -> call the func name from the npc,object,container and so on, the you are looked at
+* getmainvar name -> get the variable value from the class Main.cs
 * showsexposes SexType -> show sex poses from type category e.g 0 -> Finger
 * sexnpc SexPose -> sexnpc 2 SexPose ->  have sex with the npc the you looked at
 * npcsex SexPose -> npcsex 2 SexPose -> the selected npcs with the command npcsexselect have now sex
@@ -362,6 +363,7 @@ commands with 2 params:
 * playersetvar name value -> set the value of the var, from the player
 * npcsetvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
 * setvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
+* setmainvar name value -> set the variable value from the class Main.cs
 * sexnpc SexType SexPose -> have sex with the npc the you looked at
 * npcsex SexType SexPose -> the selected npcs with the command npcsexselect have now sex
 * sexnpcforce SexType SexPose -> have force sex with the npc the you looked at
