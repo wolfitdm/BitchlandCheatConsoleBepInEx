@@ -246,6 +246,7 @@ commands with no params:
 * npcsexselectthreeclear -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 3 npcs, clears old selection
 * listfollower -> lists all your follower
 * mainfollower -> set the npc the you looked at on first position, if this npc the you looked at is not following you, it add the npc to your follower
+* rerunmainthreads -> rerun mainthreads also removed main threads
 
 commands with 1 param:
 
