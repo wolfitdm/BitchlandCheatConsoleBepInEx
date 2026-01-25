@@ -5,6 +5,7 @@ using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
+using MapMagic.Expose;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,16 +15,18 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
 using UnityEngine.Video;
+using static UnityEngine.InputSystem.InputRemoting;
+using Component = UnityEngine.Component;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
-using Component = UnityEngine.Component;
-using System.Runtime.CompilerServices;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -88,6 +91,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static Rect fs = new Rect(randX, randY, screenWidth - randX, screenHeight - randY);
 
         public static Vector3 fly_velocity = Vector3.zero;
+
+        public static bool allowCursorOnClose = false;
 
         /*public static string message = "Hello! This is a message box.";
 
@@ -696,6 +701,8 @@ namespace BitchlandCheatConsoleBepInEx
             HandleFlight();
         }
 
+        private static string lastCommand = "";
+
         private void OnGUI()
         {
             //messageBoxOnGui();
@@ -706,7 +713,6 @@ namespace BitchlandCheatConsoleBepInEx
             // Draw a draggable window
             windowRect = GUI.Window(0, windowRect, DrawWindow, "BitchlandCheatConsole");
         }
-
         private void DrawWindow(int windowID)
         {
             GUILayout.Label("Command:");
@@ -736,6 +742,11 @@ namespace BitchlandCheatConsoleBepInEx
                 showGUI = !showGUI;
             }
 
+            if (!showGUI && inputText != null && inputText == string.Empty)
+            {
+                inputText = lastCommand;
+            }
+
             if (pressEnter)
             {
                 pressSubmitButton = true;
@@ -753,6 +764,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand(inputText);
                 }
+                lastCommand = inputText;
                 inputText = "";
             }
 
@@ -1216,6 +1228,12 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (ga == null)
             {
+                Person person = Main.Instance.GameplayMenu.PersonChattingTo;
+                if (person != null)
+                {
+                    ga = person.gameObject;
+                    return ga;
+                }
                 return null;
             }
 
@@ -4556,11 +4574,8 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static void npcadditem(string key, string value)
+        public static void npcadditembyitem(GameObject personGa, string key, string value)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: npcadditem");
-            GameObject personGa = getPersonInteract();
-
             if (personGa == null)
             {
                 return;
@@ -4588,6 +4603,11 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Main.Instance.GameplayMenu.ShowNotification("npcadditem: No item found");
             }
+        }
+        public static void npcadditem(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcadditem");
+            npcadditembyitem(getPersonInteract(), key, value);
         }
 
 
@@ -8165,10 +8185,127 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "rerunmainthreads":
+                    {
+                        rerunmainthreads();
+                    }
+                    break;
+
+                case "npcsexselect":
+                    {
+                        npcsexselect();
+                    }
+                    break;
+
+                case "npcsexselectthree":
+                    {
+                        npcsexselectthree();
+                    }
+                    break;
+
+                case "npcsexselectclear":
+                    {
+                        npcsexselect(true);
+                    }
+                    break;
+
+                case "npcsexselectthreeclear":
+                    {
+                        npcsexselectthree(true);
+                    }
+                    break;
+
+                case "showsexposes":
+                    {
+                        showsexposes(null);
+                    }
+                    break;
+
+                case "sexnpc":
+                    {
+                        sexnpc("2", "0", false);
+                    }
+                    break;
+
+                case "npcsex":
+                    {
+                        npcsex("2", "0", false);
+                    }
+                    break;
+
+                case "sexnpcforce":
+                    {
+                        sexnpc("2", "0", true);
+                    }
+                    break;
+
+                case "npcsexforce":
+                    {
+                        npcsex("2", "0", true);
+                    }
+                    break;
+
+                case "sexnpcfollower":
+                    {
+                        sexnpcfollower("2", "0", false);
+                    }
+                    break;
+
+                case "npcsexfollower":
+                    {
+                        npcsexfollower("2", "0", false);
+                    }
+                    break;
+
+                case "sexnpcfollowerforce":
+                    {
+                        sexnpcfollower("2", "0", true);
+                    }
+                    break;
+
+                case "npcsexfollowerforce":
+                    {
+                        npcsexfollower("2", "0", true);
+                    }
+                    break;
+
+                case "fucknpcfollower":
+                case "switchnpcfollowerchat":
+                    {
+                        switchnpcfollowerchat();
+                    }
+                    break;
+
+                case "fucknpc":
+                case "switchnpcchat":
+                    {
+                        switchnpcchat();
+                    }
+                    break;
+
+                case "fuckxoxa":
+                    {
+                        fuckxoxareally();
+                    }
+                    break;
+
+                case "npcmainfollower":
+                case "mainfollower":
+                    {
+                        mainfollower();
+                    }
+                    break;
+
+                case "listfollower":
+                    {
+                        listfollower();
+                    }
+                    break;
+
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 3.0");
-                        Logger.LogInfo("version: final 3.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 4.0");
+                        Logger.LogInfo("version: final 4.0");
                     }
                     break;
 
@@ -8706,6 +8843,74 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "showsexposes":
+                    {
+                        showsexposes(value);
+                    }
+                    break;
+
+                case "sexnpc":
+                    {
+                        sexnpc("2", value, false);
+                    }
+                    break;
+
+                case "npcsex":
+                    {
+                        npcsex("2", value, false);
+                    }
+                    break;
+
+                case "sexnpcforce":
+                    {
+                        sexnpc("2", value, true);
+                    }
+                    break;
+
+                case "npcsexforce":
+                    {
+                        npcsex("2", value, true);
+                    }
+                    break;
+
+                case "sexnpcfollower":
+                    {
+                        sexnpcfollower("2", value, false);
+                    }
+                    break;
+
+                case "npcsexfollower":
+                    {
+                        npcsexfollower("2", value, false);
+                    }
+                    break;
+
+                case "sexnpcfollowerforce":
+                    {
+                        sexnpcfollower("2", value, true);
+                    }
+                    break;
+
+                case "npcsexfollowerforce":
+                    {
+                        npcsexfollower("2", value, true);
+                    }
+                    break;
+
+                case "using":
+                case "followerusing":
+                    {
+                        followerusing(value);
+                    }
+                    break;
+
+                case "stopusing":
+                case "followerstopusing":
+                    {
+                        followerstopusing(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -8798,6 +9003,54 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(keyOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "sexnpc":
+                    {
+                        sexnpc(key, value, false);
+                    }
+                    break;
+
+                case "npcsex":
+                    {
+                        npcsex(key, value, false);
+                    }
+                    break;
+
+                case "sexnpcforce":
+                    {
+                        sexnpc(key, value, true);
+                    }
+                    break;
+
+                case "npcsexforce":
+                    {
+                        npcsex(key, value, true);
+                    }
+                    break;
+
+                case "sexnpcfollower":
+                    {
+                        sexnpcfollower(key, value, false);
+                    }
+                    break;
+
+                case "npcsexfollower":
+                    {
+                        npcsexfollower(key, value, false);
+                    }
+                    break;
+
+                case "sexnpcfollowerforce":
+                    {
+                        sexnpcfollower(key, value, true);
+                    }
+                    break;
+
+                case "npcsexfollowerforce":
+                    {
+                        npcsexfollower(key, value, true);
                     }
                     break;
 
@@ -10833,7 +11086,10 @@ namespace BitchlandCheatConsoleBepInEx
         private ConfigEntry<bool> configEnableMe;
         private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsole;
         private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsoleFallback;
-
+        private ConfigEntry<bool> configUseHarmonyGameAudioSourcePatch;
+        private ConfigEntry<bool> configUseHarmonyGameMainThreadsPatch;
+        private ConfigEntry<bool> configUseHarmonyAddChatSexOptionPatch;
+        private ConfigEntry<bool> configUseHarmonyGiveMe90MioCashChatOptionPatch;
 
         public BitchlandCheatConsoleBepInEx()
         {
@@ -10853,10 +11109,15 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static string pluginKeyControls = "General.KeyControls";
 
-        public static bool enableThisMod = false;
+        public static bool useHarmonyPatches = false;
 
         public static KeyCode KeyCodeF1 = 0;
         public static KeyCode KeyCodeF2 = 0;
+
+        public static bool useHarmonyGameAudioSourcePatch = false;
+        public static bool useHarmonyGameMainThreadsPatch = false;
+        public static bool useHarmonyAddChatSexOptionPatch = false;
+        public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
 
         private void Awake()
         {
@@ -10864,9 +11125,9 @@ namespace BitchlandCheatConsoleBepInEx
             Logger = base.Logger;
 
             configEnableMe = Config.Bind(pluginKey,
-                                              "EnableThisMod",
+                                              "UseHarmonyPatches",
                                               true,
-                                             "Whether or not you want enable this mod (default true also yes, you want it, and false = no)");
+                                             "Whether or not you want use harmony patches (default true also yes, you want it, and false = no)");
 
             configKeyCodeOpenTheCheatConsole = Config.Bind(pluginKeyControls,
                                                            "KeyCodeOpenTheCheatConsole",
@@ -10878,10 +11139,37 @@ namespace BitchlandCheatConsoleBepInEx
                                                                    KeyCode.F2,
                                                                    "KeyCode fallback to open the cheat console default F2");
 
-            enableThisMod = configEnableMe.Value;
+
+            configUseHarmonyGameAudioSourcePatch = Config.Bind(pluginKey,
+                                              "UseHarmonyGameAudioSourcePatch",
+                                              true,
+                                             "Whether or not you want use harmony game audio source patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyGameMainThreadsPatch = Config.Bind(pluginKey,
+                                  "UseHarmonyGameMainThreadsPatch",
+                                  true,
+                                 "Whether or not you want use harmony game main threads patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyAddChatSexOptionPatch = Config.Bind(pluginKey,
+                                  "UseHarmonyAddChatSexOptionPatch",
+                                  true,
+                                 "Whether or not you want use harmony add chat sex option patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyGiveMe90MioCashChatOptionPatch = Config.Bind(pluginKey, 
+                                 "UseHarmonyGiveMe90MioCashChatOptionPatch",
+                                  false,
+                                 "Whether or not you want use harmony give me 90 mio cash chat option patch (default false also no, you don't want it, and true = yes)");
+
+
+            useHarmonyPatches = configEnableMe.Value;
 
             KeyCodeF1 = configKeyCodeOpenTheCheatConsole.Value;
             KeyCodeF2 = configKeyCodeOpenTheCheatConsoleFallback.Value;
+
+            useHarmonyGameAudioSourcePatch = configUseHarmonyGameAudioSourcePatch.Value;
+            useHarmonyGameMainThreadsPatch = configUseHarmonyGameMainThreadsPatch.Value;
+            useHarmonyAddChatSexOptionPatch = configUseHarmonyAddChatSexOptionPatch.Value;
+            useHarmonyGiveMe90MioCashChatOptionPatch = configUseHarmonyGiveMe90MioCashChatOptionPatch.Value;
 
             PatchAllHarmonyMethods();
 
@@ -10916,6 +11204,11 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.UpdateAmmo();
             Main.Instance.GameplayMenu.UpdateNeeds();
             Main.Instance.GameplayMenu.UpdateArousal();
+            if (allowCursorOnClose)
+            {
+                Main.Instance.GameplayMenu.AllowCursor();
+                allowCursorOnClose = false;
+            }
         }
 
         private static bool onOpenCheat = false;
@@ -10961,13 +11254,1327 @@ namespace BitchlandCheatConsoleBepInEx
         {
             try
             {
+                if (!useHarmonyPatches)
+                {
+                    return;
+                }
                 //Harmony.CreateAndPatchAll(typeof(BitchlandCheatConsoleBepInEx));
-                PatchHarmonyMethodUnity(typeof(AudioSource), "PlayHelper", "PlayHelper", true, false);
-                PatchHarmonyMethodUnity(typeof(AudioSource), "PlayOneShotHelper", "PlayOneShotHelper", true, false);
+                if (useHarmonyGameAudioSourcePatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(AudioSource), "PlayHelper", "PlayHelper", true, false);
+                    PatchHarmonyMethodUnity(typeof(AudioSource), "PlayOneShotHelper", "PlayOneShotHelper", true, false);
+                }
+                if (useHarmonyGameMainThreadsPatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(List<Action>), "Add", "MainThreadsAdd", true, false);
+                    PatchHarmonyMethodUnity(typeof(List<Action>), "Remove", "MainThreadsRemove", true, false);
+                    PatchHarmonyMethodUnity(typeof(Main), "Update", "MainUpdatePrefix", true, false);
+                }
+                if (useHarmonyAddChatSexOptionPatch)
+                {
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Person), "FollowingChat", "DefaultTalk_options_AddSexOption", false, true);
+                    } catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa", "Chat_Xoxa", true, false);
+                    }
+                    catch { }
+                    //try
+                    //{
+                    //    PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa2", "DefaultTalk_options_AddSexOption", false, true);
+                    //}
+                    //catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(job_ArmyBuildingWork), "Chat_ReceptionGuard", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(job_Clinic), "Chat_Doctor", "DefaultTalk_options_AddSexOption", false, true);
+                    } catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Army), "Chat_War", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Hadley), "Chat_Hadley", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Vent), "BethTalk", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(job_CapturedHouse), "ChatPrisioner", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(job_paintShop), "ChatShop", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Prost), "DeskChat", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(job_StripClub), "StripChat", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_BackEntrance), "InteractWithSia", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_HardTutorial), "Day4_InteractWithGuard1", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_MedTutorial), "SarahChat", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Zea1), "ChatZea", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Zea2), "ChatZea", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_ZeaMistake), "ChatZea1", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Zea3), "ChatSephie", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
+                }
+                if (useHarmonyGiveMe90MioCashChatOptionPatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(int_Person), "FollowingChat", "DefaultTalk_options_GiveMe90MioCashChatOption", false, true);
+                }
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
             }
+        }
+
+        private static Action[] MainThreadsAdded = new Action[100];
+        private static bool[] MainThreadsAddedExecuted = new bool[100];
+        private static Action[] MainThreadsRemoved = new Action[100];
+        private static bool[] MainThreadsRemovedExecuted = new bool[100];
+        private static int MainThreadsAddedLength = 0;
+        private static int MainThreadsRemovedLength = 0;
+        public static bool MainThreadsAdd(Action item, object __instance)
+        {
+            if (__instance == null)
+            {
+                return true;
+            }
+
+            if (item == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                if (__instance != Main.Instance.MainThreads)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return true;
+            }
+
+            int length = 0;
+            if (MainThreadsAdded == null)
+            {
+                MainThreadsAdded = new Action[100];
+                MainThreadsAddedExecuted = new bool[100];
+                length = MainThreadsAdded.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    MainThreadsAdded[i] = null;
+                    MainThreadsAddedExecuted[i] = false;
+                }
+            }
+
+            length = MainThreadsAdded.Length;
+            if ((MainThreadsAddedLength + 10) >= length)
+            {
+                int newLength = length + 100;
+                Action[] MainThreadsAddedTemp = new Action[newLength];
+                bool[] MainThreadsAddedExecutedTemp = new bool[newLength];
+                for (int i = 0; i < length; i++)
+                {
+                    MainThreadsAddedTemp[i] = MainThreadsAdded[i];
+                    MainThreadsAddedExecutedTemp[i] = MainThreadsAddedExecuted[i];
+                }
+
+                for (int i = length; i < newLength; i++)
+                {
+                    MainThreadsAddedTemp[i] = null;
+                    MainThreadsAddedExecutedTemp[i] = false;
+                }
+                MainThreadsAdded = MainThreadsAddedTemp;
+                MainThreadsAddedExecuted = MainThreadsAddedExecutedTemp;
+            }
+
+            length = MainThreadsAddedLength;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (MainThreadsAdded[i] == null)
+                {
+                    MainThreadsAdded[i] = item;
+                    MainThreadsAddedExecuted[i] = false;
+                    return true;
+                }
+            }
+
+            MainThreadsAdded[MainThreadsAddedLength] = item;
+            MainThreadsAddedExecuted[MainThreadsAddedLength] = false;
+            MainThreadsAddedLength++;
+
+            Logger.LogInfo("Execute MainThreadsAdd");
+
+            return true;
+        }
+        public static bool MainThreadsRemove(Action item, object __instance)
+        {
+            if (__instance == null)
+            {
+                return true;
+            }
+
+            if (item == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                if (__instance != Main.Instance.MainThreads)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return true;
+            }
+
+            int length = 0;
+            if (MainThreadsRemoved == null)
+            {
+                MainThreadsRemoved = new Action[100];
+                MainThreadsRemovedExecuted = new bool[100];
+                length = MainThreadsRemoved.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    MainThreadsRemoved[i] = null;
+                    MainThreadsRemovedExecuted[i] = false;
+                }
+            }
+
+            length = MainThreadsRemoved.Length;
+            if ((MainThreadsRemovedLength + 10) >= length)
+            {
+                int newLength = length + 100;
+                Action[] MainThreadsRemovedTemp = new Action[newLength];
+                bool[] MainThreadsRemovedExecutedTemp = new bool[newLength];
+                for (int i = 0; i < length; i++)
+                {
+                    MainThreadsRemovedTemp[i] = MainThreadsRemoved[i];
+                    MainThreadsRemovedExecutedTemp[i] = MainThreadsRemovedExecuted[i];
+                }
+
+                for (int i = length; i < newLength; i++)
+                {
+                    MainThreadsRemovedTemp[i] = null;
+                    MainThreadsRemovedExecutedTemp[i] = false;
+                }
+                MainThreadsRemoved = MainThreadsRemovedTemp;
+                MainThreadsRemovedExecuted = MainThreadsRemovedExecutedTemp;
+            }
+
+            length = MainThreadsRemovedLength;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (MainThreadsRemoved[i] == null)
+                {
+                    MainThreadsRemoved[i] = item;
+                    MainThreadsRemovedExecuted[i] = false;
+                    return true;
+                }
+            }
+
+            MainThreadsRemoved[MainThreadsRemovedLength] = item;
+            MainThreadsRemovedExecuted[MainThreadsRemovedLength] = false;
+            MainThreadsRemovedLength++;
+
+            for (int i = 0; i < MainThreadsAddedLength; i++)
+            {
+                if (item == MainThreadsAdded[i])
+                {
+                    if (!MainThreadsAddedExecuted[i])
+                    {
+                        MainThreadsAddedExecuted[i] = true;
+                        try
+                        {
+                            item.Invoke();
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+                    MainThreadsAdded[i] = null;
+                }
+            }
+            Logger.LogInfo("Execute MainThreadsRemove");
+
+            return true;
+        }
+
+        public static void rerunmainthreads()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: rerunmainthreads");
+            int length = MainThreadsAddedLength;
+            for (int i = 0; i < length; i++)
+            {
+                Action item = MainThreadsAdded[i];
+
+                if (item == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    item.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex);
+                }
+                try
+                {
+                    MainThreadsAddedExecuted[i] = true;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            length = MainThreadsRemovedLength;
+            for (int i = 0; i < length; i++)
+            {
+                Action item = MainThreadsRemoved[i];
+
+                if (item == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    item.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex);
+                }
+                try
+                {
+                    MainThreadsAddedExecuted[i] = true;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
+        private static GameObject person1Select = null;
+        private static GameObject person2Select = null;
+        private static GameObject person3Select = null;
+        private static bool person1IsSelected = false;
+        private static bool person2IsSelected = false;
+        private static bool person3IsSelected = false;
+
+        public static void npcsexselect(bool clear = false)
+        {
+           Main.Instance.GameplayMenu.ShowNotification("executed command: npcsexselect");
+
+           person3Select = null;
+
+           if (clear)
+           {
+                person1Select = null;
+                person2Select = null;
+                person3Select = null;
+                person1IsSelected = false;
+                person2IsSelected = false;
+                person3IsSelected = false;
+           }
+
+           GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person1Select == null || !person1IsSelected)
+            {
+                person1Select = person.gameObject;
+                Main.Instance.GameplayMenu.ShowNotification("executed command: npc 1 selected");
+                person1IsSelected = true;
+                person2IsSelected = false;
+            } else if (person2Select == null || !person2IsSelected)
+            {
+                person2Select = person.gameObject;
+                Main.Instance.GameplayMenu.ShowNotification("executed command: npc 2 selected");
+                person2IsSelected = true;
+                person1IsSelected = false;
+            } else
+            {
+                person1IsSelected = false;
+                person2IsSelected = false;
+            }
+        }
+
+        public static void npcsexselectthree(bool clear = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsexselectthree");
+
+            if (clear)
+            {
+                person1Select = null;
+                person2Select = null;
+                person3Select = null;
+                person1IsSelected = false;
+                person2IsSelected = false;
+                person3IsSelected = false;
+            }
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person1Select == null || !person1IsSelected)
+            {
+                person1Select = person.gameObject;
+                Main.Instance.GameplayMenu.ShowNotification("executed command: npc 1 selected");
+                person1IsSelected = true;
+                person2IsSelected = false;
+            }
+            else if (person2Select == null || !person2IsSelected)
+            {
+                person2Select = person.gameObject;
+                Main.Instance.GameplayMenu.ShowNotification("executed command: npc 2 selected");
+                person2IsSelected = true;
+                person3IsSelected = false;
+            }
+            else if (person3Select == null || !person3IsSelected)
+            {
+                person3Select = person.gameObject;
+                Main.Instance.GameplayMenu.ShowNotification("executed command: npc 3 selected");
+                person3IsSelected = true;
+                person2IsSelected = false;
+                person1IsSelected = false;
+            } else
+            {
+                person1IsSelected = false;
+                person2IsSelected = false;
+                person3IsSelected = false;
+            }
+        }
+        public static void npcspawnsexsceneex(bool havePlayer, GameObject person1, GameObject person2, GameObject person3, int sextype = 2, int pose = 0, bool force = false)
+        {
+            Person person1Ex = null;
+            Person person2Ex = null;
+            Person person3Ex = null;
+
+            if (person1 != null)
+            {
+                person1Ex = person1.GetComponent<Person>();
+                if (person1Ex == null)
+                {
+                    return;
+                }
+                if (sextype == 1)
+                {
+                    if (!person1Ex.Perks.Contains("Gaping"))
+                    {
+                        person1Ex.Perks.Add("Gaping");
+                    }
+                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
+                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
+                    person1Ex.Anim.Play("pickup_10");
+                    person1Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                }
+            }
+
+            if (person2 != null)
+            {
+                person2Ex = person2.GetComponent<Person>();
+                if (person2Ex == null)
+                {
+                    return;
+                }
+                if (sextype == 1)
+                {
+                    if (!person2Ex.Perks.Contains("Gaping"))
+                    {
+                        person2Ex.Perks.Add("Gaping");
+                    }
+                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
+                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
+                    person2Ex.Anim.Play("pickup_10");
+                    person2Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                }
+            }
+
+            if (person3 != null)
+            {
+                person3Ex = person3.GetComponent<Person>();
+                if (person3Ex == null)
+                {
+                    return;
+                }
+                if (sextype == 1)
+                {
+                    if (!person3Ex.Perks.Contains("Gaping"))
+                    {
+                        person3Ex.Perks.Add("Gaping");
+                    }
+                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
+                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
+                    person3Ex.Anim.Play("pickup_10");
+                    person3Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                }
+            }
+
+            Person player = person1Ex;
+            Person person = person2Ex;
+
+            SpawnedSexScene scene = null;
+
+            Main.Instance.GameplayMenu.AllowCursor();
+            bool canControl = havePlayer;
+            if (player != null && player.HasPenis)
+            {
+                scene = Main.Instance.SexScene.SpawnSexScene(sextype, pose, player, person, person3Ex, false, canControl, force);
+                allowCursorOnClose = true;
+            }
+            else if (person != null && person.HasPenis)
+            {
+                scene = Main.Instance.SexScene.SpawnSexScene(sextype, pose, person, player, person3Ex, false, canControl, force);
+                allowCursorOnClose = true;
+            }
+            else
+            {
+                scene = Main.Instance.SexScene.SpawnSexScene(sextype, pose, player, person, person3Ex, false, canControl, force);
+                allowCursorOnClose = true;
+            }
+
+            if (scene != null)
+            {
+                Main.Instance.GameplayMenu.AllowCursor();
+                if (!canControl)
+                {
+                    scene.TimerForRandomPoseChange = true;
+                    scene.TimerMax = UnityEngine.Random.Range(10f, 20f);
+                    scene.TimerPoseChange = scene.TimerMax;
+                    scene.TimerForRandomSexEnd = true;
+                    scene.TimerSexEnd = UnityEngine.Random.Range(60f, 120f);
+                }
+            }
+        }
+
+        public static void showsexposes(string key)
+        {
+            if (key == null || key == string.Empty)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("0: Finger, 1: Dildo, 2: Sex, 3: NoEnergy, 4: Forced, 5: Furniture, 6: Couch");
+                Logger.LogInfo("0: Finger, 1: Dildo, 2: Sex, 3: NoEnergy, 4: Forced, 5: Furniture, 6: Couch");
+                return;
+            }
+
+            int sexType = 0;
+            if (int.TryParse(key, out int sextype))
+            {
+                if (sextype <= 0)
+                {
+                    sextype = 0;
+                }
+                sexType = sextype;
+            }
+
+            if (sexType <= 0)
+            {
+                sexType = 0;
+            }
+
+            List<SexPose> sexPoses = new List<SexPose>();
+            switch (sexType)
+            {
+                case 0:
+                    sexPoses = Main.Instance.SexScene.FingerPoses;
+                    break;
+                case 1:
+                    sexPoses = Main.Instance.SexScene.DildoPoses;
+                    break;
+                case 2:
+                    sexPoses = Main.Instance.SexScene.SexPoses;
+                    break;
+                case 3:
+                    sexPoses = Main.Instance.SexScene.NoEnergyPoses;
+                    break;
+                case 4:
+                    sexPoses = Main.Instance.SexScene.ForcedPoses;
+                    break;
+                case 5:
+                    sexPoses = Main.Instance.SexScene.FurniturePoses;
+                    break;
+                case 6:
+                    sexPoses = Main.Instance.SexScene.CouchPoses;
+                    break;
+                default:
+                    sexPoses = new List<SexPose>();
+                    break;
+            }
+
+            if (sexPoses.Count == 0)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No sexposes found");
+                Logger.LogInfo("No sexposes found");
+                return;
+            }
+
+            for (int i = 0; i < sexPoses.Count; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(sexPoses[i].ToString());
+                Logger.LogInfo(sexPoses[i].ToString());
+            }
+        }
+
+        public static void sexnpc(string key, string value, bool force = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: sexnpc");
+            GameObject personGa = getPersonInteract();
+            Person player = Main.Instance.Player;
+
+            person3Select = null;
+            person3IsSelected = false;
+
+            if (person1Select != null)
+            {
+                person3Select = person1Select;
+                person3IsSelected = true;
+            }
+
+            person1Select = player.gameObject;
+            person1IsSelected = true;
+
+            if (personGa != null)
+            {
+                person2Select = personGa;
+                person2IsSelected = true;
+            }
+
+            npcsex(key, value, force, true);
+        }
+
+        public static void npcsex(string key, string value, bool force = false, bool havePlayer = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsex");
+            int sexType = 2;
+            int sexPose = 0;
+
+            if (person1Select == null || !person1IsSelected)
+            {
+                person1Select = getPersonInteract();
+                if (person1Select != null)
+                {
+                    person1IsSelected = true;
+                }
+            }
+
+            if (int.TryParse(key, out int sextype))
+            {
+                if (sextype <= 0)
+                {
+                    sextype = 0;
+                }
+                sexType = sextype;
+            }
+
+            if (int.TryParse(value, out int sexpose))
+            {
+                if (sexpose <= 0)
+                {
+                    sexpose = 0;
+                }
+                sexPose = sexpose;
+            }
+
+            if (sexType <= 0)
+            {
+                sexType = 0;
+            }
+
+            if (sexPose <= 0)
+            {
+                sexPose = 0;
+            }
+
+            List<SexPose> sexPoses = new List<SexPose>();
+            switch (sexType)
+            {
+                case 0:
+                    sexPoses = Main.Instance.SexScene.FingerPoses;
+                    break;
+                case 1:
+                    sexPoses = Main.Instance.SexScene.DildoPoses;
+                    break;
+                case 2:
+                    sexPoses = Main.Instance.SexScene.SexPoses;
+                    break;
+                case 3:
+                    sexPoses = Main.Instance.SexScene.NoEnergyPoses;
+                    break;
+                case 4:
+                    sexPoses = Main.Instance.SexScene.ForcedPoses;
+                    break;
+                case 5:
+                    sexPoses = Main.Instance.SexScene.FurniturePoses;
+                    break;
+                case 6:
+                    sexPoses = Main.Instance.SexScene.CouchPoses;
+                    break;
+                default:
+                    sexPoses = new List<SexPose>();
+                    break;
+            }
+
+            if (sexPose >= sexPoses.Count)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("npcsex: sex position not found!");
+            }
+
+            npcspawnsexsceneex(havePlayer, person1Select, person2Select, person3Select, sexType, sexPose, force);
+
+            person1Select = null;
+            person2Select = null;
+            person3Select = null;
+            person1IsSelected = false;
+            person2IsSelected = false;
+            person3IsSelected = false;
+        }
+
+        public static void sexnpcfollower(string key, string value, bool force = false)
+        {
+            person1Select = null;
+            person2Select = null;
+            person3Select = null;
+            person1IsSelected = false;
+            person2IsSelected = false;
+            person3IsSelected = false;
+
+            person1Select = Main.Instance.Player.gameObject;
+            person1IsSelected = true;
+
+            if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+            {
+                for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    //Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                    if (person2Select == null)
+                    {
+                        person2Select = Main.Instance.PeopleFollowingPlayer[i].gameObject;
+                        person2IsSelected = true;
+                        continue;
+                    }
+                    else if (person3Select == null)
+                    {
+                        person3Select = Main.Instance.PeopleFollowingPlayer[i].gameObject;
+                        person3IsSelected = true;
+                    }
+                }
+            }
+            npcsex(key, value, force, true);
+        }
+        public static void npcsexfollower(string key, string value, bool force = false)
+        {
+            person1Select = null;
+            person2Select = null;
+            person3Select = null;
+            person1IsSelected = false;
+            person2IsSelected = false;
+            person3IsSelected = false;
+
+            if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+            {
+                for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    //Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                    if (person1Select == null)
+                    {
+                        person1Select = Main.Instance.PeopleFollowingPlayer[i].gameObject;
+                        person1IsSelected = true;
+                        continue;
+                    }
+                    else if (person2Select == null)
+                    {
+                        person2Select = Main.Instance.PeopleFollowingPlayer[i].gameObject;
+                        person2IsSelected = true;
+                        continue;
+                    }
+                    else if (person3Select == null)
+                    {
+                        person3Select = Main.Instance.PeopleFollowingPlayer[i].gameObject;
+                        person3IsSelected = true;
+                    }
+                }
+            }
+            npcsex(key, value, force, false);
+        }
+
+        public static void switchnpcfollowerchat()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: switchnpcfollowerchat");
+            if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+            {
+                string startchatfunc = "";
+                string chatfunc = "";
+
+                if (Main.Instance.PeopleFollowingPlayer[0].ThisPersonInt.StartTalkFunc == "FollowingChat")
+                {
+                    startchatfunc = "FollowingChat";
+                    chatfunc = "DefaultTalk";
+                    Main.Instance.GameplayMenu.ShowNotification("fucknpcfollower: on");
+                } else
+                {
+                    startchatfunc = "DefaultTalk";
+                    chatfunc = "FollowingChat";
+                    Main.Instance.GameplayMenu.ShowNotification("fucknpcfollower: off");
+                }
+
+                Main.Instance.GameplayMenu.ShowNotification($"set chat func from {startchatfunc} to {chatfunc}");
+
+                for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    //Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+                    Main.Instance.PeopleFollowingPlayer[i].ThisPersonInt.StartTalkFunc = chatfunc;
+                }
+            }
+        }
+
+        private static Dictionary<string, string> npcchatfunc = new Dictionary<string, string>();
+        private static Dictionary<string, MonoBehaviour> npcchatfuncmono = new Dictionary<string, MonoBehaviour>();
+        public static void switchnpcchat()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: switchnpcchat");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            string startTalkFunc = person.ThisPersonInt.StartTalkFunc;
+            MonoBehaviour mono = person.ThisPersonInt.StartTalkMono;
+            string nowStartTalkFunc = "DefaultTalk";
+
+            if (startTalkFunc == "FollowingChat")
+            {
+                return;
+            }
+
+            if (!npcchatfunc.ContainsKey(person.Name) || !npcchatfuncmono.ContainsKey(person.Name))
+            {
+                npcchatfunc[person.Name] = startTalkFunc;
+                npcchatfuncmono[person.Name] = mono;
+                person.ThisPersonInt.StartTalkFunc = nowStartTalkFunc;
+                person.ThisPersonInt.StartTalkMono = (MonoBehaviour)person.ThisPersonInt;
+                Main.Instance.GameplayMenu.ShowNotification("fucknpc: on");
+            } else
+            {
+                nowStartTalkFunc = npcchatfunc[person.Name];
+                mono = npcchatfuncmono[person.Name];
+                npcchatfunc.Remove(person.Name);
+                npcchatfuncmono.Remove(person.Name);
+                person.ThisPersonInt.StartTalkFunc = nowStartTalkFunc;
+                person.ThisPersonInt.StartTalkMono = mono;
+                Main.Instance.GameplayMenu.ShowNotification("fucknpc: off");
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification($"set chat func from {startTalkFunc} to {nowStartTalkFunc}");
+        }
+
+        public static void mainfollower()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mainfollower");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (Main.Instance.PeopleFollowingPlayer.Count > 0)
+            {
+                int mainindex = 0;
+                int foundindex = 0;
+                bool founded = false;
+                for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    if (Main.Instance.PeopleFollowingPlayer[i] == person)
+                    {
+                        foundindex = i;
+                        founded = true;
+                        break;
+                    }
+                }
+
+                if (!founded)
+                {
+                    List<Person> newFollower = new List<Person>();
+
+                    newFollower.Add(person);
+
+                    mainindex = 1;
+
+                    for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                    {
+                        newFollower.Add(Main.Instance.PeopleFollowingPlayer[i]);
+                    }
+
+                    Main.Instance.PeopleFollowingPlayer = newFollower;
+                }
+
+                Person follower = Main.Instance.PeopleFollowingPlayer[foundindex];
+                Person main = Main.Instance.PeopleFollowingPlayer[mainindex];
+
+                if (foundindex > 0)
+                {
+                    Main.Instance.PeopleFollowingPlayer[mainindex] = follower;
+                    Main.Instance.PeopleFollowingPlayer[foundindex] = main;
+                }
+
+                Main.Instance.GameplayMenu.ShowNotification($"{follower.Name} found on {foundindex} position");
+                Main.Instance.GameplayMenu.ShowNotification($"main follower was {main.Name}, {main.Name} is on 1st position");
+                Main.Instance.GameplayMenu.ShowNotification($"main follower is now {follower.Name}, {follower.Name} is on 1st position");
+            } else
+            {
+                Main.Instance.PeopleFollowingPlayer.Add(person);
+                Main.Instance.GameplayMenu.ShowNotification($"main follower is now {person.Name}, {person.Name} is on 1st position");
+            }
+        }
+
+        public static void followeruse(GameObject personGa, GameObject interactGa)
+        {
+            bool use = true;
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            if (interactGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            Interactible interact = interactGa.GetComponent<Interactible>();
+
+            if (interact == null)
+            {
+                return;
+            }
+
+            if (interact is MultiInteractible)
+            {
+                MultiInteractible multiInteractible = (MultiInteractible)interact;
+                if (multiInteractible.Parts[0].NPCCanUseInFollow)
+                {
+                    if (person.InteractingWith == null)
+                    {
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(true);
+                        Main.Instance.GameplayMenu.NewMultiOption_text.text = $"Ask {person.Name} to use";
+                        if (use)
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                            Main.Instance.GameplayMenu.NewMultiOption.SetActive(false);
+                            multiInteractible.Parts[0].Interact(person);
+                        }
+                    }
+                }
+            }
+            else if (interact.NPCCanUseInFollow)
+            {
+                if (person.InteractingWith == null)
+                {
+                    Main.Instance.GameplayMenu.NewMultiOption.SetActive(true);
+                    Main.Instance.GameplayMenu.NewMultiOption_text.text = $"Ask {person.Name} to use";
+                    if (use)
+                    {
+                        Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                        Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                        Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                        Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(false);
+                        Main.Instance.PeopleFollowingPlayer[0].InteractingWith = interact;
+                        interact.Interact(person);
+                    }
+                }
+            }
+        }
+
+        public static void followerstopuse(GameObject personGa, GameObject interactGa)
+        {
+            bool stopuse = true;
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            if (interactGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            Interactible interact = interactGa.GetComponent<Interactible>();
+
+            if (interact == null)
+            {
+                return;
+            }
+
+            if (interact is MultiInteractible)
+            {
+                MultiInteractible multiInteractible = (MultiInteractible)interact;
+                if (multiInteractible.Parts[0].NPCCanUseInFollow)
+                {
+                    if (person.InteractingWith != null)
+                    {
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(true);
+                        Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask to stop using";
+                        if (stopuse)
+                        {
+                            Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                            Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                            Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                            Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                            Main.Instance.GameplayMenu.NewMultiOption.SetActive(false);
+                            Interactible interactingWith = person.InteractingWith;
+                            interactingWith.InteractingPerson = person;
+                            interactingWith.StopInteracting();
+                            interactingWith.InteractingPerson = null;
+                            person.InteractingWith = null;
+                        }
+                    }
+                }
+            }
+            else if (interact.NPCCanUseInFollow)
+            {
+                if (person.InteractingWith != null)
+                {
+                    Main.Instance.GameplayMenu.NewMultiOption.SetActive(true);
+                    Main.Instance.GameplayMenu.NewMultiOption_text.text = "Ask to stop using";
+                    if (stopuse)
+                    {
+                        Main.Instance.GameplayMenu.Crossair.SetActive(false);
+                        Main.Instance.GameplayMenu.PickupText.text = string.Empty;
+                        Main.Instance.GameplayMenu.PromptIcon.sprite = Main.Instance.PromptIcons[0];
+                        Main.Instance.GameplayMenu.PromptIcon.enabled = false;
+                        Main.Instance.GameplayMenu.NewMultiOption.SetActive(false);
+                        Interactible interactingWith = person.InteractingWith;
+                        interactingWith.InteractingPerson = person;
+                        interactingWith.StopInteracting();
+                        interactingWith.InteractingPerson = null;
+                        person.InteractingWith = null;
+                    }
+                }
+            }
+        }
+
+        public static void followerusing(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: followerusing");
+            GameObject interactGa = getInteract();
+
+            List<Person> follower = Main.Instance.PeopleFollowingPlayer;
+
+            if (follower.Count == 0)
+            {
+                return;
+            }
+
+            List<Person> mainindexes = new List<Person>();
+
+            if (int.TryParse(key, out int value)) {
+                if (value <= 0)
+                {
+                    value = 0;
+                }
+                if (value < follower.Count)
+                {
+                    mainindexes.Add(follower[value]);
+                }
+            } else
+            {
+                for (int i = 0; i < follower.Count; i++)
+                {
+                    if (follower[i].Name.ToLower() == key)
+                    {
+                        mainindexes.Add(follower[i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < mainindexes.Count; i++)
+            {
+                followerstopuse(mainindexes[i].gameObject, interactGa);
+                followeruse(mainindexes[i].gameObject, interactGa);
+            }
+        }
+
+        public static void followerstopusing(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: followerstopusing");
+            GameObject interactGa = getInteract();
+
+            List<Person> follower = Main.Instance.PeopleFollowingPlayer;
+
+            if (follower.Count == 0)
+            {
+                return;
+            }
+
+            List<Person> mainindexes = new List<Person>();
+
+            if (int.TryParse(key, out int value))
+            {
+                if (value <= 0)
+                {
+                    value = 0;
+                }
+                if (value < follower.Count)
+                {
+                    mainindexes.Add(follower[value]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < follower.Count; i++)
+                {
+                    if (follower[i].Name.ToLower() == key)
+                    {
+                        mainindexes.Add(follower[i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < mainindexes.Count; i++)
+            {
+                followerstopuse(mainindexes[i].gameObject, interactGa);
+            }
+        }
+
+        public static void listfollower()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listfollower");
+            List<Person> follower = Main.Instance.PeopleFollowingPlayer;
+
+            if (follower.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < follower.Count; i++)
+            {
+                string message = $"{i}: {follower[i].Name}";
+                Logger.LogInfo(message);
+                Main.Instance.GameplayMenu.ShowNotification(message);
+            }
+        }
+
+        private static bool fuckxoxa = false;
+        public static bool Chat_Xoxa(object __instance)
+        {
+            if (!fuckxoxa)
+            {
+                return true;
+            }
+
+            Mis_Xoxa _this = (Mis_Xoxa)__instance;
+            UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
+            Person person = _gameplay.PersonChattingTo;
+            
+            if (person.CurrentZone == _this.XoxaZone)
+            {
+                person.CurrentZone = null;
+            }
+
+            return true;
+        }
+
+        public static void fuckxoxareally()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: fuckxoxa");
+            fuckxoxa = !fuckxoxa;
+
+            if (fuckxoxa)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("fuckxoxa: on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("fuckxoxa: off");
+            }
+        }
+
+        public static void DefaultTalk_options_AddSexOption(object __instance)
+        {
+            UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
+            int_Person _this = null;
+
+            if (__instance is int_Person)
+            {
+                _this = (int_Person)__instance;
+            }
+            else
+            {
+                Person person = _gameplay.PersonChattingTo;
+                _this = person != null ? person.ThisPersonInt : Main.Instance.Player.ThisPersonInt;
+            }
+
+            _gameplay.AddChatOption("Lets have sex here", (Action)(() =>
+            {
+                _this.ThisPerson.Favor += 10000;
+                if (Main.Instance.Player.HasPenis)
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, _this.ThisPerson);
+                else if (_this.ThisPerson.HasPenis)
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, _this.ThisPerson, Main.Instance.Player);
+                else
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, _this.ThisPerson);
+                _this.EndTheChat();
+            }));
+        }
+        public static void DefaultTalk_options_GiveMe90MioCashChatOption(object __instance)
+        {
+            UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
+            int_Person _this = null;
+
+            if (__instance is int_Person)
+            {
+                _this = (int_Person)__instance;
+            }
+            else
+            {
+                Person person = _gameplay.PersonChattingTo;
+                _this = person != null ? person.ThisPersonInt : Main.Instance.Player.ThisPersonInt;
+            }
+
+            _gameplay.AddChatOption("(Nympho) Give Me 90 Mio Cash", (Action)(() =>
+            {
+                _this.ThisPerson.Money += 90000000;
+                Main.Instance.Player.Money += 90000000;
+                Main.Instance.GameplayMenu.ShowNotification("Give Me 90 Mio Cash");
+                _gameplay.DisplaySubtitle("Ok", (AudioClip)null, new Action(_this.EndTheChat));
+            }));
+        }
+        public static bool MainUpdatePrefix()
+        {
+            int length = MainThreadsAddedLength;
+            for (int i = 0; i < length; i++)
+            {
+                Action item = MainThreadsAdded[i];
+
+                if (item == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    item.Invoke();
+                } catch (Exception ex)
+                {
+                    Logger.LogError(ex);
+                }
+                try
+                {
+                    MainThreadsAddedExecuted[i] = true;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            return true;
         }
 
         public static bool PlayOneShotHelper(AudioSource source, AudioClip clip, float volumeScale)

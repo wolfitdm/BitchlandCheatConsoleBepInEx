@@ -227,6 +227,25 @@ commands with no params:
 * mystats -> show all stats from the player
 * npcstats -> show all stats from the npc the you looked at
 * version -> shows current version
+* sexnpc -> sexnpc 2 0 -> have sex with the npc the you looked at
+* npcsex -> npcsex 2 0 -> the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at
+* sexnpcforce -> sexnpcforce 2 0 -> have force sex with the npc the you looked at
+* npcsexforce -> npcsexforce 2 0 -> the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at
+* sexnpcfollower -> sexnpcfollower 2 0 -> you have with your followers, sex now, 
+* npcsexfollower -> npcsexfollower 2 0 -> your followers have sex together
+* sexnpcfollowerforce -> sexnpcfollowerforce 2 0 -> you have with your followers, force sex now, 
+* npcsexfollowerforce -> npcsexfollowerforce 2 0 -> your followers have forced sex together
+* fucknpcfollower -> all followers switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* switchnpcfollowerchat -> all followers switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* fucknpc -> npc the you looked switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* fuckxoxa -> toggles the default sex chat from xoxa, can used without that you must looked at Xoxa
+* switchnpcchat -> npc the you looked switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* npcsexselect -> select the npcs the you looked at for sex, the you can spawn with the command npcsex, support for selecting maximum 2 npc
+* npcsexselectthree -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 3 npcs
+* npcsexselectclear -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 2 npc, clears old selection
+* npcsexselectthreeclear -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 3 npcs, clears old selection
+* listfollower -> lists all your follower
+* mainfollower -> set the npc the you looked at on first position, if this npc the you looked at is not following you, it add the npc to your follower
 
 commands with 1 param:
 
@@ -319,6 +338,19 @@ commands with 1 param:
 * getvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
 * callp funcname -> call the func name from the player
 * call funcname -> call the func name from the npc,object,container and so on, the you are looked at
+* showsexposes SexType -> show sex poses from type category e.g 0 -> Finger
+* sexnpc SexPose -> sexnpc 2 SexPose ->  have sex with the npc the you looked at
+* npcsex SexPose -> npcsex 2 SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcforce SexPose -> sexnpcforce 2 SexPose -> have force sex with the npc the you looked at
+* npcsexforce SexPose -> npcsexforce 2 SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcfollower SexPose -> sexnpcfollower 2 SexPose -> you have with your followers, sex now, 
+* npcsexfollower SexPose -> npcsexfollower 2 SexPose -> your followers have sex together
+* sexnpcfollowerforce SexPose -> sexnpcfollowerforce 2 SexPose -> you have with your followers, force sex now, 
+* npcsexfollowerforce SexPose -> npcsexfollowerforce 2 SexPose -> your followers have forced sex together
+* using npcname -> your follower named npcname interact with the object the you looked at
+* using index -> your follower on position index interact with the object the you looked at
+* stopusing npcname -> your follower named npcname stopped interacting with the object the you looked at
+* stopusing index -> your follower on position index stopped interacting with the object the you looked at
 
 commands with 2 params:
 
@@ -330,3 +362,11 @@ commands with 2 params:
 * playersetvar name value -> set the value of the var, from the player
 * npcsetvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
 * setvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
+* sexnpc SexType SexPose -> have sex with the npc the you looked at
+* npcsex SexType SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcforce SexType SexPose -> have force sex with the npc the you looked at
+* npcsexforce SexType SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcfollower SexType SexPose -> you have with your followers, sex now, 
+* npcsexfollower SexType SexPose -> your followers have sex together
+* sexnpcfollowerforce SexType SexPose -> you have with your followers, force sex now, 
+* npcsexfollowerforce SexType SexPose -> your followers have forced sex together

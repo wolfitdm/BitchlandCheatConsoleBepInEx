@@ -227,6 +227,25 @@ commands with no params:
 * mystats -> show all stats from the player
 * npcstats -> show all stats from the npc the you looked at
 * version -> shows current version
+* sexnpc -> sexnpc 2 0 -> have sex with the npc the you looked at
+* npcsex -> npcsex 2 0 -> the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at
+* sexnpcforce -> sexnpcforce 2 0 -> have force sex with the npc the you looked at
+* npcsexforce -> npcsexforce 2 0 -> the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at
+* sexnpcfollower -> sexnpcfollower 2 0 -> you have with your followers, sex now, 
+* npcsexfollower -> npcsexfollower 2 0 -> your followers have sex together
+* sexnpcfollowerforce -> sexnpcfollowerforce 2 0 -> you have with your followers, force sex now, 
+* npcsexfollowerforce -> npcsexfollowerforce 2 0 -> your followers have forced sex together
+* fucknpcfollower -> all followers switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* switchnpcfollowerchat -> all followers switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* fucknpc -> npc the you looked switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* fuckxoxa -> toggles the default sex chat from xoxa, can used without that you must looked at Xoxa
+* switchnpcchat -> npc the you looked switch to the default sex chat, where you can select sex for example, toggle default sex chat
+* npcsexselect -> select the npcs the you looked at for sex, the you can spawn with the command npcsex, support for selecting maximum 2 npc
+* npcsexselectthree -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 3 npcs
+* npcsexselectclear -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 2 npc, clears old selection
+* npcsexselectthreeclear -> select the npcs the you looked at for sex, the sex scene can you spawn, with the command npcsex, support for selecting maximum 3 npcs, clears old selection
+* listfollower -> lists all your follower
+* mainfollower -> set the npc the you looked at on first position, if this npc the you looked at is not following you, it add the npc to your follower
 
 commands with 1 param:
 
@@ -319,6 +338,19 @@ commands with 1 param:
 * getvar name -> get the value of the var, from the npc,object,container and so on, the you looked at
 * callp funcname -> call the func name from the player
 * call funcname -> call the func name from the npc,object,container and so on, the you are looked at
+* showsexposes SexType -> show sex poses from type category e.g 0 -> Finger
+* sexnpc SexPose -> sexnpc 2 SexPose ->  have sex with the npc the you looked at
+* npcsex SexPose -> npcsex 2 SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcforce SexPose -> sexnpcforce 2 SexPose -> have force sex with the npc the you looked at
+* npcsexforce SexPose -> npcsexforce 2 SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcfollower SexPose -> sexnpcfollower 2 SexPose -> you have with your followers, sex now, 
+* npcsexfollower SexPose -> npcsexfollower 2 SexPose -> your followers have sex together
+* sexnpcfollowerforce SexPose -> sexnpcfollowerforce 2 SexPose -> you have with your followers, force sex now, 
+* npcsexfollowerforce SexPose -> npcsexfollowerforce 2 SexPose -> your followers have forced sex together
+* using npcname -> your follower named npcname interact with the object the you looked at
+* using index -> your follower on position index interact with the object the you looked at
+* stopusing npcname -> your follower named npcname stopped interacting with the object the you looked at
+* stopusing index -> your follower on position index stopped interacting with the object the you looked at
 
 commands with 2 params:
 
@@ -330,6 +362,14 @@ commands with 2 params:
 * playersetvar name value -> set the value of the var, from the player
 * npcsetvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
 * setvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
+* sexnpc SexType SexPose -> have sex with the npc the you looked at
+* npcsex SexType SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcforce SexType SexPose -> have force sex with the npc the you looked at
+* npcsexforce SexType SexPose -> the selected npcs with the command npcsexselect have now sex
+* sexnpcfollower SexType SexPose -> you have with your followers, sex now, 
+* npcsexfollower SexType SexPose -> your followers have sex together
+* sexnpcfollowerforce SexType SexPose -> you have with your followers, force sex now, 
+* npcsexfollowerforce SexType SexPose -> your followers have forced sex together
 
 state command examples:
 
@@ -513,3 +553,89 @@ skinlistclothedversion:
 * rit
 * carol
 * beth
+
+---Sex Types---
+
+0: Finger
+1: Dildo 
+2: Sex
+3: NoEnergy
+4: Forced
+5: Furniture 
+6: Couch
+
+---SexPoses to SexType 0: Finger------------------------------
+
+0: Mast1 (SexPose_Mast1)
+1: Mast2 (SexPose_Mast2)
+2: MastSit1 (SexPose_MastSit1)
+
+---SexPoses to SexType 1: Dildo------------------------------
+
+0: DildoSit1 (SexPose_MastSitDildo1)
+1: Ride2 (SexPose_DildoRide2)
+2: Ride3 (SexPose_DildoRide3)
+3: Ride4 (SexPose_DildoRide4)
+4: Ride5 (SexPose_DildoRide5)
+5: DildoSit2 (SexPose_MastSitDildo1)
+6: DildoSit3 (SexPose_MastSitDildo1)
+7: Ride6 (SexPose_DildoRide2)
+8: Ride7 (SexPose_DildoRide2)
+9: DildoSit2 (SexPose_MastSitDildo1)
+10: DildoSit2 (1) (SexPose_MastSitDildo1)
+11: DildoSit2 (2) (SexPose_MastSitDildo1)
+12: DildoSit2 (3) (SexPose_MastSitDildo1)
+
+---SexPoses to SexType 2: Sex------------------------------
+
+0: Missionary 1 (SexPose_Miss)
+1: Doggy 1 (SexPose_Miss)
+2: Cowgirl 1 (SexPose_Miss)
+3: Blowjob 1 (SexPose_Miss)
+4: Blowjob 2 (SexPose_Miss)
+5: Blowjob 3 (SexPose_Miss)
+6: Blowjob 4 (SexPose_Miss)
+7: Doggy 2 (SexPose_Miss)
+8: Cowgirl 2 (SexPose_Miss)
+9: Cowgirl 3 (SexPose_Miss)
+10: Cowgirl 3_2 (SexPose_Miss)
+11: Cowgirl 4 (SexPose_Miss)
+12: Missionary LegLock (SexPose_Miss)
+13: Missionary 2 (SexPose_Miss)
+14: Sitting 1 (SexPose_Miss)
+15: Spooning 1 (SexPose_Miss)
+
+---SexPoses to SexType 3: NoEnergy------------------------------
+
+0: FromBehind (SexPose_Miss)
+1: FromFront (SexPose_Miss)
+
+---SexPoses to SexType 4: Forced------------------------------
+
+0: FromBehind (SexPose_Miss)
+1: LegHolding (SexPose_Miss)
+2: FromBehind_old (SexPose_Miss)
+3: ForcedBlowjob1 (SexPose_Miss)
+4: CowgirlF (SexPose_Miss)
+5: FromBehind3 (SexPose_Miss)
+6: DoggyUp (SexPose_Miss)
+7: FromBehind4 (SexPose_Miss)
+8: AssEat (SexPose_Miss)
+9: AssEat2 (SexPose_Miss)
+10: AssEat3 (SexPose_Miss)
+
+---SexPoses to SexType 5: Furniture------------------------------
+
+0: WallPussy1 (SexPose_Miss)
+1: WallPussy2 (SexPose_Miss)
+2: WallPussy3 (SexPose_Miss)
+3: Pregnancy (SexPose_Miss)
+4: SexSpot1 (SexPose_Miss)
+5: SexSpot1Pole (SexPose_Miss)
+6: GloryHole (SexPose_Miss)
+
+---SexPoses to SexType 6: Couch------------------------------
+
+0: Couch (SexPose_Miss)
+1: Couch2 (SexPose_Miss)
+2: Couch3 (SexPose_Miss)
