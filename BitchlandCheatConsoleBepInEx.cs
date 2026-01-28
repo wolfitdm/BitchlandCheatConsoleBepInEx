@@ -17,11 +17,13 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static UnityEngine.InputSystem.InputRemoting;
 using Component = UnityEngine.Component;
@@ -93,6 +95,10 @@ namespace BitchlandCheatConsoleBepInEx
         public static Vector3 fly_velocity = Vector3.zero;
 
         public static bool allowCursorOnClose = false;
+
+        public static bool multiFollower = false;
+
+        public static bool[] followerUse = new bool[10];
 
         /*public static string message = "Hello! This is a message box.";
 
@@ -691,10 +697,40 @@ namespace BitchlandCheatConsoleBepInEx
             rb.velocity = fly_velocity;
             //rb.velocity = v;
         }
+        private void HandleMultiFollower()
+        {
+            if (!multiFollower)
+            {
+                return;
+            }
+
+            int keypad0 = (int)KeyCode.Keypad0;
+            int keypad9 = (int)KeyCode.Keypad9;
+
+            for (int i = keypad0; i <= keypad9; i++) {
+                
+                KeyCode key = (KeyCode)i;
+                int x = i - keypad0;
+
+                if (Input.GetKeyUp(key))
+                {
+                    followerUse[x] = !followerUse[x];
+
+                    if (followerUse[x])
+                    {
+                        followerusing(x.ToString());
+                    } else
+                    {
+                        followerstopusing(x.ToString());
+                    }
+                }
+            }
+        }
 
         private void Update()
         {
             TriggerUpdate();
+            HandleMultiFollower();
         }
         private void LateUpdate()
         {
@@ -4722,6 +4758,7 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/fetishlist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/perklist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/skinlistclothedversion.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexposes.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
@@ -8302,6 +8339,66 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "putdildoonhand":
+                    {
+                        putdildoonhand("dildo8large");
+                    }
+                    break;
+
+                case "npcputdildoonhand":
+                    {
+                        npcputdildoonhand("dildo8large");
+                    }
+                    break;
+
+                case "multifollower":
+                    {
+                        togglePatch("multifollower");
+                    }
+                    break;
+
+                case "usemultifollower":
+                    {
+                        togglePatch("usemultifollower");
+                    }
+                    break;
+
+                case "useharmonypatches":
+                    {
+                        togglePatch("useharmonypatches");
+                    }
+                    break;
+
+                case "useharmonygameaudiosourcepatch":
+                    {
+                        togglePatch("useharmonygameaudiosourcepatch");
+                    }
+                    break;
+
+                case "useharmonygamemainthreadspatch":
+                    {
+                        togglePatch("useharmonygamemainthreadspatch");
+                    }
+                    break;
+
+                case "useharmonyaddfollowingchatsexoptionpatch":
+                    {
+                        togglePatch("useharmonyaddfollowingchatsexoptionpatch");
+                    }
+                    break;
+
+                case "useharmonyaddchatsexoptionpatch":
+                    {
+                        togglePatch("useharmonyaddchatsexoptionpatch");
+                    }
+                    break;
+
+                case "useharmonygiveme90miocashchatoptionpatch":
+                    {
+                        togglePatch("useharmonygiveme90miocashchatoptionpatch");
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 4.0");
@@ -8908,6 +9005,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "followerstopusing":
                     {
                         followerstopusing(value);
+                    }
+                    break;
+
+                case "putdildoonhand":
+                    {
+                        putdildoonhand(value);
+                    }
+                    break;
+
+                case "npcputdildoonhand":
+                    {
+                        npcputdildoonhand(value);
                     }
                     break;
 
@@ -11083,13 +11192,15 @@ namespace BitchlandCheatConsoleBepInEx
 
         internal static new ManualLogSource Logger;
 
-        private ConfigEntry<bool> configEnableMe;
-        private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsole;
-        private ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsoleFallback;
-        private ConfigEntry<bool> configUseHarmonyGameAudioSourcePatch;
-        private ConfigEntry<bool> configUseHarmonyGameMainThreadsPatch;
-        private ConfigEntry<bool> configUseHarmonyAddChatSexOptionPatch;
-        private ConfigEntry<bool> configUseHarmonyGiveMe90MioCashChatOptionPatch;
+        private static ConfigEntry<bool> configEnableMe;
+        private static ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsole;
+        private static ConfigEntry<KeyCode> configKeyCodeOpenTheCheatConsoleFallback;
+        private static ConfigEntry<bool> configUseHarmonyGameAudioSourcePatch;
+        private static ConfigEntry<bool> configUseHarmonyGameMainThreadsPatch;
+        private static ConfigEntry<bool> configUseHarmonyAddChatSexOptionPatch;
+        private static ConfigEntry<bool> configUseHarmonyAddFollowingChatSexOptionPatch;
+        private static ConfigEntry<bool> configUseHarmonyGiveMe90MioCashChatOptionPatch;
+        private static ConfigEntry<bool> configUseMultiFollower;
 
         public BitchlandCheatConsoleBepInEx()
         {
@@ -11117,6 +11228,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyGameAudioSourcePatch = false;
         public static bool useHarmonyGameMainThreadsPatch = false;
         public static bool useHarmonyAddChatSexOptionPatch = false;
+        public static bool useHarmonyAddFollowingChatSexOptionPatch = false;
         public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
 
         private void Awake()
@@ -11150,15 +11262,26 @@ namespace BitchlandCheatConsoleBepInEx
                                   true,
                                  "Whether or not you want use harmony game main threads patch (default true also yes, you want it, and false = no)");
 
+            configUseHarmonyAddFollowingChatSexOptionPatch = Config.Bind(pluginKey,
+                                  "UseHarmonyAddFollowingChatSexOptionPatch",
+                                  true,
+                                 "Whether or not you want use harmony add following chat sex option patch (default true also yes, you want it, and false = no)");
+
             configUseHarmonyAddChatSexOptionPatch = Config.Bind(pluginKey,
                                   "UseHarmonyAddChatSexOptionPatch",
                                   true,
                                  "Whether or not you want use harmony add chat sex option patch (default true also yes, you want it, and false = no)");
 
+
             configUseHarmonyGiveMe90MioCashChatOptionPatch = Config.Bind(pluginKey, 
                                  "UseHarmonyGiveMe90MioCashChatOptionPatch",
                                   false,
                                  "Whether or not you want use harmony give me 90 mio cash chat option patch (default false also no, you don't want it, and true = yes)");
+
+            configUseMultiFollower = Config.Bind(pluginKey,
+                     "UseMultiFollower",
+                      true,
+                     "Whether or not you want use multi follower (default true also yes, you want it, and false = no)");
 
 
             useHarmonyPatches = configEnableMe.Value;
@@ -11169,7 +11292,9 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyGameAudioSourcePatch = configUseHarmonyGameAudioSourcePatch.Value;
             useHarmonyGameMainThreadsPatch = configUseHarmonyGameMainThreadsPatch.Value;
             useHarmonyAddChatSexOptionPatch = configUseHarmonyAddChatSexOptionPatch.Value;
+            useHarmonyAddFollowingChatSexOptionPatch = configUseHarmonyAddFollowingChatSexOptionPatch.Value;
             useHarmonyGiveMe90MioCashChatOptionPatch = configUseHarmonyGiveMe90MioCashChatOptionPatch.Value;
+            multiFollower = configUseMultiFollower.Value;
 
             PatchAllHarmonyMethods();
 
@@ -11250,6 +11375,71 @@ namespace BitchlandCheatConsoleBepInEx
                 postfix: postfixMethod);
         }
 
+        public static void togglePatch(string patch)
+        {
+            if (patch == null || patch == string.Empty)
+            {
+                return;
+            }
+
+            patch = patch.ToLower();
+
+            bool set = false;
+
+            switch(patch)
+            {
+                case "multifollower":
+                case "usemultifollower":
+                    {
+                        set = multiFollower = !multiFollower;
+                        configUseMultiFollower.Value = multiFollower;
+                    }
+                    break;
+
+                case "useharmonypatches":
+                    {
+                        set = useHarmonyPatches = !useHarmonyPatches;
+                        configEnableMe.Value = useHarmonyPatches;
+                    }
+                    break;
+
+                case "useharmonygameaudiosourcepatch":
+                    {
+                        set = useHarmonyGameAudioSourcePatch = !useHarmonyGameAudioSourcePatch;
+                        configUseHarmonyGameAudioSourcePatch.Value = useHarmonyGameAudioSourcePatch;
+                    }
+                    break;
+
+                case "useharmonygamemainthreadspatch":
+                    {
+                        set = useHarmonyGameMainThreadsPatch = !useHarmonyGameMainThreadsPatch;
+                        configUseHarmonyGameMainThreadsPatch.Value = useHarmonyGameMainThreadsPatch;
+                    }
+                    break;
+
+                case "useharmonyaddfollowingchatsexoptionpatch":
+                    {
+                        set = useHarmonyAddFollowingChatSexOptionPatch = !useHarmonyAddFollowingChatSexOptionPatch;
+                        configUseHarmonyAddFollowingChatSexOptionPatch.Value = useHarmonyAddFollowingChatSexOptionPatch;
+                    }
+                    break;
+
+                case "useharmonyaddchatsexoptionpatch":
+                    {
+                        set = useHarmonyAddChatSexOptionPatch = !useHarmonyAddChatSexOptionPatch;
+                        configUseHarmonyAddChatSexOptionPatch.Value = useHarmonyAddChatSexOptionPatch;
+                    }
+                    break;
+
+                case "useharmonygiveme90miocashchatoptionpatch":
+                    {
+                        set = useHarmonyGiveMe90MioCashChatOptionPatch = !useHarmonyGiveMe90MioCashChatOptionPatch;
+                        configUseHarmonyGiveMe90MioCashChatOptionPatch.Value = useHarmonyGiveMe90MioCashChatOptionPatch;
+                    }
+                    break;
+            }
+            Main.Instance.GameplayMenu.ShowNotification($"set {patch} to {set.ToString()}");
+        }
         public static void PatchAllHarmonyMethods()
         {
             try
@@ -11270,12 +11460,16 @@ namespace BitchlandCheatConsoleBepInEx
                     PatchHarmonyMethodUnity(typeof(List<Action>), "Remove", "MainThreadsRemove", true, false);
                     PatchHarmonyMethodUnity(typeof(Main), "Update", "MainUpdatePrefix", true, false);
                 }
-                if (useHarmonyAddChatSexOptionPatch)
+                if (useHarmonyAddFollowingChatSexOptionPatch)
                 {
                     try
                     {
-                        PatchHarmonyMethodUnity(typeof(int_Person), "FollowingChat", "DefaultTalk_options_AddSexOption", false, true);
-                    } catch { }
+                        PatchHarmonyMethodUnity(typeof(int_Person), "FollowingChat", "DefaultTalk_options_AddFollowingSexOption", false, true);
+                    }
+                    catch { }
+                }
+                if (useHarmonyAddChatSexOptionPatch)
+                {
                     try
                     {
                         PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa", "Chat_Xoxa", true, false);
@@ -11384,6 +11578,16 @@ namespace BitchlandCheatConsoleBepInEx
         private static int MainThreadsRemovedLength = 0;
         public static bool MainThreadsAdd(Action item, object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyGameMainThreadsPatch)
+            {
+                return true;
+            }
+
             if (__instance == null)
             {
                 return true;
@@ -11462,6 +11666,16 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static bool MainThreadsRemove(Action item, object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyGameMainThreadsPatch)
+            {
+                return true;
+            }
+
             if (__instance == null)
             {
                 return true;
@@ -11717,6 +11931,73 @@ namespace BitchlandCheatConsoleBepInEx
                 person3IsSelected = false;
             }
         }
+
+        public static void putdildoonhand(GameObject personGa, string item)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person1Ex = personGa.GetComponent<Person>();
+
+            if (person1Ex == null)
+            {
+                return;
+            }
+
+            if (!person1Ex.Perks.Contains("Gaping"))
+            {
+                person1Ex.Perks.Add("Gaping");
+            }
+
+            if (item == null)
+            {
+                return;
+            }
+
+            if (!item.StartsWith("dildo"))
+            {
+                return;
+            }
+
+            GameObject itemSpawned = getItemByName(null, item);
+
+            if (itemSpawned == null)
+            {
+                return;
+            }
+
+            GameObject dildo = SafeSpawn(itemSpawned);
+
+            if (dildo == null)
+            {
+                return;
+            }
+
+            int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
+
+            if (dildoX == null)
+            {
+                return;
+            }
+
+            person1Ex.Anim.Play("pickup_10");
+            person1Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+        }
+
+        public static void putdildoonhand(string item)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: putdildoonhand");
+
+            putdildoonhand(Main.Instance.Player.gameObject, item);
+        }
+        public static void npcputdildoonhand(string item)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcputdildoonhand");
+
+            putdildoonhand(getPersonInteract(), item);
+        }
         public static void npcspawnsexsceneex(bool havePlayer, GameObject person1, GameObject person2, GameObject person3, int sextype = 2, int pose = 0, bool force = false)
         {
             Person person1Ex = null;
@@ -11732,14 +12013,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (sextype == 1)
                 {
-                    if (!person1Ex.Perks.Contains("Gaping"))
-                    {
-                        person1Ex.Perks.Add("Gaping");
-                    }
-                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
-                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
-                    person1Ex.Anim.Play("pickup_10");
-                    person1Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                    putdildoonhand(person1Ex.gameObject, "dildo8large");
                 }
             }
 
@@ -11752,14 +12026,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (sextype == 1)
                 {
-                    if (!person2Ex.Perks.Contains("Gaping"))
-                    {
-                        person2Ex.Perks.Add("Gaping");
-                    }
-                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
-                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
-                    person2Ex.Anim.Play("pickup_10");
-                    person2Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                    putdildoonhand(person2Ex.gameObject, "dildo8large");
                 }
             }
 
@@ -11772,14 +12039,7 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (sextype == 1)
                 {
-                    if (!person3Ex.Perks.Contains("Gaping"))
-                    {
-                        person3Ex.Perks.Add("Gaping");
-                    }
-                    GameObject dildo = SafeSpawn(getItemByName(null, "dildo8large"));
-                    int_dildo dildoX = dildo.GetComponentInChildren<int_dildo>(true);
-                    person3Ex.Anim.Play("pickup_10");
-                    person3Ex.PutOnHand(dildoX.RootObj, dildoX.BackPos, dildoX.BackRot);
+                    putdildoonhand(person3Ex.gameObject, "dildo8large");
                 }
             }
 
@@ -12466,6 +12726,16 @@ namespace BitchlandCheatConsoleBepInEx
         private static bool fuckxoxa = false;
         public static bool Chat_Xoxa(object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyAddChatSexOptionPatch)
+            {
+                return true;
+            }
+
             if (!fuckxoxa)
             {
                 return true;
@@ -12496,9 +12766,27 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("fuckxoxa: off");
             }
         }
+        public static void DefaultTalk_options_AddFollowingSexOption(object __instance)
+        {
+            if (!useHarmonyAddFollowingChatSexOptionPatch)
+            {
+                return;
+            }
 
+            DefaultTalk_options_AddSexOption(__instance);
+        }
         public static void DefaultTalk_options_AddSexOption(object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return;
+            }
+
+            if (!useHarmonyAddChatSexOptionPatch)
+            {
+                return;
+            }
+
             UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
             int_Person _this = null;
 
@@ -12526,6 +12814,16 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void DefaultTalk_options_GiveMe90MioCashChatOption(object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return;
+            }
+
+            if (!useHarmonyGiveMe90MioCashChatOptionPatch)
+            {
+                return;
+            }
+
             UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
             int_Person _this = null;
 
@@ -12549,6 +12847,16 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static bool MainUpdatePrefix()
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyGameMainThreadsPatch)
+            {
+                return true;
+            }
+
             int length = MainThreadsAddedLength;
             for (int i = 0; i < length; i++)
             {
@@ -12579,6 +12887,16 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool PlayOneShotHelper(AudioSource source, AudioClip clip, float volumeScale)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyGameAudioSourcePatch)
+            {
+                return true;
+            }
+
             try
             {
                 AudioSource _this = source;
@@ -12608,6 +12926,16 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static bool PlayHelper(AudioSource source, ulong delay)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyGameAudioSourcePatch)
+            {
+                return true;
+            }
+
             try
             {
                 AudioSource _this = source;

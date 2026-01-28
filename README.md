@@ -247,6 +247,16 @@ commands with no params:
 * listfollower -> lists all your follower
 * mainfollower -> set the npc the you looked at on first position, if this npc the you looked at is not following you, it add the npc to your follower
 * rerunmainthreads -> rerun mainthreads also removed main threads
+* putdildoinhand -> put player dildo8large in hand
+* npcputdildoinhand -> put npc the you looked at or chatting with dildo8large in hand
+* multifollower -> toggle config option UseMultiFollower
+* usemultifollower -> toggle config option UseMultiFollower
+* useharmonypatches -> toggle config option UseHarmonyPatches
+* useharmonygameaudiosourcepatch -> toggle config option UseHarmonyGameAudioSourcePatch
+* useharmonygamemainthreadspatch -> toggle config option UseHarmonyGameMainThreadsPatch
+* useharmonyaddfollowingchatsexoptionpatch -> toggle config option UseHarmonyAddFollowingChatSexOptionPatch
+* useharmonyaddchatsexoptionpatch -> toggle config option UseHarmonyAddChatSexOptionPatch
+* useharmonygiveme90miocashchatoptionpatch -> toggle config option UseHarmonyGiveMe90MioCashChatOptionPatch
 
 commands with 1 param:
 
@@ -353,6 +363,8 @@ commands with 1 param:
 * using index -> your follower on position index interact with the object the you looked at
 * stopusing npcname -> your follower named npcname stopped interacting with the object the you looked at
 * stopusing index -> your follower on position index stopped interacting with the object the you looked at
+* putdildoinhand item -> put player dildo named in hand (see itemlist.txt)
+* npcputdildoinhand item -> put npc the you looked at or chatting with dildo named in hand (see itemlist.txt)
 
 commands with 2 params:
 
