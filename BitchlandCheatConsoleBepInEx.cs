@@ -5139,6 +5139,81 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.IsPlayerDescendant = true;
             offspring.CantBeForced = true;
         }
+
+        public static void spawnbirthintopod_with_parent(string parent)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnbirthintopod");
+
+            if (!(Main.Instance.Player is Girl))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("you are a male!");
+                return;
+            }
+
+            GameObject podAvailableFree = getHealthPodInteract();
+
+            if (podAvailableFree == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You must look at a HealthPod, in the clinic you can found a healthpod, or in the lab you can also found a healthpod");
+                return;
+            }
+
+            int_HealthPod podAvailable = podAvailableFree.GetComponent<int_HealthPod>();
+
+            GameObject personGa = CreatePersonNew(parent, false, true);
+
+            if (personGa == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"npc {parent} not found!");
+                return;
+            }
+
+            Person s = personGa.GetComponent<Person>();
+
+            if (s == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"npc {parent} not found!");
+                return;
+            }
+
+            Person parent1 = s;
+            Person parent2 = s;
+            Person offspring = Main.Instance.CreateOffspring(parent1, parent2);
+            podAvailable.PodUseType = 2;
+            podAvailable.Interact(offspring);
+            offspring.IsPlayerDescendant = true;
+            offspring.CantBeForced = true;
+
+            GameObject.Destroy(s.gameObject);
+        }
+        public static void animplay(string anim)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: animplay");
+
+            Main.Instance.Player.Anim.Play(anim);
+        }
+        public static void npcanimplay(string anim)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcanimplay");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.Anim.Play(anim);
+        }
+
+
         public static void spawnmale(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
@@ -8399,6 +8474,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay("pickup_10");
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay("pickup_10");
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 4.0");
@@ -9017,6 +9104,25 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcputdildoonhand":
                     {
                         npcputdildoonhand(value);
+                    }
+                    break;
+
+                case "spawnbirth":
+                case "spawnbirthintopod":
+                    {
+                        spawnbirthintopod_with_parent(value);
+                    }
+                    break;
+
+                case "animplay":
+                    {
+                        animplay(valueOriginal);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(valueOriginal);
                     }
                     break;
 

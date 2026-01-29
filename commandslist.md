@@ -257,6 +257,8 @@ commands with no params:
 * useharmonyaddfollowingchatsexoptionpatch -> toggle config option UseHarmonyAddFollowingChatSexOptionPatch
 * useharmonyaddchatsexoptionpatch -> toggle config option UseHarmonyAddChatSexOptionPatch
 * useharmonygiveme90miocashchatoptionpatch -> toggle config option UseHarmonyGiveMe90MioCashChatOptionPatch
+* animplay -> player plays animation pickup_10
+* npcanimplay -> the npc the you looked at or chatted with plays animation pickup_10
 
 commands with 1 param:
 
@@ -365,6 +367,10 @@ commands with 1 param:
 * stopusing index -> your follower on position index stopped interacting with the object the you looked at
 * putdildoinhand item -> put player dildo named in hand (see itemlist.txt)
 * npcputdildoinhand item -> put npc the you looked at or chatting with dildo named in hand (see itemlist.txt)
+* animplay name -> player plays animation name
+* npcanimplay name -> the npc the you looked at or chatted with plays animation name
+* spawnbirth name -> spawn birth with parents (see Assets\wolfitdm\females), e.g spawnbirth harley
+* spawnbirthintopod name -> spawn birth parents (see Assets\wolfitdm\females), e.g spawnbirth harley
 
 commands with 2 params:
 
