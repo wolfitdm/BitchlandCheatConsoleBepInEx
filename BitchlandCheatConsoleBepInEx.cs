@@ -5029,11 +5029,20 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: addbackpack");
             additem("jeans", "1");
         }
-        public static void use()
-        {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: use");
 
-            Person person = Main.Instance.Player;
+        public static void use_(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
 
             GameObject ga = getInteract();
 
@@ -5109,6 +5118,36 @@ namespace BitchlandCheatConsoleBepInEx
                     gasInt.Interact(person);
                 }
             }
+        }
+
+        public static void use()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: use");
+
+            use_(Main.Instance.Player.gameObject);
+        }
+
+        private static GameObject personSelected = null;
+        public static void npcuse()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcuse");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa != null)
+            {
+                personSelected = personGa;
+                Main.Instance.GameplayMenu.ShowNotification("npcuse: person selected, now look at a item and use the command again!");
+                return;
+            }
+
+            if (personSelected == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("npcuse: you must first look at a person, and use the command, then you can look at the item, the want the npc use!");
+                return;
+            }
+
+            use_(personSelected);
         }
 
         public static void spawnbirthintopod()
@@ -8483,6 +8522,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay("pickup_10");
+                    }
+                    break;
+
+                case "npcuse":
+                    {
+                        npcuse();
                     }
                     break;
 

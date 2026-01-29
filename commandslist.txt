@@ -258,6 +258,7 @@ useharmonyaddchatsexoptionpatch -> toggle config option UseHarmonyAddChatSexOpti
 useharmonygiveme90miocashchatoptionpatch -> toggle config option UseHarmonyGiveMe90MioCashChatOptionPatch
 animplay -> player plays animation pickup_10
 npcanimplay -> the npc the you looked at or chatted with plays animation pickup_10
+npcuse -> first look at a npc and use the command, then look at a item and use the command again, so that the npc can use the item
 
 commands with 1 param:
 
