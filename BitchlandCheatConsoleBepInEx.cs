@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -22,10 +23,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static UnityEngine.InputSystem.InputRemoting;
+using static UnityEngine.Rendering.VolumeComponent;
 using Component = UnityEngine.Component;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -98,7 +101,113 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool multiFollower = false;
 
-        public static bool[] followerUse = new bool[10];
+        public static bool[] followerUse = new bool[1000];
+
+        public static bool useMultiFollowerUpgrade = false;
+
+        public static bool useMultiFollowerUpgradeEx = false;
+
+        private static int mainfollowerindex = 0;
+
+        // INPUT type constant
+        private const int INPUT_KEYBOARD = 1;
+
+        // KEYEVENTF flags
+        private const uint KEYEVENTF_KEYDOWN = 0x0000;
+        private const uint KEYEVENTF_KEYUP = 0x0002;
+
+        // Virtual-Key Codes (example: 'A' key)
+        private const ushort VK_A = 0x41;
+        private const ushort VK_NUMLOCK = 0x90;
+        private const byte VK_NUMLOCK_OLD = 0x90;
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct INPUT
+        {
+            public int type;
+            public InputUnion u;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        struct InputUnion
+        {
+            [FieldOffset(0)] public KEYBDINPUT ki;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct KEYBDINPUT
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        // Import the legacy WinAPI function keybd_event
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+        static void PressKey(ushort keyCode)
+        {
+            INPUT[] inputs = new INPUT[1];
+            inputs[0].type = INPUT_KEYBOARD;
+            inputs[0].u.ki.wVk = keyCode;
+            inputs[0].u.ki.wScan = 0;
+            inputs[0].u.ki.dwFlags = KEYEVENTF_KEYDOWN;
+            inputs[0].u.ki.time = 0;
+            inputs[0].u.ki.dwExtraInfo = IntPtr.Zero;
+
+            if (SendInput(1, inputs, Marshal.SizeOf(typeof(INPUT))) == 0)
+            {
+                Console.WriteLine("Error sending key down: " + Marshal.GetLastWin32Error());
+            }
+        }
+
+        static void PressKeyOld(byte keyCode)
+        {
+            keybd_event(keyCode, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+        }
+
+        static void ReleaseKey(ushort keyCode)
+        {
+            INPUT[] inputs = new INPUT[1];
+            inputs[0].type = INPUT_KEYBOARD;
+            inputs[0].u.ki.wVk = keyCode;
+            inputs[0].u.ki.wScan = 0;
+            inputs[0].u.ki.dwFlags = KEYEVENTF_KEYUP;
+            inputs[0].u.ki.time = 0;
+            inputs[0].u.ki.dwExtraInfo = IntPtr.Zero;
+
+            if (SendInput(1, inputs, Marshal.SizeOf(typeof(INPUT))) == 0)
+            {
+                Console.WriteLine("Error sending key up: " + Marshal.GetLastWin32Error());
+            }
+        }
+        static void ReleaseKeyOld(byte keyCode)
+        {
+            keybd_event(keyCode, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+
+        static bool isNumLockPressed()
+        {
+            if (!IsNumLockOn())
+            {
+                PressKeyOld(VK_NUMLOCK_OLD);   // Key down
+                ReleaseKeyOld(VK_NUMLOCK_OLD); // Key up
+            }
+
+            if (IsNumLockOn())
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         /*public static string message = "Hello! This is a message box.";
 
@@ -697,6 +806,43 @@ namespace BitchlandCheatConsoleBepInEx
             rb.velocity = fly_velocity;
             //rb.velocity = v;
         }
+        // Import GetKeyState from user32.dll
+        [DllImport("user32.dll")]
+        public static extern short GetKeyState(int nVirtKey);
+
+        public static bool IsNumLockOn()
+        {
+            // 0x90 is the virtual key code for NumLock
+            // If the low-order bit is 1, the key is toggled (on)
+            return (((ushort)GetKeyState(0x90) & 0x8000) & 0xffff) != 0;
+        }
+
+        public static bool isNumKeyPadKeyPressed(int key)
+        {
+            int numpadKey = key + 96;
+            return (((ushort)GetKeyState(numpadKey) & 0x8000) & 0xffff) != 0;
+        }
+
+        public static bool isNumLockReallyOn()
+        {
+            bool state1 = false;
+            if (Input.GetKeyUp(KeyCode.Numlock))
+            {
+                state1 = true;
+            }
+
+            bool state2 = IsNumLockOn();
+
+            bool state = state1 && state2 || state2;
+
+            return state;
+        }
+
+        private static int lastIndex0 = -1;
+        private static int lastIndex1 = -1;
+        private static int currentpage = 0;
+        private static int currentmaximumpage = 0;
+        private static bool pressNumlock = false;
         private void HandleMultiFollower()
         {
             if (!multiFollower)
@@ -707,23 +853,161 @@ namespace BitchlandCheatConsoleBepInEx
             int keypad0 = (int)KeyCode.Keypad0;
             int keypad9 = (int)KeyCode.Keypad9;
 
-            for (int i = keypad0; i <= keypad9; i++) {
-                
+            bool numlockon = isNumLockReallyOn();
+
+            bool[] keyPadUp = new bool[10];
+            bool[] keyPadPressed = new bool[10];
+            KeyCode[] keys = new KeyCode[10];
+
+            for (int i = keypad0; i <= keypad9; i++)
+            {
                 KeyCode key = (KeyCode)i;
                 int x = i - keypad0;
+                keys[x] = key;
 
-                if (Input.GetKeyUp(key))
+                if (isNumKeyPadKeyPressed(x))
                 {
-                    followerUse[x] = !followerUse[x];
+                    keyPadPressed[x] = true;
+                } else
+                {
+                    keyPadPressed[x] = false;
+                }
 
-                    if (followerUse[x])
+                if (Input.GetKeyUp(keys[x]))
+                {
+                    keyPadUp[x] = true;
+                } else
+                {
+                    keyPadUp[x] = false;
+                }
+            }
+
+            int selectUpKey1Index = -1;
+            int selectUpKey2Index = -1;
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (keyPadPressed[i] && selectUpKey1Index == -1)
+                {
+                    selectUpKey1Index = i + (currentpage * 10);
+                }
+                else if(keyPadPressed[i] && selectUpKey2Index == -1)
+                {
+                    selectUpKey2Index = i + (currentpage * 10);
+                }
+            }
+
+            if (selectUpKey1Index != -1 && selectUpKey2Index != -1)
+            {
+                int index1 = selectUpKey1Index;
+                int index2 = selectUpKey2Index;
+                selectUpKey1Index = selectUpKey2Index = -1;
+                lastIndex0 = index1;
+                lastIndex1 = index2;
+                return;
+            } else if (lastIndex0 != -1 && lastIndex1 != -1)
+            {
+                int index1 = lastIndex0;
+                int index2 = lastIndex1;
+
+                lastIndex0 = lastIndex1 = -1;
+
+                int[] sexscene = selectrandomsexscene();
+
+               // if (sexscene[0] == 1)
+               // {
+               //     sexscene[0] = 0;
+               //     sexscene[1] = 0;
+               // }
+
+                if (npcspawnsexsceneexfollow(index1, index2, sexscene[0], sexscene[1], false))
+                    return;
+
+                return;
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (keyPadUp[i])
+                {
+                    if (useNewMultiFollowerUpgradeKeyPadInterface)
                     {
-                        followerusing(x.ToString());
-                    } else
+                        interacted_ = null;
+                        followerUse[i + (currentpage * 10)] = true;
+                        followerstopusing((i + (currentpage * 10)).ToString());
+                        if (getInteract() == null)
+                        {
+                            interacted_ = null;
+                            followersexusing((i + (currentpage * 10)).ToString(), "", "", "");
+                            continue;
+                        }
+                        else
+                        {
+                            interacted_ = null;
+                            followerusing((i + (currentpage * 10)).ToString());
+                        }
+                        continue;
+                    }
+                    else
                     {
-                        followerstopusing(x.ToString());
+                        followerUse[i + (currentpage * 10)] = !followerUse[i + (currentpage * 10)];
+                        if (followerUse[(i + (currentpage * 10))])
+                        {
+                            interacted_ = null;
+                            if (getInteract() == null)
+                            {
+                                interacted_ = null;
+                                followersexusing((i + (currentpage * 10)).ToString(), "", "", "");
+                                continue;
+                            }
+                            else
+                            {
+                                interacted_ = null;
+                                followerusing((i + (currentpage * 10)).ToString());
+                            }
+                        }
+                        else
+                        {
+                            interacted_ = null;
+                            followerstopusing((i + (currentpage * 10)).ToString());
+                        }
                     }
                 }
+            }
+        }
+        private void HandleMultiFollowerUpgrade()
+        {
+            if (!useMultiFollowerUpgrade || !useMultiFollowerUpgradeEx)
+            {
+                return;
+            }
+
+            bool numlockon = isNumLockReallyOn();
+
+            if (Input.GetKeyUp(KeyCode.G))
+            {
+                interacted_ = null;
+
+                followerUse[mainfollowerindex] = followerCanUse(mainfollowerindex.ToString());
+
+                if (numlockon)
+                {
+                    followerUse[mainfollowerindex] = true;
+                    followerstopusing(mainfollowerindex.ToString());
+                    followerusing(mainfollowerindex.ToString());
+                    return;
+                }
+
+                if (followerUse[mainfollowerindex])
+                {
+                    followerusing(mainfollowerindex.ToString());
+                }
+                else
+                {
+                    followerstopusing(mainfollowerindex.ToString());
+                }
+
+                interacted_ = null;
             }
         }
 
@@ -1182,6 +1466,8 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
         }
+
+        private static GameObject interacted_ = null;
         public static GameObject getInteract()
         {
             try
@@ -1196,6 +1482,7 @@ namespace BitchlandCheatConsoleBepInEx
                 if (la != null)
                 {
                     GameObject ga = la.gameObject;
+                    interacted_ = ga;
                     return ga;
                 }
             }
@@ -1203,6 +1490,14 @@ namespace BitchlandCheatConsoleBepInEx
             {
             }
             return null;
+        }
+        private static bool haveInteract()
+        {
+            return interacted_ != null;
+        }
+        private static GameObject getLastInteract()
+        {
+            return interacted_;
         }
         public static GameObject getMultiInteract()
         {
@@ -5030,32 +5325,32 @@ namespace BitchlandCheatConsoleBepInEx
             additem("jeans", "1");
         }
 
-        public static void use_(GameObject personGa)
+        public static GameObject interactWith(GameObject personGa, GameObject interactWith)
         {
             if (personGa == null)
             {
-                return;
+                return null;
             }
 
             Person person = personGa.GetComponent<Person>();
 
             if (person == null)
             {
-                return;
+                return null;
             }
 
-            GameObject ga = getInteract();
+            GameObject ga = interactWith;
 
             if (ga == null)
             {
-                return;
+                return null;
             }
 
             GameObject[] gas = getChildren(ga);
 
             if (gas == null)
             {
-                return;
+                return null;
             }
 
             for (int i = 0; i < gas.Length; i++)
@@ -5083,41 +5378,76 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 else if (gasInt is int_dildo)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_money)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_food)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is Int_Pickupable)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_PickableClothingPackage)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_Piss)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_basicSit)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else if (gasInt is int_ResourceItem)
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
                 else
                 {
-                    gasInt.Interact(person);
+                    return gasInt.gameObject;
                 }
             }
+
+            return null;
+        }
+
+        public static void use_(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            GameObject ga = getInteract();
+
+            GameObject interact = interactWith(person.gameObject, ga);
+
+            if (interact == null)
+            {
+                return;
+            }
+
+            Interactible i = interact.GetComponent<Interactible>();
+
+            if (i == null)
+            {
+                return;
+            }
+
+            i.Interact(person);
         }
 
         public static void use()
@@ -8420,6 +8750,69 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "sexnpcrandom":
+                    {
+                        int[] random = selectrandomsexscene();
+                        sexnpc(random[0].ToString(), random[1].ToString(), false);
+                    }
+                    break;
+
+                case "npcsexrandom":
+                    {
+                        int[] random = selectrandomsexscene();
+                        npcsex(random[0].ToString(), random[1].ToString(), false);
+                    }
+                    break;
+
+                case "sexnpcrandomforce":
+                    {
+                        int[] random = selectrandomsexscene();
+                        sexnpc(random[0].ToString(), random[1].ToString(), true);
+                    }
+                    break;
+
+                case "npcsexrandomforce":
+                    {
+                        int[] random = selectrandomsexscene();
+                        npcsex(random[0].ToString(), random[1].ToString(), true);
+                    }
+                    break;
+
+                case "sexnpcrandomfollower":
+                    {
+                        int[] random = selectrandomsexscene();
+                        sexnpcfollower(random[0].ToString(), random[1].ToString(), false);
+                    }
+                    break;
+
+                case "npcsexrandomfollower":
+                    {
+                        int[] random = selectrandomsexscene();
+                        npcsexfollower(random[0].ToString(), random[1].ToString(), false);
+                    }
+                    break;
+
+                case "sexnpcrandomfollowerforce":
+                    {
+                        int[] random = selectrandomsexscene();
+                        sexnpcfollower(random[0].ToString(), random[1].ToString(), true);
+                    }
+                    break;
+
+                case "npcsexrandomfollowerforce":
+                    {
+                        int[] random = selectrandomsexscene();
+                        npcsexfollower(random[0].ToString(), random[1].ToString(), true);
+                    }
+                    break;
+
+                case "sexusing":
+                case "followersexusing":
+                    {
+                        followersexusing("all", "all", "", "");
+                    }
+                    break;
+
                 case "fucknpcfollower":
                 case "switchnpcfollowerchat":
                     {
@@ -8450,6 +8843,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "listfollower":
                     {
                         listfollower();
+                    }
+                    break;
+
+                case "listfollowerpage":
+                    {
+                        listfollowerpage();
                     }
                     break;
 
@@ -8513,6 +8912,29 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "usemultifollowerupgrade":
+                    {
+                        togglePatch("usemultifollowerupgrade");
+                    }
+                    break;
+
+                case "usemultifollowerupgradeex":
+                    {
+                        togglePatch("usemultifollowerupgradeex");
+                    }
+                    break;
+
+                case "useharmonylistanimspatch":
+                    {
+                        togglePatch("useharmonylistanimspatch");
+                    }
+                    break;
+
+                case "usenewmultifollowerupgradekeypadinterface":
+                    {
+                        togglePatch("usenewmultifollowerupgradekeypadinterface");
+                    }
+                    break;
                 case "animplay":
                     {
                         animplay("pickup_10");
@@ -8531,10 +8953,28 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "getpage":
+                    {
+                        getpage();
+                    }
+                    break;
+
+                case "setpage":
+                    {
+                        setpage("0");
+                    }
+                    break;
+
+                case "listanims":
+                    {
+                        listanims();
+                    }
+                    break;
+
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 4.0");
-                        Logger.LogInfo("version: final 4.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 5.0");
+                        Logger.LogInfo("version: final 5.0");
                     }
                     break;
 
@@ -9129,14 +9569,32 @@ namespace BitchlandCheatConsoleBepInEx
                 case "using":
                 case "followerusing":
                     {
+                        interacted_ = null;
                         followerusing(value);
+                    }
+                    break;
+
+                case "usingall":
+                case "followerusingall":
+                    {
+                        interacted_ = null;
+                        followerusing("all");
                     }
                     break;
 
                 case "stopusing":
                 case "followerstopusing":
                     {
+                        interacted_ = null;
                         followerstopusing(value);
+                    }
+                    break;
+
+                case "stopusingall":
+                case "followerstopusingall":
+                    {
+                        interacted_ = null;
+                        followerstopusing("all");
                     }
                     break;
 
@@ -9168,6 +9626,25 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay(valueOriginal);
+                    }
+                    break;
+
+                case "sexusing":
+                case "followersexusing":
+                    {
+                        followersexusing(value, "", "", "");
+                    }
+                    break;
+
+                case "getpage":
+                    {
+                        getpage();
+                    }
+                    break;
+
+                case "setpage":
+                    {
+                        setpage(value);
                     }
                     break;
 
@@ -9314,6 +9791,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "sexusing":
+                case "followersexusing":
+                    {
+                        followersexusing(key, value, "", "");
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -9371,6 +9855,13 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(key, value + " " + value2);
+                    }
+                    break;
+
+                case "sexusing":
+                case "followersexusing":
+                    {
+                        followersexusing(key.ToLower(), value.ToLower(), value2.ToLower(), "");
                     }
                     break;
 
@@ -9432,6 +9923,13 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(key, value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "sexusing":
+                case "followersexusing":
+                    {
+                        followersexusing(key.ToLower(), value.ToLower(), value2.ToLower(), value3.ToLower());
                     }
                     break;
 
@@ -11352,7 +11850,10 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseHarmonyAddFollowingChatSexOptionPatch;
         private static ConfigEntry<bool> configUseHarmonyGiveMe90MioCashChatOptionPatch;
         private static ConfigEntry<bool> configUseMultiFollower;
-
+        private static ConfigEntry<bool> configUseMultiFollowerUpgrade;
+        private static ConfigEntry<bool> configUseMultiFollowerUpgradeEx;
+        private static ConfigEntry<bool> configUseHarmonyListAnimsPatch;
+        private static ConfigEntry<bool> configUseNewMultiFollowerUpgradeKeyPadInterface;
         public BitchlandCheatConsoleBepInEx()
         {
         }
@@ -11381,6 +11882,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyAddChatSexOptionPatch = false;
         public static bool useHarmonyAddFollowingChatSexOptionPatch = false;
         public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
+        public static bool useHarmonyListAnimsPatch = false;
+        public static bool useNewMultiFollowerUpgradeKeyPadInterface = false;
 
         private void Awake()
         {
@@ -11434,6 +11937,25 @@ namespace BitchlandCheatConsoleBepInEx
                       true,
                      "Whether or not you want use multi follower (default true also yes, you want it, and false = no)");
 
+            configUseMultiFollowerUpgrade = Config.Bind(pluginKey,
+                "UseMultiFollowerUpgrade",
+                true,
+                "Whether or not you want use multi follower upgrade (default true also yes, you want it, and false = no)");
+
+            configUseMultiFollowerUpgradeEx = Config.Bind(pluginKey,
+                "UseMultiFollowerUpgradeEx",
+                true,
+                "Whether or not you want use multi follower upgrade ex (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyListAnimsPatch = Config.Bind(pluginKey,
+               "UseHarmonyListAnimsPatch",
+               true,
+               "Whether or not you want use harmony list anims patch (default true also yes, you want it, and false = no)");
+
+            configUseNewMultiFollowerUpgradeKeyPadInterface = Config.Bind(pluginKey,
+                "UseNewMultiFollowerUpgradeKeyPadInterface",
+                true,
+                "Whether or not you want use new multi follower upgrade keypad interface patch (default true also yes, you want it, and false = no)");
 
             useHarmonyPatches = configEnableMe.Value;
 
@@ -11446,6 +11968,15 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyAddFollowingChatSexOptionPatch = configUseHarmonyAddFollowingChatSexOptionPatch.Value;
             useHarmonyGiveMe90MioCashChatOptionPatch = configUseHarmonyGiveMe90MioCashChatOptionPatch.Value;
             multiFollower = configUseMultiFollower.Value;
+            useMultiFollowerUpgrade = configUseMultiFollowerUpgrade.Value;
+            useMultiFollowerUpgradeEx = configUseMultiFollowerUpgradeEx.Value;
+            useHarmonyListAnimsPatch = configUseHarmonyListAnimsPatch.Value;
+            useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
+
+            if (useMultiFollowerUpgradeEx)
+            {
+                isNumLockPressed();
+            }
 
             PatchAllHarmonyMethods();
 
@@ -11537,13 +12068,32 @@ namespace BitchlandCheatConsoleBepInEx
 
             bool set = false;
 
-            switch(patch)
+            switch (patch)
             {
                 case "multifollower":
                 case "usemultifollower":
                     {
                         set = multiFollower = !multiFollower;
                         configUseMultiFollower.Value = multiFollower;
+                    }
+                    break;
+
+                case "usemultifollowerupgrade":
+                    {
+                        set = useMultiFollowerUpgrade = !useMultiFollowerUpgrade;
+                        configUseMultiFollowerUpgrade.Value = useMultiFollowerUpgrade;
+                    }
+                    break;
+
+                case "usemultifollowerupgradeex":
+                    {
+                        set = useMultiFollowerUpgradeEx = !useMultiFollowerUpgradeEx;
+                        configUseMultiFollowerUpgradeEx.Value = useMultiFollowerUpgradeEx;
+
+                        if (useMultiFollowerUpgradeEx)
+                        {
+                            isNumLockPressed();
+                        }
                     }
                     break;
 
@@ -11586,6 +12136,20 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         set = useHarmonyGiveMe90MioCashChatOptionPatch = !useHarmonyGiveMe90MioCashChatOptionPatch;
                         configUseHarmonyGiveMe90MioCashChatOptionPatch.Value = useHarmonyGiveMe90MioCashChatOptionPatch;
+                    }
+                    break;
+
+                case "useharmonylistanimspatch":
+                    {
+                        set = useHarmonyListAnimsPatch = !useHarmonyListAnimsPatch;
+                        configUseHarmonyListAnimsPatch.Value = useHarmonyListAnimsPatch;
+                    }
+                    break;
+
+                case "usenewmultifollowerupgradekeypadinterface":
+                    {
+                        set = useNewMultiFollowerUpgradeKeyPadInterface = !useNewMultiFollowerUpgradeKeyPadInterface;
+                        configUseNewMultiFollowerUpgradeKeyPadInterface.Value = useNewMultiFollowerUpgradeKeyPadInterface;
                     }
                     break;
             }
@@ -11715,10 +12279,30 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     PatchHarmonyMethodUnity(typeof(int_Person), "FollowingChat", "DefaultTalk_options_GiveMe90MioCashChatOption", false, true);
                 }
+                if (useHarmonyListAnimsPatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(UnityEngine.Animator), "StringToHash", "PlayAnimator", true, false);
+                }
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
             }
+        }
+
+        private static List<string> animsList = new List<string>();
+        public static bool PlayAnimator(string name)
+        {
+            if (!useHarmonyListAnimsPatch)
+            {
+                return true;
+            }
+
+            if (!animsList.Contains(name))
+            {
+                animsList.Add(name);
+            }
+
+            return true;
         }
 
         private static Action[] MainThreadsAdded = new Action[100];
@@ -12149,6 +12733,44 @@ namespace BitchlandCheatConsoleBepInEx
 
             putdildoonhand(getPersonInteract(), item);
         }
+
+        public static bool npcspawnsexsceneexfollow(int index1, int index2, int sextype = 2, int pose = 0, bool force = false)
+        {
+            int length = Main.Instance.PeopleFollowingPlayer.Count;
+            
+            if (length <= 0)
+            {
+                return false;
+            }
+
+            Person person1 = null;
+            Person person2 = null;
+
+            if (index1 < length && index2 < length)
+            {
+                person1 = Main.Instance.PeopleFollowingPlayer[index1];
+                person2 = Main.Instance.PeopleFollowingPlayer[index2];
+                person1.transform.position = person2.transform.position;
+                person1.transform.position = Main.Instance.Player.transform.position;
+                person2.transform.position = Main.Instance.Player.transform.position;
+            } else
+            {
+                return false;
+            }
+
+            person1Select = person1.gameObject;
+            person2Select = person2.gameObject;
+            person3Select = null;
+
+            person1IsSelected = true;
+            person2IsSelected = true;
+            person3IsSelected = false;
+
+            npcspawnsexsceneex(false, person1Select, person2Select, person3Select, sextype, pose, force);
+            
+            return true;
+        }
+
         public static void npcspawnsexsceneex(bool havePlayer, GameObject person1, GameObject person2, GameObject person3, int sextype = 2, int pose = 0, bool force = false)
         {
             Person person1Ex = null;
@@ -12162,6 +12784,12 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
+                person1Ex.transform.position = Main.Instance.Player.transform.position;
+                if (person1Ex != Main.Instance.Player)
+                {
+                    person1Ex.CreatePersonRelationship();
+                }
+                person1Ex.Favor = 100000000;
                 if (sextype == 1)
                 {
                     putdildoonhand(person1Ex.gameObject, "dildo8large");
@@ -12175,6 +12803,12 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
+                person2Ex.transform.position = Main.Instance.Player.transform.position;
+                if (person2Ex != Main.Instance.Player)
+                {
+                    person2Ex.CreatePersonRelationship();
+                }
+                person2Ex.Favor = 100000000;
                 if (sextype == 1)
                 {
                     putdildoonhand(person2Ex.gameObject, "dildo8large");
@@ -12188,6 +12822,12 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
+                person3Ex.transform.position = Main.Instance.Player.transform.position;
+                if (person3Ex != Main.Instance.Player)
+                {
+                    person3Ex.CreatePersonRelationship();
+                }
+                person3Ex.Favor = 100000000;
                 if (sextype == 1)
                 {
                     putdildoonhand(person3Ex.gameObject, "dildo8large");
@@ -12231,6 +12871,70 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static int[] selectrandomsexscene()
+        {
+            int[] sexscenes = new int[2];
+
+            sexscenes[0] = UnityEngine.Random.Range(0, 5);
+
+            if (sexscenes[0] == 5)
+            {
+                sexscenes[0] = 0;
+            }
+
+            List<SexPose> sexPoses = new List<SexPose>();
+            
+            switch (sexscenes[0])
+            {
+                case 0:
+                    sexPoses = Main.Instance.SexScene.FingerPoses;
+                    break;
+                case 1:
+                    sexPoses = Main.Instance.SexScene.DildoPoses;
+                    break;
+                case 2:
+                    sexPoses = Main.Instance.SexScene.SexPoses;
+                    break;
+                case 3:
+                    sexPoses = Main.Instance.SexScene.NoEnergyPoses;
+                    break;
+                case 4:
+                    sexPoses = Main.Instance.SexScene.ForcedPoses;
+                    break;
+                case 5:
+                    sexPoses = Main.Instance.SexScene.FurniturePoses;
+                    break;
+                case 6:
+                    sexPoses = Main.Instance.SexScene.CouchPoses;
+                    break;
+                default:
+                    sexPoses = new List<SexPose>();
+                    break;
+            }
+
+            int length = sexPoses.Count;
+
+            if (length == 0)
+            {
+                sexscenes[0] = 0;
+                sexscenes[1] = 2;
+                return sexscenes;
+            }
+
+            sexscenes[1] = UnityEngine.Random.Range(0, length);
+
+            if (sexscenes[1] == length)
+            {
+                sexscenes[1]--;
+
+                if (sexscenes[1] <= 0)
+                {
+                    sexscenes[1] = 0;
+                }
+            }
+
+            return sexscenes;
+        }
         public static void showsexposes(string key)
         {
             if (key == null || key == string.Empty)
@@ -12560,6 +13264,107 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification($"set chat func from {startTalkFunc} to {nowStartTalkFunc}");
         }
 
+        public static void setpage(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setpage");
+
+            int reallyPage = 0;
+
+            if (int.TryParse(key, out int page))
+            {
+                if (page <= 0)
+                {
+                    page = 0;
+                }
+
+                reallyPage = page;
+            }
+
+            int length = Main.Instance.PeopleFollowingPlayer.Count / 10;
+
+            int rest = Main.Instance.PeopleFollowingPlayer.Count % 10;
+
+            if (reallyPage > length)
+            {
+                reallyPage = length;
+            }
+
+            if (length > 0 && rest > 0)
+            {
+                currentmaximumpage = length;
+            } else
+            {
+                currentmaximumpage = 0;
+            }
+
+            if (length > 0 && rest > 0 && reallyPage <= length)
+            {
+                currentpage = reallyPage;
+            }
+            else
+            {
+                reallyPage = 0;
+                currentpage = 0;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("set page to " + reallyPage.ToString());
+            Main.Instance.GameplayMenu.ShowNotification("maximum page: " + currentmaximumpage.ToString());
+        }
+
+        public static void getpage()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getpage");
+            Main.Instance.GameplayMenu.ShowNotification("current page: " + currentpage.ToString());
+            Main.Instance.GameplayMenu.ShowNotification("minimum page: 0");
+            
+            int maximumpage = 0;
+            int length = Main.Instance.PeopleFollowingPlayer.Count / 10;
+
+            int rest = Main.Instance.PeopleFollowingPlayer.Count % 10;
+
+            if (length > 0 && rest > 0)
+            {
+                maximumpage = length;
+            }
+            else
+            {
+                maximumpage = 0;
+            }
+
+            currentmaximumpage = maximumpage;
+
+            Main.Instance.GameplayMenu.ShowNotification("maximum page: " + maximumpage.ToString());
+        }
+
+        public static void listfollowerpage()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listfollowerpage");
+            Main.Instance.GameplayMenu.ShowNotification("currentpage: " + currentpage.ToString());
+            Main.Instance.GameplayMenu.ShowNotification("maximumpage: " + currentmaximumpage.ToString());
+
+            int index = currentpage * 10;
+            int maxindex = index + 9;
+            int pageindex = 0;
+
+            for (int i = index; i <= maxindex && i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+            {
+                string message = pageindex.ToString() + ": " + Main.Instance.PeopleFollowingPlayer[i].Name.ToString();
+                Main.Instance.GameplayMenu.ShowNotification(message);
+                Logger.LogInfo(message);
+                pageindex++;
+            }
+        }
+
+        public static void listanims()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listanims");
+
+            for (int i = 0; i < animsList.Count; i++)
+            {
+                Logger.LogInfo(animsList[i]);
+            }
+
+        }
         public static void mainfollower()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: mainfollower");
@@ -12599,6 +13404,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                     newFollower.Add(person);
 
+                    mainfollowerindex = 0;
+
                     mainindex = 1;
 
                     for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
@@ -12614,6 +13421,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 if (foundindex > 0)
                 {
+                    mainfollowerindex = mainindex;
                     Main.Instance.PeopleFollowingPlayer[mainindex] = follower;
                     Main.Instance.PeopleFollowingPlayer[foundindex] = main;
                 }
@@ -12623,6 +13431,7 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification($"main follower is now {follower.Name}, {follower.Name} is on 1st position");
             } else
             {
+                mainfollowerindex = 0;
                 Main.Instance.PeopleFollowingPlayer.Add(person);
                 Main.Instance.GameplayMenu.ShowNotification($"main follower is now {person.Name}, {person.Name} is on 1st position");
             }
@@ -12653,6 +13462,14 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (interact == null)
             {
+                if (person.InteractingWith != null)
+                {
+                    Interactible interactingWith = person.InteractingWith;
+                    interactingWith.InteractingPerson = person;
+                    interactingWith.StopInteracting();
+                    interactingWith.InteractingPerson = null;
+                    person.InteractingWith = null;
+                }
                 return;
             }
 
@@ -12675,6 +13492,39 @@ namespace BitchlandCheatConsoleBepInEx
                             multiInteractible.Parts[0].Interact(person);
                         }
                     }
+                } else
+                {
+                    if (!useMultiFollowerUpgrade)
+                    {
+                        return;
+                    }
+
+                    GameObject interacted = interactWith(person.gameObject, interact.gameObject);
+
+                    if (interacted == null)
+                    {
+                        return;
+                    }
+
+                    Interactible i = interacted.GetComponent<Interactible>();
+
+                    if (i == null)
+                    {
+                        return;
+                    }
+
+                    if (i is int_Person)
+                    {
+                        return;
+                    }
+
+                    if (person.InteractingWith != null)
+                    {
+                        return;
+                    }
+
+                    person.InteractingWith = i;
+                    i.Interact(person);
                 }
             }
             else if (interact.NPCCanUseInFollow)
@@ -12694,7 +13544,67 @@ namespace BitchlandCheatConsoleBepInEx
                         interact.Interact(person);
                     }
                 }
-            }
+            } else if (!(interact is int_Person))
+            {
+                if (!useMultiFollowerUpgrade)
+                {
+                    return;
+                }
+
+                if (person.InteractingWith != null)
+                {
+                    return;
+                }
+
+                person.InteractingWith = interact;
+                interact.Interact(person);
+            } else
+            {
+                if (!useMultiFollowerUpgrade)
+                {
+                    return;
+                }
+
+                int_Person personInt = (int_Person)interact;
+                
+                if (personInt == null)
+                {
+                    return;
+                }
+
+                Person personInteract = personInt.ThisPerson;
+
+                if (personInteract == null)
+                {
+                    return;
+                }
+
+                if (person.InteractingWith != null)
+                {
+                    return;
+                }
+
+                person.InteractingWith = personInt;
+
+                person1Select = person.gameObject;
+                person2Select = personInteract.gameObject;
+                person3Select = null;
+
+                person1IsSelected = true;
+                person2IsSelected = true;
+                person3IsSelected = false;
+
+                int[] randomsexscene = selectrandomsexscene();
+               
+                npcspawnsexsceneex(false, person1Select, person2Select, person3Select, randomsexscene[0], randomsexscene[1], false);
+
+                person1Select = null;
+                person2Select = null;
+                person3Select = null;
+                person1IsSelected = false;
+                person2IsSelected = false;
+                person3IsSelected = false;
+            }    
         }
 
         public static void followerstopuse(GameObject personGa, GameObject interactGa)
@@ -12722,6 +13632,14 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (interact == null)
             {
+                if (person.InteractingWith != null)
+                {
+                    Interactible interactingWith = person.InteractingWith;
+                    interactingWith.InteractingPerson = person;
+                    interactingWith.StopInteracting();
+                    interactingWith.InteractingPerson = null;
+                    person.InteractingWith = null;
+                }
                 return;
             }
 
@@ -12749,6 +13667,41 @@ namespace BitchlandCheatConsoleBepInEx
                         }
                     }
                 }
+                else
+                {
+                    if (!useMultiFollowerUpgrade)
+                    {
+                        return;
+                    }
+
+                    GameObject interacted = interactWith(person.gameObject, interact.gameObject);
+
+                    if (interacted == null)
+                    {
+                        return;
+                    }
+
+                    Interactible i = interacted.GetComponent<Interactible>();
+
+                    if (i == null)
+                    {
+                        return;
+                    }
+
+                    if (i is int_Person)
+                    {
+                        return;
+                    }
+
+                    if (person.InteractingWith != null)
+                    {
+                        Interactible interactingWith = person.InteractingWith;
+                        interactingWith.InteractingPerson = person;
+                        interactingWith.StopInteracting();
+                        interactingWith.InteractingPerson = null;
+                        person.InteractingWith = null;
+                    }
+                }
             }
             else if (interact.NPCCanUseInFollow)
             {
@@ -12771,12 +13724,121 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                 }
             }
+            else if (!(interact is int_Person))
+            {
+                if (!useMultiFollowerUpgrade)
+                {
+                    return;
+                }
+
+                if (person.InteractingWith != null)
+                {
+                    Interactible interactingWith = person.InteractingWith;
+                    interactingWith.InteractingPerson = person;
+                    interactingWith.StopInteracting();
+                    interactingWith.InteractingPerson = null;
+                    person.InteractingWith = null;
+                }
+            }
+            else
+            {
+                if (!useMultiFollowerUpgrade)
+                {
+                    return;
+                }
+
+                if (person.InteractingWith != null)
+                {
+                    Interactible interactingWith = person.InteractingWith;
+                    interactingWith.InteractingPerson = person;
+                    interactingWith.StopInteracting();
+                    interactingWith.InteractingPerson = null;
+                    person.InteractingWith = null;
+                }
+            }
+        }
+
+        public static bool followerCanUse_(GameObject interactGa, string key)
+        {
+            if (interactGa == null)
+            {
+                return false;
+            }
+
+            List<Person> follower = Main.Instance.PeopleFollowingPlayer;
+
+            if (follower.Count == 0)
+            {
+                return false;
+            }
+
+            List<Person> mainindexes = new List<Person>();
+
+            if (int.TryParse(key, out int value))
+            {
+                if (value <= 0)
+                {
+                    value = 0;
+                }
+                if (value < follower.Count)
+                {
+                    mainindexes.Add(follower[value]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < follower.Count; i++)
+                {
+                    if (follower[i].Name.ToLower() == key)
+                    {
+                        mainindexes.Add(follower[i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < mainindexes.Count; i++)
+            {
+                if (mainindexes[i].InteractingWith != null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool followerCanUse(string key)
+        {
+            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+
+            return followerCanUse_(interactGa, key);
         }
 
         public static void followerusing(string key)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: followerusing");
-            GameObject interactGa = getInteract();
+
+            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+
+            interacted_ = null;
+
+            if (key == "all")
+            {
+                List<Person> followers = Main.Instance.PeopleFollowingPlayer;
+
+                if (followers.Count == 0)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < followers.Count; i++)
+                {
+                    followerstopuse(followers[i].gameObject, interactGa);
+                    followeruse(followers[i].gameObject, interactGa);
+                }
+
+                return;
+            }
 
             List<Person> follower = Main.Instance.PeopleFollowingPlayer;
 
@@ -12813,11 +13875,30 @@ namespace BitchlandCheatConsoleBepInEx
                 followeruse(mainindexes[i].gameObject, interactGa);
             }
         }
-
         public static void followerstopusing(string key)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: followerstopusing");
-            GameObject interactGa = getInteract();
+            
+            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+
+            interacted_ = null;
+
+            if (key == "all")
+            {
+                List<Person> followers = Main.Instance.PeopleFollowingPlayer;
+
+                if (followers.Count == 0)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < followers.Count; i++)
+                {
+                    followerstopuse(followers[i].gameObject, interactGa);
+                }
+
+                return;
+            }
 
             List<Person> follower = Main.Instance.PeopleFollowingPlayer;
 
@@ -12854,6 +13935,167 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 followerstopuse(mainindexes[i].gameObject, interactGa);
             }
+        }
+
+        public static void followersexusing(string key, string value, string value3, string value4)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: followersexusing");
+
+            int sexType = 0;
+            int sexPose = 0;
+
+            if (value3 == null || value3 == string.Empty || value4 == null || value4 == string.Empty)
+            {
+                int[] sexscene = selectrandomsexscene();
+                sexType = sexscene[0];
+                sexPose = sexscene[1];
+            } else
+            {
+                if (int.TryParse(value3, out int value3x))
+                {
+                    if (value3x <= 0)
+                    {
+                        value3x = 0;
+                    }
+                    sexType = value3x;
+                } else
+                {
+                    int[] sexscene = selectrandomsexscene();
+                    sexType = sexscene[0];
+                    sexPose = sexscene[1];
+                }
+
+                if (int.TryParse(value4, out int value4x))
+                {
+                    if (value4x <= 0)
+                    {
+                        value4x = 0;
+                    }
+                    sexPose = value4x;
+                }
+                else
+                {
+                    int[] sexscene = selectrandomsexscene();
+                    sexType = sexscene[0];
+                    sexPose = sexscene[1];
+                }
+            }
+
+            interacted_ = null;
+
+            person1Select = null;
+            person2Select = null;
+            person3Select = null;
+
+            person1IsSelected = false;
+            person2IsSelected = false;
+            person3IsSelected = false;
+
+            if (key == "all" || value == "all")
+            {
+                List<Person> followers = Main.Instance.PeopleFollowingPlayer;
+
+                if (followers.Count == 0)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < followers.Count; i++)
+                {
+                    if (!person1IsSelected)
+                    {
+                        person1Select = followers[i].gameObject;
+                        person1IsSelected = true;
+                    } else if (!person2IsSelected)
+                    {
+                        person2Select = followers[i].gameObject;
+                        person2IsSelected = true;
+                    } else if (!person3IsSelected)
+                    {
+                        person3Select = followers[i].gameObject;
+                        person3IsSelected = true;
+                    }
+                }
+
+                npcspawnsexsceneex(false, person1Select, person2Select, person3Select, sexType, sexPose);
+
+                return;
+            }
+
+            List<Person> follower = Main.Instance.PeopleFollowingPlayer;
+
+            if (follower.Count == 0)
+            {
+                return;
+            }
+
+            Person person1 = null;
+            Person person2 = null;
+
+            if (key == "")
+            {
+                person1Select = null;
+                person1IsSelected = false;
+            } else if (int.TryParse(key, out int valuex))
+            {
+                if (valuex <= 0)
+                {
+                    valuex = 0;
+                }
+                if (valuex < follower.Count)
+                {
+                    person1 = follower[valuex];
+                    person1Select = person1.gameObject;
+                    person1IsSelected = true;
+                }
+            }
+            else  
+            {
+                for (int i = 0; i < follower.Count; i++)
+                {
+                    if (follower[i].Name.ToLower() == key)
+                    {
+                        person1 = follower[i];
+                        person1Select = person1.gameObject;
+                        person1IsSelected = true;
+                        break;
+                    }
+                }
+            }
+
+            if (value == "")
+            {
+                person2Select = null;
+                person2IsSelected = false;
+            }
+            else if (int.TryParse(value, out int valuey))
+            {
+                if (valuey <= 0)
+                {
+                    valuey = 0;
+                }
+                if (valuey < follower.Count)
+                {
+                    person2 = follower[valuey];
+                    person2Select = person2.gameObject;
+                    person2IsSelected = true;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < follower.Count; i++)
+                {
+                    if (follower[i].Name.ToLower() == value)
+                    {
+                        person2 = follower[i];
+                        person2Select = person2.gameObject;
+                        person2IsSelected = true;
+                        break;
+                    }
+                }
+            }
+
+            npcspawnsexsceneex(false, person1Select, person2Select, person3Select, sexType, sexPose);
         }
 
         public static void listfollower()

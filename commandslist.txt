@@ -259,6 +259,24 @@ useharmonygiveme90miocashchatoptionpatch -> toggle config option UseHarmonyGiveM
 animplay -> player plays animation pickup_10
 npcanimplay -> the npc the you looked at or chatted with plays animation pickup_10
 npcuse -> first look at a npc and use the command, then look at a item and use the command again, so that the npc can use the item
+sexnpcrandom ->  have sex with the npc the you looked at or chatted with, spawns random sex scene
+npcsexrandom ->  the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+sexnpcrandomforce ->  the selected npcs with the command npcsexselect have now force sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+npcsexrandomforce ->  the selected npcs with the command npcsexselect have now forced sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+sexnpcrandomfollower -> you have sex with your followers, spawns random sex scene
+npcsexrandomfollower -> your followers have forced sex together, spawns random sex scene
+sexnpcrandomfollowerforce -> your have force sex with your followers, spawns random sex scene
+npcsexrandomfollowerforce -> your followers have forced sex together, spawns random sex scene
+usemultifollowerupgrade -> toggle config option UseMultiFollowerUpgrade
+usemultifollowerupgradeex -> toggle config option UseMultiFollowerUpgradeEx
+useharmonylistanimspatch -> toggle config option UseHarmonyListAnimsPatch
+followersexusing -> your follower on position 0 have sex with the npc the you looked at or chatted with
+sexusing -> your follower on position 0 have sex with the npc the you looked at or chatted with
+getpage -> shows your current page (is important if you have more as 10 followers)
+setpage -> set the page to 0 (is importantant if you have more as 10 followers)
+listfollowerpage -> shows followers on page 0 (is importantant if you have more as 10 followers)
+listanims -> list all anims, the you can play with animplay/npcanimplay
+usenewmultifollowerupgradekeypadinterface -> toggle config option useNewMultiFollowerUpgradeKeyPadInterface
 
 commands with 1 param:
 
