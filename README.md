@@ -278,6 +278,11 @@ commands with no params:
 * listfollowerpage -> shows followers on page 0 (is importantant if you have more as 10 followers)
 * listanims -> list all anims, the you can play with animplay/npcanimplay
 * usenewmultifollowerupgradekeypadinterface -> toggle config option useNewMultiFollowerUpgradeKeyPadInterface
+* followernympho -> all followers are nymphoman, have all perks, and all fetishes
+* releasefollowers -> release all your followers, so that you don't have any follower now
+* getallposters -> get all posters
+* fullgallery -> unlock all archievements
+* getallbitchnotes -> get all bitch notes
 
 commands with 1 param:
 
@@ -390,6 +395,9 @@ commands with 1 param:
 * npcanimplay name -> the npc the you looked at or chatted with plays animation name
 * spawnbirth name -> spawn birth with parents (see Assets\wolfitdm\females), e.g spawnbirth harley
 * spawnbirthintopod name -> spawn birth parents (see Assets\wolfitdm\females), e.g spawnbirth harley
+* setpage page -> set the page to page (is important if you have more as 10 followers)
+* followersexusing name1 -> follower named name1 or index1 have sex alone
+* sexusing name1 ->  follower named name1 or index1 have sex alone
 
 commands with 2 params:
 
@@ -410,6 +418,10 @@ commands with 2 params:
 * npcsexfollower SexType SexPose -> your followers have sex together
 * sexnpcfollowerforce SexType SexPose -> you have with your followers, force sex now, 
 * npcsexfollowerforce SexType SexPose -> your followers have forced sex together
+* followersexusing name1 name2 -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns random sex scene
+* sexusing name1 name2 -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns random sex scene
+* followersexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes
+* sexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes
 
 state command examples:
 

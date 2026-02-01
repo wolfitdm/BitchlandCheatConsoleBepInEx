@@ -1,0 +1,58 @@
+sexnpcrandom
+npcsexrandom
+sexnpcrandomforce
+npcsexrandomforce
+sexnpcrandomfollower
+npcsexrandomfollower
+sexnpcrandomfollowerforce
+npcsexrandomfollowerforce
+usemultifollowerupgrade
+usemultifollowerupgradeex
+useharmonylistanimspatch
+followersexusing
+sexusing
+getpage
+setpage
+listfollowerpage
+listanims
+
+
+Add new commands:
+* sexnpcrandom ->  have sex with the npc the you looked at or chatted with, spawns random sex scene
+* npcsexrandom ->  the selected npcs with the command npcsexselect have now sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+* sexnpcrandomforce ->  the selected npcs with the command npcsexselect have now force sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+* npcsexrandomforce ->  the selected npcs with the command npcsexselect have now forced sex, if you dont have select a npc, it select automatically the npc the you looked at, spawns random sex scene
+* sexnpcrandomfollower -> you have sex with your followers, spawns random sex scene
+* npcsexrandomfollower -> your followers have forced sex together, spawns random sex scene
+* sexnpcrandomfollowerforce -> your have force sex with your followers, spawns random sex scene
+* npcsexrandomfollowerforce -> your followers have forced sex together, spawns random sex scene
+* usemultifollowerupgrade -> toggle config option UseMultiFollowerUpgrade
+* usemultifollowerupgradeex -> toggle config option UseMultiFollowerUpgradeEx
+* useharmonylistanimspatch -> toggle config option UseHarmonyListAnimsPatch
+* followersexusing -> your follower on position 0 have sex with the npc the you looked at or chatted with
+* sexusing -> your follower on position 0 have sex with the npc the you looked at or chatted with
+* getpage -> shows your current page (is important if you have more as 10 followers)
+* setpage -> set the page to 0 (is importantant if you have more as 10 followers)
+* listfollowerpage -> shows followers on page 0 (is importantant if you have more as 10 followers)
+* listanims -> list all anims, the you can play with animplay/npcanimplay
+* usenewmultifollowerupgradekeypadinterface -> toggle config option useNewMultiFollowerUpgradeKeyPadInterface
+* followernympho -> all followers are nymphoman, have all perks, and all fetishes
+* releasefollowers -> release all your followers, so that you don't have any follower now
+* getallposters -> get all posters
+* fullgallery -> unlock all archievements
+* getallbitchnotes -> get all bitch notes
+
+
+Add new commands:
+* fullgallery -> unlock all archievements
+* getallbitchnotes -> get all bitch notes
+* getallposters -> get all posters
+* releasefollowers -> release all your followers, so that you don't have any follower now
+* followernympho -> all followers are nymphoman, have all perks, and all fetishes
+* setpage page -> set the page to page (is important if you have more as 10 followers)
+* followersexusing name1 -> follower named name1 or index1 have sex alone
+* sexusing name1 ->  follower named name1 or index1 have sex alone
+* followersexusing name1 name2 -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns random sex scene
+* sexusing name1 name2 -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns random sex scene
+* followersexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes
+* sexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes

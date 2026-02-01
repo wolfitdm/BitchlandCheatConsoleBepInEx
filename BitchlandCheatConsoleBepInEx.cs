@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
@@ -28,6 +29,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static UnityEngine.InputSystem.InputRemoting;
+using static UnityEngine.Random;
 using static UnityEngine.Rendering.VolumeComponent;
 using Component = UnityEngine.Component;
 using Quaternion = UnityEngine.Quaternion;
@@ -758,31 +760,40 @@ namespace BitchlandCheatConsoleBepInEx
             // Vertical movement (Space = up, LeftControl = down)
             float ascend = 0f;
            // Vector3 v = rb.velocity;
-            if (Input.GetKey(KeyCode.Space)) {
+            if (Input.GetKey(KeyCodeFlyUp)) {
                 ascend = 1f;
                // v.y += 1f;
             }
-            else if (Input.GetKey(KeyCode.LeftControl)) {
+            else if (Input.GetKey(KeyCodeFlyDown)) {
                 ascend = -1f;
                // v.y -= 1f;
+            } else if (Input.GetKey(KeyCodeFlySpeedMore))
+            {
+                flyspeedmore();
+            } else if (Input.GetKey(KeyCodeFlySpeedLess))
+            {
+                flyspeedless();
+            } else if (Input.GetKey(KeyCodeFlySpeedNormal))
+            {
+                flyspeednormal();
             }
 
-           /* if (Input.GetKey(KeyCode.W))
-            {
-                v.x -= 1;
-            } else if(Input.GetKey(KeyCode.S))
-            {
-                v.x += 1;
-            }
+            /* if (Input.GetKey(KeyCode.W))
+             {
+                 v.x -= 1;
+             } else if(Input.GetKey(KeyCode.S))
+             {
+                 v.x += 1;
+             }
 
-            if (Input.GetKey(KeyCode.D))
-            {
-                v.z += 1;
-            }
-            else if (Input.GetKey(KeyCode.A))
-            {
-                v.z -= 1;
-            }*/
+             if (Input.GetKey(KeyCode.D))
+             {
+                 v.z += 1;
+             }
+             else if (Input.GetKey(KeyCode.A))
+             {
+                 v.z -= 1;
+             }*/
 
             // Sprint modifier
             //if (Input.GetKey(KeyCode.LeftShift))
@@ -823,6 +834,19 @@ namespace BitchlandCheatConsoleBepInEx
             return (((ushort)GetKeyState(numpadKey) & 0x8000) & 0xffff) != 0;
         }
 
+        public static bool isKeyPressed(KeyCode key)
+        {
+            Util.KeyCodes.Init();
+
+            if (Util.KeyCodes.keyCodesBack.ContainsKey(key))
+            {
+                int vkKey = Util.KeyCodes.keyCodesBack[key];
+                return (((ushort)GetKeyState(vkKey) & 0x8000) & 0xffff) != 0;
+            }
+
+            return false;
+        }
+
         public static bool isNumLockReallyOn()
         {
             bool state1 = false;
@@ -850,35 +874,59 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            int keypad0 = (int)KeyCode.Keypad0;
-            int keypad9 = (int)KeyCode.Keypad9;
-
+            bool keypadPlusUp = false;
+            bool keypadMinusUp = false;
+            bool keypadEnter = false;
             bool numlockon = isNumLockReallyOn();
+
+            if (Input.GetKeyUp(KeyCodeMultiFollowerNextPage))
+            {
+                keypadPlusUp = true;
+            }
+
+            if (Input.GetKeyUp(KeyCodeMultiFollowerPreviousPage))
+            {
+               keypadMinusUp = true;
+            }
+
+            if (Input.GetKeyUp(KeyCodeMultiFollowerListFollowerPage)) 
+            {
+                keypadEnter = true;
+            }
 
             bool[] keyPadUp = new bool[10];
             bool[] keyPadPressed = new bool[10];
             KeyCode[] keys = new KeyCode[10];
 
-            for (int i = keypad0; i <= keypad9; i++)
-            {
-                KeyCode key = (KeyCode)i;
-                int x = i - keypad0;
-                keys[x] = key;
+            keys[0] = KeyCodeMultiFollowerPosition0;
+            keys[1] = KeyCodeMultiFollowerPosition1;
+            keys[2] = KeyCodeMultiFollowerPosition2;
+            keys[3] = KeyCodeMultiFollowerPosition3;
+            keys[4] = KeyCodeMultiFollowerPosition4;
+            keys[5] = KeyCodeMultiFollowerPosition5;
+            keys[6] = KeyCodeMultiFollowerPosition6;
+            keys[7] = KeyCodeMultiFollowerPosition7;
+            keys[8] = KeyCodeMultiFollowerPosition8;
+            keys[9] = KeyCodeMultiFollowerPosition9;
 
-                if (isNumKeyPadKeyPressed(x))
+            for (int i = 0; i < 10; i++)
+            {
+                KeyCode key = (KeyCode)keys[i];
+
+                if (isKeyPressed(key))
                 {
-                    keyPadPressed[x] = true;
+                    keyPadPressed[i] = true;
                 } else
                 {
-                    keyPadPressed[x] = false;
+                    keyPadPressed[i] = false;
                 }
 
-                if (Input.GetKeyUp(keys[x]))
+                if (Input.GetKeyUp(key))
                 {
-                    keyPadUp[x] = true;
+                    keyPadUp[i] = true;
                 } else
                 {
-                    keyPadUp[x] = false;
+                    keyPadUp[i] = false;
                 }
             }
 
@@ -897,6 +945,24 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
 
+            if (keypadPlusUp)
+            {
+                int page = currentpage;
+                page++;
+                setpage(page.ToString());
+                return;
+            } else if (keypadMinusUp)
+            {
+                int page = currentpage;
+                page--;
+                setpage(page.ToString());
+                return;
+            } else if (keypadEnter)
+            {
+                listfollowerpage();
+                return;
+            }
+
             if (selectUpKey1Index != -1 && selectUpKey2Index != -1)
             {
                 int index1 = selectUpKey1Index;
@@ -905,7 +971,8 @@ namespace BitchlandCheatConsoleBepInEx
                 lastIndex0 = index1;
                 lastIndex1 = index2;
                 return;
-            } else if (lastIndex0 != -1 && lastIndex1 != -1)
+            }
+            else if (lastIndex0 != -1 && lastIndex1 != -1)
             {
                 int index1 = lastIndex0;
                 int index2 = lastIndex1;
@@ -914,11 +981,11 @@ namespace BitchlandCheatConsoleBepInEx
 
                 int[] sexscene = selectrandomsexscene();
 
-               // if (sexscene[0] == 1)
-               // {
-               //     sexscene[0] = 0;
-               //     sexscene[1] = 0;
-               // }
+                // if (sexscene[0] == 1)
+                // {
+                //     sexscene[0] = 0;
+                //     sexscene[1] = 0;
+                // }
 
                 if (npcspawnsexsceneexfollow(index1, index2, sexscene[0], sexscene[1], false))
                     return;
@@ -3676,6 +3743,15 @@ namespace BitchlandCheatConsoleBepInEx
             Person thisPerson = personInteract.GetComponent<Person>();
             setPersonaltyToNympho(thisPerson.gameObject);
             Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
+        }
+
+        public static void followernympho()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: followernympho");
+            for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+            {
+                setPersonaltyToNympho(Main.Instance.PeopleFollowingPlayer[i].gameObject);
+            }
         }
         public static void listpersontypes()
         {
@@ -7865,6 +7941,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "followernympho":
+                    {
+                        followernympho();
+                    }
+                    break;
+
                 case "iamanympho":
                     {
                         iamanympho();
@@ -8971,10 +9053,34 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "releasefollowers":
+                    {
+                        releasefollowers();
+                    }
+                    break;
+
+                case "getallposters":
+                    {
+                        getallposters();
+                    }
+                    break;
+
+                case "getallbitchnotes":
+                    {
+                        getallbitchnotes();
+                    }
+                    break;
+
+                case "fullgallery":
+                    {
+                        fullgallery();
+                    }
+                    break;
+
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 5.0");
-                        Logger.LogInfo("version: final 5.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 6.0");
+                        Logger.LogInfo("version: final 6.0");
                     }
                     break;
 
@@ -8990,6 +9096,108 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        private static void releasefollowers()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: releasefollowers");
+            for (int i =  0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+            {
+                Main.Instance.PeopleFollowingPlayer[i].transform.position = Main.Instance.Player.transform.position;
+            }
+            Main.Instance.PeopleFollowingPlayer.Clear();
+        }
+
+        private static void getallposters()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getallposters");
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasPostersBC.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasPostersBC[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasPostersBCLeg.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasPostersBCLeg[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasPostersBCBEL.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasPostersBCBEL[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasPostersBCCap.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasPostersBCCap[i] = true;
+            }
+
+            Mis_Acheiv_Posters[] objectOfType = UnityEngine.Object.FindObjectsOfType<Mis_Acheiv_Posters>();
+
+            if (objectOfType == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < objectOfType.Length; i++)
+            {
+                if (objectOfType[i] != null)
+                {
+                    objectOfType[i].UpdateAcheiv1();
+                    objectOfType[i].UpdateAcheiv2();
+                    objectOfType[i].UpdateAcheiv3();
+                    objectOfType[i].UpdateAcheiv4();
+                }
+            }
+
+            int_posterCollectible[] objectsOfType2 = UnityEngine.Object.FindObjectsOfType<int_posterCollectible>();
+
+            for (int i = 0; i < objectsOfType2.Length; i++)
+            {
+                objectsOfType2[i].Interact(Main.Instance.Player);
+            }
+        }
+
+        public static void getallbitchnotes()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getallbitchnotes");
+            
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotes10.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotes10[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotes20.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotes20[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotes50.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotes50[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotes100.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotes100[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotes1000.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotes1000[i] = true;
+            }
+
+            for (int i = 0; i < Main.Instance.GameplayMenu.HasBitchNotesProt.Length; i++)
+            {
+                Main.Instance.GameplayMenu.HasBitchNotesProt[i] = true;
+            }
+        }
+
+        public static void fullgallery()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: fullgallery");
+            getallposters();
+            getallbitchnotes();
         }
 
         public static void handleCommandLength2(string command, string value)
@@ -11854,6 +12062,27 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseMultiFollowerUpgradeEx;
         private static ConfigEntry<bool> configUseHarmonyListAnimsPatch;
         private static ConfigEntry<bool> configUseNewMultiFollowerUpgradeKeyPadInterface;
+        private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
+        private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
+        private static ConfigEntry<KeyCode> configKeyCodeFlySpeedMore;
+        private static ConfigEntry<KeyCode> configKeyCodeFlySpeedLess;
+        private static ConfigEntry<KeyCode> configKeyCodeFlySpeedNormal;
+
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerNextPage;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPreviousPage;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerListFollowerPage;
+
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition0;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition1;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition2;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition3;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition4;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition5;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition6;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition7;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition8;
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition9;
+
         public BitchlandCheatConsoleBepInEx()
         {
         }
@@ -11871,6 +12100,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static string pluginKey = "General.Toggles";
 
         private static string pluginKeyControls = "General.KeyControls";
+        private static string pluginKeyControlsFly = "Fly.KeyControls";
+        private static string pluginKeyControlsMultiFollower = "MultiFollower.KeyControls";
 
         public static bool useHarmonyPatches = false;
 
@@ -11884,6 +12115,26 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
         public static bool useHarmonyListAnimsPatch = false;
         public static bool useNewMultiFollowerUpgradeKeyPadInterface = false;
+
+        public static KeyCode KeyCodeFlyUp = 0;
+        public static KeyCode KeyCodeFlyDown = 0;
+        public static KeyCode KeyCodeFlySpeedLess = 0;
+        public static KeyCode KeyCodeFlySpeedMore = 0;
+        public static KeyCode KeyCodeFlySpeedNormal = 0;
+        public static KeyCode KeyCodeMultiFollowerNextPage = 0;
+        public static KeyCode KeyCodeMultiFollowerPreviousPage = 0;
+        public static KeyCode KeyCodeMultiFollowerListFollowerPage = 0;
+
+        public static KeyCode KeyCodeMultiFollowerPosition0 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition1 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition2 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition3 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition4 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition5 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition6 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition7 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition8 = 0;
+        public static KeyCode KeyCodeMultiFollowerPosition9 = 0;
 
         private void Awake()
         {
@@ -11956,6 +12207,118 @@ namespace BitchlandCheatConsoleBepInEx
                 "UseNewMultiFollowerUpgradeKeyPadInterface",
                 true,
                 "Whether or not you want use new multi follower upgrade keypad interface patch (default true also yes, you want it, and false = no)");
+
+            configKeyCodeFlyUp = Config.Bind(pluginKeyControlsFly,
+                                                           "KeyCodeFlyUp",
+                                                            KeyCode.Space,
+                                                           "KeyCode to fly up, default Space");
+
+            configKeyCodeFlyDown = Config.Bind(pluginKeyControlsFly,
+                                               "KeyCodeFlyDown",
+                                                KeyCode.LeftControl,
+                                               "KeyCode to fly down, default LeftControl");
+
+            configKeyCodeFlySpeedMore = Config.Bind(pluginKeyControlsFly,
+                                   "KeyCodeFlySpeedMore",
+                                    KeyCode.KeypadMultiply,
+                                   "KeyCode to fly use the command flyspeedmore, default KeypadMultiply");
+
+            configKeyCodeFlySpeedLess = Config.Bind(pluginKeyControlsFly,
+                       "KeyCodeFlySpeedLess",
+                        KeyCode.KeypadDivide,
+                       "KeyCode to fly use the command flyspeedless, default KeypadDivide");
+
+            configKeyCodeFlySpeedNormal = Config.Bind(pluginKeyControlsFly,
+                       "KeyCodeFlySpeedNormal",
+                        KeyCode.KeypadEnter,
+                       "KeyCode to fly use the command flyspeednormal, default KeypadEnter");
+
+            configKeyCodeMultiFollowerNextPage = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerNextPage",
+                                                          KeyCode.KeypadPlus,
+                                                         "KeyCode to get next page, default KeypadPlus");
+
+            configKeyCodeMultiFollowerPreviousPage = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerPreviousPage",
+                                                          KeyCode.KeypadMinus,
+                                                         "KeyCode to get previous page, default KeypadMinus");
+
+            configKeyCodeMultiFollowerListFollowerPage = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerListFollowerPage",
+                                                          KeyCode.KeypadEnter,
+                                                         "KeyCode to list follower page, default KeypadEnter");
+
+
+            configKeyCodeMultiFollowerPosition0 = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerPosition0",
+                                                          KeyCode.Keypad0,
+                                                         "KeyCode for follower position 0, default Keypad0");
+
+            configKeyCodeMultiFollowerPosition1 = Config.Bind(pluginKeyControlsMultiFollower,
+                                             "KeyCodeMultiFollowerPosition1",
+                                              KeyCode.Keypad1,
+                                             "KeyCode for follower position 1, default Keypad1");
+
+            configKeyCodeMultiFollowerPosition2 = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerPosition2",
+                                                          KeyCode.Keypad2,
+                                                         "KeyCode for follower position 2, default Keypad2");
+
+            configKeyCodeMultiFollowerPosition3 = Config.Bind(pluginKeyControlsMultiFollower,
+                                             "KeyCodeMultiFollowerPosition3",
+                                              KeyCode.Keypad3,
+                                             "KeyCode for follower position 3, default Keypad3");
+
+            configKeyCodeMultiFollowerPosition4 = Config.Bind(pluginKeyControlsMultiFollower,
+                                             "KeyCodeMultiFollowerPosition4",
+                                              KeyCode.Keypad4,
+                                             "KeyCode for follower position 4, default Keypad4");
+
+            configKeyCodeMultiFollowerPosition5 = Config.Bind(pluginKeyControlsMultiFollower,
+                                             "KeyCodeMultiFollowerPosition5",
+                                              KeyCode.Keypad5,
+                                             "KeyCode for follower position 5, default Keypad5");
+
+            configKeyCodeMultiFollowerPosition6 = Config.Bind(pluginKeyControlsMultiFollower,
+                                                         "KeyCodeMultiFollowerPosition6",
+                                                          KeyCode.Keypad6,
+                                                         "KeyCode for follower position 6, default Keypad6");
+
+            configKeyCodeMultiFollowerPosition7 = Config.Bind(pluginKeyControlsMultiFollower,
+                                             "KeyCodeMultiFollowerPosition7",
+                                              KeyCode.Keypad7,
+                                             "KeyCode for follower position 7, default Keypad7");
+
+            configKeyCodeMultiFollowerPosition8 = Config.Bind(pluginKeyControlsMultiFollower,
+                                 "KeyCodeMultiFollowerPosition8",
+                                  KeyCode.Keypad8,
+                                 "KeyCode for follower position 8, default Keypad8");
+
+            configKeyCodeMultiFollowerPosition9 = Config.Bind(pluginKeyControlsMultiFollower,
+                                 "KeyCodeMultiFollowerPosition9",
+                                  KeyCode.Keypad9,
+                                 "KeyCode for follower position 9, default Keypad9");
+
+            KeyCodeFlyUp = configKeyCodeFlyUp.Value;
+            KeyCodeFlyDown = configKeyCodeFlyDown.Value;
+            KeyCodeFlySpeedMore = configKeyCodeFlySpeedMore.Value;
+            KeyCodeFlySpeedLess = configKeyCodeFlySpeedLess.Value;
+            KeyCodeFlySpeedNormal = configKeyCodeFlySpeedNormal.Value;
+
+            KeyCodeMultiFollowerNextPage = configKeyCodeMultiFollowerNextPage.Value;
+            KeyCodeMultiFollowerPreviousPage = configKeyCodeMultiFollowerPreviousPage.Value;
+            KeyCodeMultiFollowerListFollowerPage = configKeyCodeMultiFollowerListFollowerPage.Value;
+
+            KeyCodeMultiFollowerPosition0 = configKeyCodeMultiFollowerPosition0.Value;
+            KeyCodeMultiFollowerPosition1 = configKeyCodeMultiFollowerPosition1.Value;
+            KeyCodeMultiFollowerPosition2 = configKeyCodeMultiFollowerPosition2.Value;
+            KeyCodeMultiFollowerPosition3 = configKeyCodeMultiFollowerPosition3.Value;
+            KeyCodeMultiFollowerPosition4 = configKeyCodeMultiFollowerPosition4.Value;
+            KeyCodeMultiFollowerPosition5 = configKeyCodeMultiFollowerPosition5.Value;
+            KeyCodeMultiFollowerPosition6 = configKeyCodeMultiFollowerPosition6.Value;
+            KeyCodeMultiFollowerPosition7 = configKeyCodeMultiFollowerPosition7.Value;
+            KeyCodeMultiFollowerPosition8 = configKeyCodeMultiFollowerPosition8.Value;
+            KeyCodeMultiFollowerPosition9 = configKeyCodeMultiFollowerPosition9.Value;
 
             useHarmonyPatches = configEnableMe.Value;
 
