@@ -1051,7 +1051,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             bool numlockon = isNumLockReallyOn();
 
-            if (Input.GetKeyUp(KeyCode.G))
+            if (Input.GetKeyUp(MultiFollowerKeyCodeGKey))
             {
                 interacted_ = null;
 
@@ -12083,6 +12083,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition8;
         private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerPosition9;
 
+        private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerGKey;
+
         public BitchlandCheatConsoleBepInEx()
         {
         }
@@ -12135,6 +12137,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static KeyCode KeyCodeMultiFollowerPosition7 = 0;
         public static KeyCode KeyCodeMultiFollowerPosition8 = 0;
         public static KeyCode KeyCodeMultiFollowerPosition9 = 0;
+
+        public static KeyCode MultiFollowerKeyCodeGKey = 0;
 
         private void Awake()
         {
@@ -12298,6 +12302,11 @@ namespace BitchlandCheatConsoleBepInEx
                                  "KeyCodeMultiFollowerPosition9",
                                   KeyCode.Keypad9,
                                  "KeyCode for follower position 9, default Keypad9");
+
+            configKeyCodeMultiFollowerGKey = Config.Bind(pluginKeyControlsMultiFollower,
+                                 "KeyCodeMultiFollowerGKey",
+                                  KeyCode.G,
+                                 "Alternative for the F Key, default G");
 
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
