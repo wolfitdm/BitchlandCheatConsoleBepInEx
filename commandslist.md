@@ -283,6 +283,7 @@ commands with no params:
 * getallposters -> get all posters
 * fullgallery -> unlock all archievements
 * getallbitchnotes -> get all bitch notes
+* modmanager -> open mod manager urls
 
 commands with 1 param:
 

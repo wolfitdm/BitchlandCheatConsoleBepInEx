@@ -283,6 +283,7 @@ commands with no params:
 * getallposters -> get all posters
 * fullgallery -> unlock all archievements
 * getallbitchnotes -> get all bitch notes
+* modmanager -> open mod manager urls
 
 commands with 1 param:
 
@@ -691,3 +692,51 @@ skinlistclothedversion:
 0: Couch (SexPose_Miss)
 1: Couch2 (SexPose_Miss)
 2: Couch3 (SexPose_Miss)
+
+---------------------ANIMS-LIST-----------------------------
+
+mixIdle
+BedHug2
+BedHug1
+Anim_dildoMastSit2
+PodFloat
+Wall_TiredRest
+Anim_wallSex4
+pole1
+boobs1
+pole2
+Anim_wallSex3
+TableAnim
+LockerStand2
+FloorSleep1
+Sitting Dazed
+DoctorSit
+GainControl
+AGIA_Idle_generic_01
+RifleIdle
+AnimSexOffer1
+Anim_SexSpot1_Idle
+pose_03
+Mast1
+idle_01
+Happy Walk
+HumanoidWalk
+SexyWalk1
+AGIA_Other_walking_01
+RifleWalkF
+UNCombatRunF
+UNWalkF
+Orc Walk2
+Sad Walk
+LegHolding_2
+LegHolding_1
+sit_03
+sexydesk
+StationaryDoggy_Idle
+1HIdle
+sit_02
+sit_00
+Villager@Idle01
+HumanoidIdle
+sit_05
+pickup_10

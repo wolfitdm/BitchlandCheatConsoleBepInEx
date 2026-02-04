@@ -282,6 +282,7 @@ releasefollowers -> release all your followers, so that you don't have any follo
 getallposters -> get all posters
 fullgallery -> unlock all archievements
 getallbitchnotes -> get all bitch notes
+modmanager -> open mod manager urls
 
 commands with 1 param:
 
