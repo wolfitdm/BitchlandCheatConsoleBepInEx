@@ -1057,7 +1057,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 followerUse[mainfollowerindex] = followerCanUse(mainfollowerindex.ToString());
 
-                if (numlockon)
+                if (useNewMultiFollowerUpgradeKeyPadInterface)
                 {
                     followerUse[mainfollowerindex] = true;
                     followerstopusing(mainfollowerindex.ToString());
@@ -5131,8 +5131,15 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/skinlistclothedversion.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexposes.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
-            OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
+        }
+
+        public static void modmanager()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: modmanager");
+            OpenUrl("https://github.com/wolfitdm/BitchlandModManager/releases/tag/1.0.0");
+            OpenUrl("https://github.com/wolfitdm/BitchlandModManager/releases/download/1.0.0/BitchlandModManager.zip");
+            OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/BitchlandCheatConsole_BepInEx-Unity.Mono-win-x64-6.0.0-be.752+dd0655f.zip");
         }
 
         public static void dropallass()
@@ -9077,10 +9084,16 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "modmanager":
+                    {
+                        modmanager();
+                    }
+                    break;
+
                 case "version":
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("version: final 6.0");
-                        Logger.LogInfo("version: final 6.0");
+                        Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
+                        Logger.LogInfo("version: final 7.0");
                     }
                     break;
 
@@ -12328,6 +12341,8 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeMultiFollowerPosition7 = configKeyCodeMultiFollowerPosition7.Value;
             KeyCodeMultiFollowerPosition8 = configKeyCodeMultiFollowerPosition8.Value;
             KeyCodeMultiFollowerPosition9 = configKeyCodeMultiFollowerPosition9.Value;
+
+            MultiFollowerKeyCodeGKey = configKeyCodeMultiFollowerGKey.Value;
 
             useHarmonyPatches = configEnableMe.Value;
 
