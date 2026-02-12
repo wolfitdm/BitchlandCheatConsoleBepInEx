@@ -6,6 +6,7 @@ using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
 using MapMagic.Expose;
+using MapMagic.Nodes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
+using TinyJson;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.InputSystem;
@@ -1087,6 +1089,7 @@ namespace BitchlandCheatConsoleBepInEx
         private void LateUpdate()
         {
             HandleFlight();
+            handleCommandKeys();
         }
 
         private static string lastCommand = "";
@@ -1647,6 +1650,32 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         Person thisPerson = int_thisPerson.ThisPerson;
                         return thisPerson.gameObject;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static GameObject getInstructionPlanInteract()
+        {
+            GameObject ga = getInteract();
+
+            if (ga == null)
+            {
+                return null;
+            }
+
+            Interactible la = ga.GetComponent<Interactible>();
+
+            if (la != null)
+            {
+                if (la is int_ConstructionPlan)
+                {
+                    int_ConstructionPlan plan = (int_ConstructionPlan)la;
+                    if (plan != null)
+                    {
+                        return plan.gameObject;
                     }
                 }
             }
@@ -9145,6 +9174,48 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "buildplans":
+                    {
+                        buildplans();
+                    }
+                    break;
+
+                case "additemsforplan":
+                    {
+                        additemsforplan();
+                    }
+                    break;
+
+                case "buildplanfull":
+                    {
+                        buildplanfull();
+                    }
+                    break;
+
+                case "listcommandkeys":
+                    {
+                        listcommandkeys();
+                    }
+                    break;
+
+                case "clearcommandkeys":
+                    {
+                        clearcommandkeys();
+                    }
+                    break;
+
+                case "removeallcommandkeys":
+                    {
+                        removeallcommandkeys();
+                    }
+                    break;
+
+                case "listallcommandkeys":
+                    {
+                        listallcommandkeys();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -9260,7 +9331,109 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.HasBitchNotesProt[i] = true;
             }
         }
+        public static List<GameObject> getallbuildplans()
+        {
+            List<GameObject> list = new List<GameObject>();
+            
+            if (Main.Instance.Prefabs_Plans != null)
+            {
+                for (int i = 0; i < Main.Instance.Prefabs_Plans.Count; i++)
+                {
+                    list.Add(Main.Instance.Prefabs_Plans[i]);
+                }
+            }
 
+            return list;
+
+        }
+
+        public static void buildplans()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: buildplans");
+            List<GameObject> list = getallbuildplans();
+
+            if (list.Count > 0)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string name = list[i].name;
+                    Logger.LogInfo(name);
+                    Main.Instance.GameplayMenu.ShowNotification(name);
+                }
+            }
+        }
+        public static void buildplan(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: buildplan");
+            List<GameObject> plans = getallbuildplans();
+            if (plans.Count > 0)
+            {
+                for (int i = 0; i < plans.Count; i++)
+                {
+                    string name = plans[i].name;
+                    if (name == value)
+                    {
+                        build(plans[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        public static void build(GameObject plan)
+        {
+            UI_Gameplay _this = Main.Instance.GameplayMenu;
+            _this.CloseJournal();
+            _this._BuildindPlan = Main.Spawn(plan);
+            _this._BuildindPlan.GetComponentInChildren<Interactible>().AddBlocker("PlanPlacing");
+            
+            if (_this._BuildindPlan == null)
+                return;
+
+            Main.RunInNextFrame((Action)(() => Main.Instance.MainThreads.Add(new Action(_this.BuildThread))), 5);
+        }
+
+        public static void additemsforplan()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: additemsforplan");
+            GameObject planG = getInstructionPlanInteract();
+
+            if (planG == null)
+            {
+                return;
+            }
+
+            int_ConstructionPlan plan = planG.GetComponent<int_ConstructionPlan>();
+
+            if (plan == null)
+            {
+                return;
+            }
+
+            plan.AllResourcesIn = true;
+
+            Main.Instance.GameplayMenu.ShowNotification("additemsforplan: all resources in, you can build them :)");
+        }
+
+        public static void buildplanfull()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: buildplanfull");
+            
+            GameObject planG = getInstructionPlanInteract();
+
+            if (planG == null)
+            {
+                return;
+            }
+
+            int_ConstructionPlan plan = planG.GetComponent<int_ConstructionPlan>();
+
+            if (plan == null)
+            {
+                return;
+            }
+
+            build(plan.FinalPrefab);
+        }
         public static void fullgallery()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fullgallery");
@@ -9936,6 +10109,42 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "buildplan":
+                    {
+                        buildplan(valueOriginal);
+                    }
+                    break;
+
+                case "removecommandkey":
+                    {
+                        removecommandkey(valueOriginal);
+                    }
+                    break;
+
+                case "getcommandkey":
+                    {
+                        getcommandkey(valueOriginal);
+                    }
+                    break;
+
+                case "savecommandkeys":
+                    {
+                        savecommandkeys(valueOriginal);
+                    }
+                    break;
+
+                case "readcommandkeys":
+                    {
+                        readcommandkeys(valueOriginal);
+                    }
+                    break;
+
+                case "removecommandkeys":
+                    {
+                        removecommandkeys(valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10085,6 +10294,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setcommandkey":
+                    {
+                        setcommandkey(keyOriginal, valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10149,6 +10364,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "followersexusing":
                     {
                         followersexusing(key.ToLower(), value.ToLower(), value2.ToLower(), "");
+                    }
+                    break;
+
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2);
                     }
                     break;
 
@@ -10220,6 +10441,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10278,6 +10505,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4);
                     }
                     break;
 
@@ -10342,6 +10575,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10400,6 +10639,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
                     }
                     break;
 
@@ -10464,6 +10709,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10522,6 +10773,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setglobalvar":
                     {
                         setglobalvar(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
                     }
                     break;
 
@@ -10586,11 +10843,236 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "setcommandkey":
+                    {
+                        setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        private static Dictionary<KeyCode, string> commandKeys = new Dictionary<KeyCode, string>();
+        private static void setcommandkey(string key, string v)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: setcommandkey");
+            List<string> messages = new List<string>();
+            if (Enum.TryParse<KeyCode>(key, true, out KeyCode keyCode))
+            {
+                if (commandKeys.ContainsKey(keyCode))
+                {
+                    string lastKeyCodeCommand = commandKeys[keyCode];
+                    commandKeys[keyCode] = v;
+                    messages.Add($"{keyCode} old value {lastKeyCodeCommand}");
+                    messages.Add($"{keyCode} new value {v}");
+                } else
+                {
+                    commandKeys.Add(keyCode, v);
+                    messages.Add($"{keyCode} new value {v}");
+                }
+            }
+
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Logger.LogInfo(messages[i]);
+                Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+            }
+        }
+
+        public static void removecommandkey(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removecommandkey");
+            List<string> messages = new List<string>();
+            if (Enum.TryParse<KeyCode>(key, true, out KeyCode keyCode))
+            {
+                if (commandKeys.ContainsKey(keyCode))
+                {
+                    string lastKeyCodeCommand = commandKeys[keyCode];
+                    commandKeys.Remove(keyCode);
+                    messages.Add($"{keyCode} with value {lastKeyCodeCommand} removed");
+                    messages.Add($"{keyCode} is free");
+                }
+                else
+                {
+                    messages.Add($"{keyCode} is free");
+                }
+            }
+
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Logger.LogInfo(messages[i]);
+                Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+            }
+        }
+
+        public static void getcommandkey(string key)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: getcommandkey");
+            List<string> messages = new List<string>();
+            if (Enum.TryParse<KeyCode>(key, true, out KeyCode keyCode))
+            {
+                if (commandKeys.ContainsKey(keyCode))
+                {
+                    string lastKeyCodeCommand = commandKeys[keyCode];
+                    messages.Add($"{keyCode} value {lastKeyCodeCommand}");
+                }
+            }
+
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Logger.LogInfo(messages[i]);
+                Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+            }
+        }
+
+        public static void listcommandkeys()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listcommandkeys");
+            foreach (KeyCode key in commandKeys.Keys)
+            {
+                string message = "";
+                string lastKeyCodeCommand = commandKeys[key];
+                message = $"{key} value {lastKeyCodeCommand}";
+                Logger.LogInfo(message);
+                Main.Instance.GameplayMenu.ShowNotification(message);
+            }
+        }
+
+        public static void handleCommandKeys()
+        {
+            if (commandKeys.Count == 0)
+            {
+                return;
+            }
+
+            foreach (KeyCode key in commandKeys.Keys)
+            {
+                if (Input.GetKeyUp(key))
+                {
+                    handleCommand(commandKeys[key]);
+                }
+            }
+        }
+        public static void savecommandkeys(string name)
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects/commandkeys";
+            Directory.CreateDirectory(objectsFolder);
+            Dictionary<string, string> keyCodes = new Dictionary<string, string>();
+
+            foreach (KeyCode key in commandKeys.Keys)
+            {
+                string lastKeyCodeCommand = commandKeys[key];
+                string keyCode = $"{key}";
+
+                if (keyCodes.ContainsKey(keyCode))
+                {
+                    continue;
+                }
+
+                keyCodes.Add(keyCode, lastKeyCodeCommand);
+            }
+
+            string path = "${objectsFolder}/commandkeys/{name}.json";
+
+            File.WriteAllText(path, keyCodes.ToJson());
+
+            Main.Instance.GameplayMenu.ShowNotification(path + " written!");
+        }
+        public static void readcommandkeys(string name)
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects/commandkeys";
+            Directory.CreateDirectory(objectsFolder);
+            string path = "${objectsFolder}/{name}.json";
+
+            if (!File.Exists(path))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(path + " not exist!");
+                return;
+            }
+
+            string content = File.ReadAllText(path);
+
+            Dictionary<string,string> keyCodes = content.FromJson<Dictionary<string, string>>();
+
+            commandKeys.Clear();
+
+            foreach (string key in keyCodes.Keys)
+            {
+                if (Enum.TryParse<KeyCode>(key, true, out KeyCode keyCode))
+                {
+                    if (commandKeys.ContainsKey(keyCode))
+                    {
+                        commandKeys[keyCode] = keyCodes[key];
+                    }
+                    else
+                    {
+                        commandKeys.Add(keyCode, keyCodes[key]);
+                    }
+                }
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification(path + " loaded!");
+        }
+        public static void clearcommandkeys()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: clearcommandkeys");
+            commandKeys.Clear();
+            Main.Instance.GameplayMenu.ShowNotification("commandkeys cleared");
+        }
+
+        public static void removecommandkeys(string name)
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects/commandkeys";
+            Directory.CreateDirectory(objectsFolder);
+            string path = "${objectsFolder}/{name}.json";
+
+            if (!File.Exists(path))
+            {
+                Main.Instance.GameplayMenu.ShowNotification(path + " not exist!");
+                return;
+            }
+
+            File.Delete(path);
+
+            Main.Instance.GameplayMenu.ShowNotification(path + " removed");
+        }
+
+        public static void removeallcommandkeys()
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects/commandkeys";
+            Directory.CreateDirectory(objectsFolder);
+
+            string[] files = Directory.GetFiles(objectsFolder, "*.json");
+
+            foreach (string path in files)
+            {
+
+                if (!File.Exists(path))
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(path + " not exist!");
+                }
+
+                File.Delete(path);
+
+                Main.Instance.GameplayMenu.ShowNotification(path + " removed");
+            }
+        }
+
+        public static void listallcommandkeys()
+        {
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects/commandkeys";
+            Directory.CreateDirectory(objectsFolder);
+
+            string[] files = Directory.GetFiles(objectsFolder, "*.json");
+
+            foreach (string path in files)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(Path.GetFileNameWithoutExtension(path));
             }
         }
 

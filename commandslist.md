@@ -288,6 +288,13 @@ commands with no params:
 * modmanager -> open mod manager urls
 * howlongwantssex -> see how long want the player have sex
 * npchowlongwantssex -> see how long want the npc have sex
+* buildplans -> list all build plans
+* buildplanfull -> build  the final prefab from the build plan the you looked at
+* additemsforplan -> add all items to the plan the you looked at, so that you can build the plan
+* removeallcommandkeys -> remove all command key files in Assets\wolfitdm\objects\commandkeys
+* listallcommandkeys -> list all command key files in Assets\wolfitdm\objects\commandkeys
+* listcommandkeys -> list all command keys
+* clearcommandkeys -> clear the command keys list
 
 commands with 1 param:
 
@@ -405,6 +412,12 @@ commands with 1 param:
 * sexusing name1 ->  follower named name1 or index1 have sex alone
 * howlongwantssex value -> change the value how long want the player have sex
 * npchowlongwantssex value -> change the value how long want the npc have sex
+* buildplan name -> build the plan with name, you can list all buildplans with the command buildplans
+* removecommandkey key -> remove the command key, e. g. removecommandkey U 
+* getcommandkey key -> get the command to the key e. g. getcommandkey U
+* savecommandkeys name -> save all command keys the you have setted up to file Assets\wolfitdm\objects\commandkeys\name.json
+* readcommandkeys name -> load all command keys the you have saved to file Assets\wolfitdm\objects\commandkeys\name.json, so that you can use the command keys ingame
+* removecommandkeys name -> remove file Assets\wolfitdm\objects\commandkeys\name.json
 
 commands with 2 params:
 
@@ -429,3 +442,4 @@ commands with 2 params:
 * sexusing name1 name2 -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns random sex scene
 * followersexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes
 * sexusing name1 name2 sexType sexPose -> follower named name1 or name2 or index1 and/or index2 have sex together, spawns sex scene from type sextype and sexpose, see showallsexposes
+* setcommandkey Key command -> set the command on the key Key e.g setcommandkey U warp tc , if you then press U it executes the command warp tc, , you can see all KeyCodes in BepInEx\config....BitchlandCheatConsoleBepInEx.cfg
