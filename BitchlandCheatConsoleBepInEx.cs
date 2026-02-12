@@ -6475,9 +6475,9 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("setpersonstatetofree: that mean, npc is fuckable great!, yeah :)");
             }
         }
-        public static void lock_int()
+        public static void lockold_int()
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: lock");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lockold");
 
             GameObject lockable = getLockableInteract();
 
@@ -6496,9 +6496,9 @@ namespace BitchlandCheatConsoleBepInEx
                 int_Lo.InteractText = int_Lo.InteractText.Replace("(Unlocked", "(Locked");
             }
         }
-        public static void unlock_int()
+        public static void unlockold_int()
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: unlock");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlockold");
             GameObject lockable = getLockableInteract();
 
             if (lockable == null)
@@ -6515,6 +6515,36 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 int_Lo.InteractText = int_Lo.InteractText.Replace("(Locked", "(Unlocked");
             }
+        }
+
+        public static void lock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lock");
+
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
+            {
+                return;
+            }
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            int_Lo.Locked = true;
+        }
+        public static void unlock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlock");
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
+            {
+                return;
+            }
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            int_Lo.Locked = false;
         }
 
         public static void storagemax_int()
@@ -7781,12 +7811,23 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "lockold":
+                    {
+                        lockold_int();
+                    }
+                    break;
+
+                case "unlockold":
+                    {
+                        unlockold_int();
+                    }
+                    break;
+
                 case "lock":
                     {
                         lock_int();
                     }
                     break;
-
 
                 case "unlock":
                     {

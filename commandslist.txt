@@ -41,6 +41,8 @@ save -> saves the game on everytime in the normal slot
 autosave -> saves the game on everytime in the autosave slot
 unstuckme -> unstuck the player
 warpfollower -> teleports all follower to you
+lockold -> If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be closed
+unlockold ->  If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be open
 lock -> If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be closed
 unlock -> If you look at a door,drive or any lockable with the camera and enter this command in the console, then the door,drive or any lockable will be open
 storagemax -> If you look at a backpack, locker, or any other container with the camera and enter this command in the console, then the container will now have a maximum size of 2,147,483,647.
