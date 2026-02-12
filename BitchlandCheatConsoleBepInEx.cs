@@ -9133,6 +9133,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "howlongwantssex":
+                    {
+                        howlongwantssex("");    
+                    }
+                    break;
+
+                case "npchowlongwantssex":
+                    {
+                        npchowlongwantssex("");
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -9912,6 +9924,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "howlongwantssex":
+                    {
+                        howlongwantssex(value);
+                    }
+                    break;
+
+                case "npchowlongwantssex":
+                    {
+                        npchowlongwantssex(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -9919,7 +9943,6 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
-
         public static void handleCommandLength3(string command, string key, string value)
         {
             string keyOriginal = key;
@@ -10690,6 +10713,69 @@ namespace BitchlandCheatConsoleBepInEx
                 // use audio clip
                 callback(clip);
             }
+        }
+        private static void npchowlongwantssex(string value)
+        {
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (value == "")
+            {
+                Main.Instance.GameplayMenu.ShowNotification("HowLongWantsSex: " + person._PersonalityData.HowLongWantsSex.ToString("G", culture));
+                return;
+            }
+
+            float volume = 0;
+            try
+            {
+                volume = float.Parse(value, culture);
+                volume = volume <= 0 ? 0 : volume;
+            }
+            catch (Exception)
+            {
+                volume = 1f;
+            }
+
+            person._PersonalityData.HowLongWantsSex = volume;
+
+            Main.Instance.GameplayMenu.ShowNotification("HowLongWantsSex is set to " + volume.ToString("G", culture));
+        }
+
+        private static void howlongwantssex(string value)
+        {
+            Person person = Main.Instance.Player;
+
+            if (value == "")
+            {
+                Main.Instance.GameplayMenu.ShowNotification("HowLongWantsSex: " + person._PersonalityData.HowLongWantsSex.ToString("G", culture));
+                return;
+            }
+
+            float volume = 0;
+            try
+            {
+                volume = float.Parse(value, culture);
+                volume = volume <= 0 ? 0 : volume;
+            }
+            catch (Exception)
+            {
+                volume = 1f;
+            }
+
+            person._PersonalityData.HowLongWantsSex = volume;
+
+            Main.Instance.GameplayMenu.ShowNotification("HowLongWantsSex is set to " + volume.ToString("G", culture));
         }
 
         public static void timeofday(string value)
@@ -15059,6 +15145,10 @@ namespace BitchlandCheatConsoleBepInEx
                 varIsFound = setGameObjectVar(key, value, isPlayer, person);
                 if (!varIsFound)
                 {
+                    varIsFound = setGameObjectVar(key, value, isPlayer, person._PersonalityData);
+                }
+                if (!varIsFound)
+                {
                     varIsFound = setGameObjectVar(key, value, isPlayer, person.TheHealth);
                 }
                 if (!varIsFound)
@@ -15092,6 +15182,10 @@ namespace BitchlandCheatConsoleBepInEx
                     Person f = i.ThisPerson;
                     person = f;
                     varIsFound = setGameObjectVar(key, value, isPlayer, person);
+                    if (!varIsFound)
+                    {
+                        varIsFound = setGameObjectVar(key, value, isPlayer, person._PersonalityData);
+                    }
                     if (!varIsFound)
                     {
                         varIsFound = setGameObjectVar(key, value, isPlayer, person.TheHealth);
@@ -15191,6 +15285,10 @@ namespace BitchlandCheatConsoleBepInEx
                 varIsFound = getGameObjectVar(key, isPlayer, person);
                 if (!varIsFound)
                 {
+                    varIsFound = getGameObjectVar(key, isPlayer, person._PersonalityData);
+                }
+                if (!varIsFound)
+                {
                     varIsFound = getGameObjectVar(key, isPlayer, person.TheHealth);
                 }
                 if (!varIsFound)
@@ -15225,6 +15323,10 @@ namespace BitchlandCheatConsoleBepInEx
                     Person f = i.ThisPerson;
                     person = f;
                     varIsFound = getGameObjectVar(key, isPlayer, person);
+                    if (!varIsFound)
+                    {
+                        varIsFound = getGameObjectVar(key, isPlayer, person._PersonalityData);
+                    }
                     if (!varIsFound)
                     {
                         varIsFound = getGameObjectVar(key, isPlayer, person.TheHealth);
@@ -15373,6 +15475,10 @@ namespace BitchlandCheatConsoleBepInEx
                 funcCanCalled = callFunc(key, person);
                 if (!funcCanCalled)
                 {
+                    funcCanCalled = callFunc(key, person._PersonalityData);
+                }
+                if (!funcCanCalled)
+                {
                     funcCanCalled = callFunc(key, person.TheHealth);
                 }
                 if (!funcCanCalled)
@@ -15406,6 +15512,10 @@ namespace BitchlandCheatConsoleBepInEx
                     Person f = i.ThisPerson;
                     person = f;
                     funcCanCalled = callFunc(key, person);
+                    if (!funcCanCalled)
+                    {
+                        funcCanCalled = callFunc(key, person._PersonalityData);
+                    }
                     if (!funcCanCalled)
                     {
                         funcCanCalled = callFunc(key, person.TheHealth);

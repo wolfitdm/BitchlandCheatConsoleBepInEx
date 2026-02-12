@@ -286,6 +286,8 @@ commands with no params:
 * fullgallery -> unlock all archievements
 * getallbitchnotes -> get all bitch notes
 * modmanager -> open mod manager urls
+* howlongwantssex -> see how long want the player have sex
+* npchowlongwantssex -> see how long want the npc have sex
 
 commands with 1 param:
 
@@ -401,6 +403,8 @@ commands with 1 param:
 * setpage page -> set the page to page (is important if you have more as 10 followers)
 * followersexusing name1 -> follower named name1 or index1 have sex alone
 * sexusing name1 ->  follower named name1 or index1 have sex alone
+* howlongwantssex value -> change the value how long want the player have sex
+* npchowlongwantssex value -> change the value how long want the npc have sex
 
 commands with 2 params:
 
