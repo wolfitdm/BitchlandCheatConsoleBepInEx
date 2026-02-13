@@ -7,6 +7,7 @@ using Den.Tools;
 using HarmonyLib;
 using MapMagic.Expose;
 using MapMagic.Nodes;
+using SemanticVersioning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
+using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
 using static UnityEngine.InputSystem.InputRemoting;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.VolumeComponent;
@@ -12989,6 +12991,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseMultiFollowerUpgradeEx;
         private static ConfigEntry<bool> configUseHarmonyListAnimsPatch;
         private static ConfigEntry<bool> configUseNewMultiFollowerUpgradeKeyPadInterface;
+        private static ConfigEntry<bool> configUseHarmonySlaveSystemPatch;
+
         private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
         private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
         private static ConfigEntry<KeyCode> configKeyCodeFlySpeedMore;
@@ -13044,6 +13048,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
         public static bool useHarmonyListAnimsPatch = false;
         public static bool useNewMultiFollowerUpgradeKeyPadInterface = false;
+        public static bool useHarmonySlaveSystemPatch = false;
 
         public static KeyCode KeyCodeFlyUp = 0;
         public static KeyCode KeyCodeFlyDown = 0;
@@ -13133,6 +13138,11 @@ namespace BitchlandCheatConsoleBepInEx
                "UseHarmonyListAnimsPatch",
                true,
                "Whether or not you want use harmony list anims patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonySlaveSystemPatch = Config.Bind(pluginKey,
+                "UseHarmonySlaveSystemPatch",
+                true,
+                "Whether or not you want use harmony slave system patch (default true also yes, you want it, and false = no)");
 
             configUseNewMultiFollowerUpgradeKeyPadInterface = Config.Bind(pluginKey,
                 "UseNewMultiFollowerUpgradeKeyPadInterface",
@@ -13272,6 +13282,7 @@ namespace BitchlandCheatConsoleBepInEx
             useMultiFollowerUpgrade = configUseMultiFollowerUpgrade.Value;
             useMultiFollowerUpgradeEx = configUseMultiFollowerUpgradeEx.Value;
             useHarmonyListAnimsPatch = configUseHarmonyListAnimsPatch.Value;
+            useHarmonySlaveSystemPatch = configUseHarmonySlaveSystemPatch.Value;
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
 
             if (useMultiFollowerUpgradeEx)
@@ -13584,11 +13595,218 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     PatchHarmonyMethodUnity(typeof(UnityEngine.Animator), "StringToHash", "PlayAnimator", true, false);
                 }
+                if (useHarmonySlaveSystemPatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(bl_ThirdPersonUserControl), "Update", "bl_ThirdPersonUserControl_Update", false, true);
+                    PatchHarmonyMethodUnity(typeof(bl_meleeHitBox), "OnTriggerEnter", "OnSlaveEnter", true, false);
+                }
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
             }
         }
+
+        public enum MeleeSlaveOptions
+        {
+            None,
+            Capture,
+            Enslave,
+            Train,
+            Max
+        }
+
+        public static MeleeSlaveOptions currentMeleeSlaveOption = MeleeSlaveOptions.None;
+
+        public static MeleeSlaveOptions currentMeleeSlaveWeaponOption
+        {
+            get => currentMeleeSlaveOption;
+            set
+            {
+                currentMeleeSlaveOption = value;
+                switch (currentMeleeSlaveOption)
+                {
+                    case MeleeSlaveOptions.None:
+                        {
+                            Main.Instance.GameplayMenu.MeleeOptionsUI.SetActive(true);
+                            Main.Instance.GameplayMenu.MeleeOptionText.text = "Knockout";
+                        }
+                        break;
+
+                    case MeleeSlaveOptions.Capture:
+                        {
+                            Main.Instance.GameplayMenu.MeleeOptionsUI.SetActive(true);
+                            Main.Instance.GameplayMenu.MeleeOptionText.text = "Capture";
+                        }
+                        break;
+
+                    case MeleeSlaveOptions.Enslave:
+                        {
+                            Main.Instance.GameplayMenu.MeleeOptionsUI.SetActive(true);
+                            Main.Instance.GameplayMenu.MeleeOptionText.text = "Enslave";
+                        }
+                        break;
+
+                    case MeleeSlaveOptions.Train:
+                        {
+                            Main.Instance.GameplayMenu.MeleeOptionsUI.SetActive(true);
+                            Main.Instance.GameplayMenu.MeleeOptionText.text = "Train";
+                        }
+                        break;
+
+                    case MeleeSlaveOptions.Max:
+                        currentMeleeSlaveOption = MeleeSlaveOptions.None;
+                        goto case MeleeSlaveOptions.None;
+                }
+            }
+        }
+
+        public static bool OnSlaveEnter(object __instance, Collider other)
+        {
+            bl_meleeHitBox _this = (bl_meleeHitBox)__instance;
+            Person component = other.transform.root.GetComponent<Person>();
+            if (!((UnityEngine.Object)component != (UnityEngine.Object)null) || component.IsPlayer || component.CantBeHit)
+                return true;
+            switch(currentMeleeSlaveWeaponOption)
+            {
+                case MeleeSlaveOptions.Enslave:
+                case MeleeSlaveOptions.Train:
+                case MeleeSlaveOptions.Capture:
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("Train/Capture/Enslave " + component.name);
+                        _this.gameObject.SetActive(false);
+                        return false;
+                    }
+                    break;
+            }
+            /*
+            if (Main.Instance.Player.Doing_Punch)
+                Main.Instance.Player.Punch(component);
+            else if (Main.Instance.Player.Doing_ThrowDown)
+                Main.Instance.Player.ThrowDown(component);
+            else
+                Main.Instance.Player.MeleeHit(component);
+            _this.gameObject.SetActive(false);*/
+            return true;
+        }
+
+        public static void slaveThrowDown(object __instance, object person)
+        {
+            Person _this = (Person)__instance;
+            Person other = person == null ? null : (Person)person;
+            int num = _this.IsPlayer ? 1 : 0;
+            _this.enabled = false;
+            _this.AddMoveBlocker("ThrowDowning");
+            _this.Anim.Play("jump_13_b");
+            if ((UnityEngine.Object)_this.ThisPersonInt != (UnityEngine.Object)null)
+                _this.ThisPersonInt.AddBlocker("ThrowDowning");
+            if (!_this.Doing_ThrowDown)
+                Main.Instance.MainThreads.Add(new Action(_this.ThrowDowning));
+            _this.Doing_ThrowDown = true;
+            _this.PersonThrowingDown = other;
+            if ((UnityEngine.Object)person != (UnityEngine.Object)null)
+            {
+                _this.PersonAudio.PlayOneShot(Main.Instance.PunchSounds[UnityEngine.Random.Range(0, Main.Instance.PunchSounds.Length)]);
+            }
+            else
+            {
+                //_this._personPunching = (Person)null;
+                _this.PersonAudio.PlayOneShot(Main.Instance.PunchMissSounds[UnityEngine.Random.Range(0, Main.Instance.PunchMissSounds.Length)]);
+                if (!_this.IsPlayer)
+                    return;
+                _this.MeleeHitBox.SetActive(true);
+            }
+        }
+        public static void bl_ThirdPersonUserControl_Update(object __instance)
+        {
+            // GetAxis("Mouse ScrollWheel") returns:
+            // > 0 when scrolling up
+            // < 0 when scrolling down
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+            bool scrollDown = false;
+            bool scrollUp = false;
+
+            if (scroll < -0.1f)
+            {
+                scrollDown = true;
+            }
+            else if (scroll > 0.1f)
+            {
+                scrollUp = true;
+            }
+
+            bl_ThirdPersonUserControl _this = (bl_ThirdPersonUserControl)__instance;
+            if (_this.ThisPerson.WeaponInv.CurrentWeapon != null && _this.ThisPerson.WeaponInv.CurrentWeapon.HoldingType == WeaponHoldingType.Blunt)
+            {
+                switch (_this.MeleeWeaponOption)
+                {
+                    case bl_ThirdPersonUserControl.MeleeWeaponOptions.Knockout:
+                        {
+
+                            bool pressMiddleWheelButton = Input.GetMouseButtonDown(2);
+                            bool pressF3 = scrollUp || scrollDown;
+
+                            if (pressMiddleWheelButton)
+                            {
+                                ++currentMeleeSlaveWeaponOption;
+                            }
+
+                            string message = null;
+
+                            if (pressF3)
+                            {
+                                switch (currentMeleeSlaveWeaponOption)
+                                {
+                                    case MeleeSlaveOptions.None:
+                                        {
+                                            message = null;
+                                        }
+                                        break;
+
+                                    case MeleeSlaveOptions.Capture:
+                                        {
+                                            message = "Capture Them";
+                                            slaveThrowDown(Main.Instance.Player, null);
+                                        }
+                                        break;
+
+                                    case MeleeSlaveOptions.Enslave:
+                                        {
+                                            message = "Enslave Them";
+                                        }
+                                        break;
+
+                                    case MeleeSlaveOptions.Train:
+                                        {
+                                            message = "Train Them";
+                                        }
+                                        break;
+
+                                    case MeleeSlaveOptions.Max:
+                                        {
+                                            message = null;
+                                        }
+                                        break;
+
+                                    default:
+                                        {
+                                            message = null;
+                                        }
+                                        break;
+                                }
+
+                                if (message != null)
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification(message);
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } 
 
         private static List<string> animsList = new List<string>();
         public static bool PlayAnimator(string name)
