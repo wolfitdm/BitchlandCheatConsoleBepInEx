@@ -3080,6 +3080,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             PersonGenerated.Personality = Personality_Type.Nympho;
             addAllFetishesToPerson(personGa);
+            setmaxallskills(personGa, 300);
         }
 
         public static void setPersonaltyTo(GameObject personGa, string personalty, bool cleanOrDirt = true)
@@ -3107,6 +3108,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             PersonGenerated.Personality = personality;
             addAllFetishesToPerson(personGa, cleanOrDirt);
+            setmaxallskills(personGa, 300);
         }
         public static void setPersonState(GameObject personGa, string personState)
         {
@@ -7115,65 +7117,231 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("npcfullenergy: set the npc to full energy");
         }
 
-        public static void maxarousal(int level)
+        public static int stringLevelToInt(string value)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: maxarousal");
+            int amount = 0;
+
+            if (int.TryParse(value, out int amount2)) {
+                if (amount2 <= 0)
+                {
+                    amount2 = 1;
+                }
+                amount = amount2;
+            } else
+            {
+                amount = 1;
+            }
+
+            return amount;
+        }
+
+        public static void setmaxarousal(GameObject personGa, int level)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
             int add = 300;
             level = level > 0 && level <= add ? level : add;
             add = level;
-            Main.Instance.Player.Arousal = add;
+            person.Arousal = add;
+        }
+
+
+        public static void setmaxsexskills(GameObject personGa, int level)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            int add = 300;
+            level = level > 0 && level <= add ? level : add;
+            add = level;
+            person.SexSkills = add;
+            int sexMax = person.SexXpThisLvlMax;
+            sexMax = sexMax >= 0 ? sexMax : add;
+            person.SexXpThisLvl = sexMax;
+        }
+
+        public static void setmaxworkskills(GameObject personGa, int level)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            int add = 300;
+            level = level > 0 && level <= add ? level : add;
+            add = level;
+            person.WorkSkills = add;
+            int workMax = person.WorkXpThisLvlMax;
+            workMax = workMax >= 0 ? workMax : add;
+            person.WorkXpThisLvl = workMax;
+        }
+
+        public static void setmaxarmyskills(GameObject personGa, int level)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            int add = 300;
+            level = level > 0 && level <= add ? level : add;
+            add = level;
+            person.ArmySkills = add;
+            int armyMax = person.ArmyXpThisLvlMax;
+            armyMax = armyMax >= 0 ? armyMax : add;
+            person.ArmyXpThisLvl = armyMax;
+        }
+
+        public static void setmaxallskills(GameObject personGa, int level)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            setmaxsexskills(person.gameObject, level);
+            setmaxworkskills(person.gameObject, level);
+            setmaxarmyskills(person.gameObject, level);
+            setmaxarousal(person.gameObject, level);
+            
+            person.AnalTraining = level;
+            person.VaginalTraining = level;
+            person.NippleTraining = level;
+            person.ClitTraining = level;
+            person.BodyTraining = level;
+        }
+
+        public static void maxarousal(int level)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxarousal");
+            setmaxarousal(Main.Instance.Player.gameObject, level);
         }
 
 
         public static void maxsexskills(int level)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: maxsexskills");
-            int add = 300;
-            level = level > 0 && level <= add ? level : add;
-            add = level;
-            Main.Instance.Player.SexSkills = add;
-            int sexMax = Main.Instance.Player.SexXpThisLvlMax;
-            sexMax = sexMax >= 0 ? sexMax : add;
-            Main.Instance.Player.SexXpThisLvl = sexMax;
+            setmaxsexskills(Main.Instance.Player.gameObject, level);
         }
 
         public static void maxworkskills(int level)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: maxworkskills");
-            int add = 300;
-            level = level > 0 && level <= add ? level : add;
-            add = level;
-            Main.Instance.Player.WorkSkills = add;
-            int workMax = Main.Instance.Player.WorkXpThisLvlMax;
-            workMax = workMax >= 0 ? workMax : add;
-            Main.Instance.Player.WorkXpThisLvl = workMax;
+            setmaxworkskills(Main.Instance.Player.gameObject, level);
         }
 
         public static void maxarmyskills(int level)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: maxarmyskills");
-            int add = 300;
-            level = level > 0 && level <= add ? level : add;
-            add = level;
-            Main.Instance.Player.ArmySkills = add;
-            int armyMax = Main.Instance.Player.ArmyXpThisLvlMax;
-            armyMax = armyMax >= 0 ? armyMax : add;
-            Main.Instance.Player.ArmyXpThisLvl = armyMax;
+            setmaxarmyskills(Main.Instance.Player.gameObject, level);
         }
 
         public static void maxallskills(int level)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: maxallskills");
-            maxsexskills(level);
-            maxworkskills(level);
-            maxarmyskills(level);
+            setmaxallskills(Main.Instance.Player.gameObject, level);
         }
 
-        public static void addallitems()
+        public static void npcmaxarousal(int level)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: addallitems");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxarousal");
+            setmaxarousal(getPersonInteract(), level);
+        }
 
-            if (Main.Instance.Player.CurrentBackpack == null)
+        public static void npcmaxsexskills(int level)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxsexskills");
+            setmaxsexskills(getPersonInteract(), level);
+        }
+
+        public static void npcmaxworkskills(int level)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxworkskills");
+            setmaxworkskills(getPersonInteract(), level);
+        }
+
+        public static void npcmaxarmyskills(int level)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxarmyskills");
+            setmaxarmyskills(getPersonInteract(), level);
+        }
+
+        public static void npcmaxallskills(int level)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxallskills");
+            setmaxallskills(getPersonInteract(), level);
+        }
+
+        public static void addallitemstoperson(GameObject personGa, string value)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            int amount = 0;
+
+            if (int.TryParse(value, out int amount2)) {
+                
+                if (amount2 <= 0)
+                {
+                    amount2 = 1;
+                }
+
+                amount = amount2;
+            } else
+            {
+                amount = 1;
+            }
+
+            if (person.CurrentBackpack == null)
             {
                 GameObject backpack2 = getItemByName(null, "backpack2");
                 if (backpack2 == null)
@@ -7184,13 +7352,11 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
-                Main.Instance.Player.DressClothe(Main.Spawn(backpack2));
+                person.DressClothe(Main.Spawn(backpack2));
             }
 
-            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            if (person.CurrentBackpack != null && person.CurrentBackpack.ThisStorage != null)
             {
-                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
-
                 List<GameObject> items = getAllItems();
 
                 if (items == null || items.Count == 0)
@@ -7200,11 +7366,40 @@ namespace BitchlandCheatConsoleBepInEx
 
                 int length = items.Count;
 
+                int storagemax = person.CurrentBackpack.ThisStorage.StorageMax;
+
+                int reallyAmount = length * amount;
+
+                if (storagemax <= reallyAmount)
+                {
+                    storagemax = reallyAmount + 10;
+                }
+
+                if (storagemax <= 0)
+                {
+                    storagemax = int.MaxValue;
+                }
+                
+                person.CurrentBackpack.ThisStorage.StorageMax = storagemax;
+
                 for (int i = 0; i < length; i++)
                 {
-                    Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(items[i]);
+                    for (int j = 0; j < amount; j++)
+                    {
+                        Main.Instance.Player.CurrentBackpack.ThisStorage.AddItem(items[i]);
+                    }
                 }
             }
+        }
+        public static void addallitems(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addallitems");
+            addallitemstoperson(Main.Instance.Player.gameObject, value);
+        }
+        public static void npcaddallitems(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddallitems");
+            addallitemstoperson(getPersonInteract(), value);
         }
 
         public static void addallperkstoperson(GameObject personGa)
@@ -7783,9 +7978,45 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcmaxsexskills":
+                    {
+                        npcmaxallskills(300);
+                    }
+                    break;
+
+                case "npcmaxarmyskills":
+                    {
+                        npcmaxarmyskills(300);
+                    }
+                    break;
+
+                case "npcmaxworkskills":
+                    {
+                        npcmaxworkskills(300);
+                    }
+                    break;
+
+                case "npcmaxallskills":
+                    {
+                        npcmaxallskills(300);
+                    }
+                    break;
+
+                case "npcmaxarousal":
+                    {
+                        npcmaxarousal(300);
+                    }
+                    break;
+
                 case "addallitems":
                     {
-                        addallitems();
+                        addallitems("1");
+                    }
+                    break;
+
+                case "npcaddallitems":
+                    {
+                        npcaddallitems("1");
                     }
                     break;
 
@@ -10142,6 +10373,78 @@ namespace BitchlandCheatConsoleBepInEx
                 case "removecommandkeys":
                     {
                         removecommandkeys(valueOriginal);
+                    }
+                    break;
+
+                case "maxsexskills":
+                    {
+                        maxallskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "maxarmyskills":
+                    {
+                        maxarmyskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "maxworkskills":
+                    {
+                        maxworkskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "maxallskills":
+                    {
+                        maxallskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "maxarousal":
+                    {
+                        maxarousal(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "npcmaxsexskills":
+                    {
+                        npcmaxallskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "npcmaxarmyskills":
+                    {
+                        npcmaxarmyskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "npcmaxworkskills":
+                    {
+                        npcmaxworkskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "npcmaxallskills":
+                    {
+                        npcmaxallskills(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "npcmaxarousal":
+                    {
+                        npcmaxarousal(stringLevelToInt(value));
+                    }
+                    break;
+
+                case "addallitems":
+                    {
+                        addallitems(value);
+                    }
+                    break;
+
+                case "npcaddallitems":
+                    {
+                        npcaddallitems(value);
                     }
                     break;
 

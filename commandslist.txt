@@ -417,6 +417,18 @@ getcommandkey key -> get the command to the key e. g. getcommandkey U
 savecommandkeys name -> save all command keys the you have setted up to file Assets\wolfitdm\objects\commandkeys\name.json
 readcommandkeys name -> load all command keys the you have saved to file Assets\wolfitdm\objects\commandkeys\name.json, so that you can use the command keys ingame
 removecommandkeys name -> remove file Assets\wolfitdm\objects\commandkeys\name.json
+maxsexskills level -> set all sex skills to level 
+maxarmyskills level -> set all army skills to level
+maxworkskills level -> set all work skills to level
+maxallskills level -> set all skills and trainings to level
+maxarousal level ->  set arousal to level
+npcmaxsexskills level -> set all sex skills from the npc the you looked at or chatted with to level
+npcmaxarmyskills level -> set all army skills from the npc the you looked at or chatted with to level
+npcmaxworkskills level -> set all work skills from the npc the you looked at or chatted with to level
+npcmaxallskills level -> set all skills and trainings from the npc the you looked at or chatted with to level
+npcmaxarousal level -> set arousal from the npc the you looked at or chatted with to level
+addallitems amount -> add the player all items * amount
+npcaddallitems amount -> add all items * amount to the npc the you looked at or chatted with 
 
 commands with 2 params:
 
