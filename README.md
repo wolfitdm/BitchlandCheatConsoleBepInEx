@@ -430,6 +430,8 @@ commands with 1 param:
 * npcmaxarousal level -> set arousal from the npc the you looked at or chatted with to level
 * addallitems amount -> add the player all items * amount
 * npcaddallitems amount -> add all items * amount to the npc the you looked at or chatted with 
+* saveplayertofile name -> save player card to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
+* savenpctofile name -> save from the npc the you looked at or chatted with to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
 
 commands with 2 params:
 

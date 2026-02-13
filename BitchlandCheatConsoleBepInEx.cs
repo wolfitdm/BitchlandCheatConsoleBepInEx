@@ -1096,8 +1096,42 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static string lastCommand = "";
 
+        private GUIStyle levelLabelStyle = null;
+
+        private static bool showLevelLabel = false;
+
+        private static string currentLevelText = "Level 1";
+
+        private void Start()
+        {
+        }
+
+        private void handleLevelSystem()
+        {
+            if (useHarmonySlaveSystemPatch && showLevelLabel)
+            {
+                if (levelLabelStyle == null)
+                {
+                    // Initialize the style
+                    levelLabelStyle = new GUIStyle(GUI.skin.label)
+                    {
+                        fontSize = 24, // Bigger font
+                        fontStyle = FontStyle.Bold,
+                        alignment = TextAnchor.MiddleCenter
+                    };
+                }
+                // Add some padding
+                GUILayout.BeginArea(new Rect(10, 10, 200, 50));
+
+                // Draw the label with the custom style
+                GUILayout.Label(currentLevelText, levelLabelStyle);
+
+                GUILayout.EndArea();
+            }
+        }
         private void OnGUI()
         {
+            handleLevelSystem();
             //messageBoxOnGui();
             renderVideoTexture();
 
@@ -1958,12 +1992,15 @@ namespace BitchlandCheatConsoleBepInEx
                 Directory.CreateDirectory(femalesFolder);
                 Directory.CreateDirectory(audioFolder);
                 string maleOrFemale = spawnFemale ? "females" : "males";
-                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
-                if (!File.Exists(filename))
+                string filenamepng = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
+                string filenamechr = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.chr";
+                if (!File.Exists(filenamepng) && !File.Exists(filenamechr))
                 {
-                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
-                    return null;
+                    Main.Instance.GameplayMenu.ShowNotification(filenamepng + " not exists!");
+                    Main.Instance.GameplayMenu.ShowNotification(filenamechr + " not exists!");
+                    return PersonGenerated.gameObject;
                 }
+                string filename = File.Exists(filenamepng) ? filenamepng : filenamechr;
                 PersonGenerated.StartingClothes = new List<GameObject>();
                 PersonGenerated.StartingWeapons = new List<GameObject>();
                 PersonGenerated._StartingClothes = new List<string>();
@@ -2367,12 +2404,15 @@ namespace BitchlandCheatConsoleBepInEx
                 Directory.CreateDirectory(femalesFolder);
                 Directory.CreateDirectory(audioFolder);
                 string maleOrFemale = spawnFemale ? "females" : "males";
-                string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
-                if (!File.Exists(filename))
+                string filenamepng = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.png";
+                string filenamechr = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.chr";
+                if (!File.Exists(filenamepng) && !File.Exists(filenamechr))
                 {
-                    Main.Instance.GameplayMenu.ShowNotification(filename + " not exists!");
+                    Main.Instance.GameplayMenu.ShowNotification(filenamepng + " not exists!");
+                    Main.Instance.GameplayMenu.ShowNotification(filenamechr + " not exists!");
                     return PersonGenerated.gameObject;
                 }
+                string filename = File.Exists(filenamepng) ? filenamepng : filenamechr;
                 UpdatePerson(PersonGenerated.gameObject, spawnFemale, filename);
                 PersonGenerated.StartingClothes = new List<GameObject>();
                 PersonGenerated.StartingWeapons = new List<GameObject>();
@@ -10450,6 +10490,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "saveplayertofile":
+                    {
+                        saveplayertofile(value);
+                    }
+                    break;
+
+                case "savenpctofile":
+                    {
+                        savenpctofile(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -10457,6 +10509,75 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
+
+        private static void savenpctofile(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: savenpctofile");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            string name = value.ToLower();
+            bool spawnFemale = person is Girl;
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+            Directory.CreateDirectory(objectsFolder);
+            Directory.CreateDirectory(malesFolder);
+            Directory.CreateDirectory(femalesFolder);
+            Directory.CreateDirectory(audioFolder);
+            string maleOrFemale = spawnFemale ? "females" : "males";
+            string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.chr";
+
+            if (File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"{name} already exists, please choose a other name");
+                Main.Instance.GameplayMenu.ShowNotification($"{filename} already exists, please choose a other path");
+                return;
+            }
+
+            person.SaveToFile(filename);
+            Main.Instance.GameplayMenu.ShowNotification(filename + " written");
+        }
+
+        private static void saveplayertofile(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: saveplayertofile");
+            string name = value.ToLower();
+            bool spawnFemale = Main.Instance.Player is Girl;
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+            Directory.CreateDirectory(objectsFolder);
+            Directory.CreateDirectory(malesFolder);
+            Directory.CreateDirectory(femalesFolder);
+            Directory.CreateDirectory(audioFolder);
+            string maleOrFemale = spawnFemale ? "females" : "males";
+            string filename = $"{Main.AssetsFolder}/wolfitdm/{maleOrFemale}/{name}.chr";
+
+            if (File.Exists(filename))
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"{name} already exists, please choose a other name");
+                Main.Instance.GameplayMenu.ShowNotification($"{filename} already exists, please choose a other path");
+                return;
+            }
+
+            Main.Instance.Player.SaveToFile(filename);
+            Main.Instance.GameplayMenu.ShowNotification(filename + " written");
+        }
+
         public static void handleCommandLength3(string command, string key, string value)
         {
             string keyOriginal = key;
@@ -13615,6 +13736,8 @@ namespace BitchlandCheatConsoleBepInEx
             Max
         }
 
+        public static Dictionary<GameObject, int> levelSystem = new Dictionary<GameObject, int>();
+
         public static MeleeSlaveOptions currentMeleeSlaveOption = MeleeSlaveOptions.None;
 
         public static MeleeSlaveOptions currentMeleeSlaveWeaponOption
@@ -13666,15 +13789,31 @@ namespace BitchlandCheatConsoleBepInEx
             Person component = other.transform.root.GetComponent<Person>();
             if (!((UnityEngine.Object)component != (UnityEngine.Object)null) || component.IsPlayer || component.CantBeHit)
                 return true;
-            switch(currentMeleeSlaveWeaponOption)
+            if (!levelSystem.ContainsKey(component.gameObject))
+            {
+                levelSystem.Add(component.gameObject, 1);
+            }
+            switch (currentMeleeSlaveWeaponOption)
             {
                 case MeleeSlaveOptions.Enslave:
                 case MeleeSlaveOptions.Train:
                 case MeleeSlaveOptions.Capture:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("Train/Capture/Enslave " + component.name);
+                        if (levelSystem.ContainsKey(component.gameObject))
+                        {
+                            int level = levelSystem[component.gameObject];
+                            currentLevelText = $"{component.Name} Level {level}";
+                            showLevelLabel = true;
+                        }
                         _this.gameObject.SetActive(false);
                         return false;
+                    }
+                    break;
+
+                default:
+                    {
+                        showLevelLabel = true;
                     }
                     break;
             }
