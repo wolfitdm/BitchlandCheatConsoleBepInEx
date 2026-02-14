@@ -3671,14 +3671,18 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        private static void spawnItemReal(GameObject item, int value)
+        private static GameObject[] spawnItemReal(GameObject item, int value)
         {
             value = value <= 0 ? 1 : value;
 
+            GameObject[] gameObjects = new GameObject[value];
+
             for (int i = 0; i < value; i++)
             {
-                SafeSpawn(item);
+                gameObjects[i] = SafeSpawn(item);
             }
+
+            return gameObjects;
         }
 
         public static void patreon()
@@ -5032,27 +5036,8 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddweapon");
             GameObject personGa = getPersonInteract();
-
-            if (personGa == null)
-            {
-                return;
-            }
-
-            Person player = personGa.GetComponent<Person>();
             GameObject weapon = getWeaponByName(null, value);
-
-            if (weapon != null)
-            {
-                GameObject weaponx = Main.Spawn(weapon);
-
-                if (weaponx == null)
-                {
-                    return;
-                }
-
-                player.WeaponInv.DropAllWeapons();
-                player.WeaponInv.PickupWeapon(weaponx);
-            }
+            GameObject weaponx = addWeaponReal(personGa, weapon);
         }
 
         public static void npcadditembyitem(GameObject personGa, string key, string value)
@@ -5404,6 +5389,76 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Main.Instance.Player.DressClothe(pih.gameObject);
+        }
+
+        public static void npcequipfromhand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcequipfromhand");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (Main.Instance.Player.WeaponInv.CurrentWeapon != null)
+            {
+                person.WeaponInv.DropAllWeapons();
+                person.WeaponInv.PickupWeapon(Main.Instance.Player.WeaponInv.CurrentWeapon.gameObject);
+                Main.Instance.Player.WeaponInv.CurrentWeapon = null;
+                return;
+            }
+
+            Int_Storage hands = Main.Instance.Player.Storage_Hands;
+
+            if (hands == null)
+            {
+                return;
+            }
+
+            List<GameObject> items = new List<GameObject>();
+
+            List<GameObject> itemsStorage = hands.StorageItems;
+
+            if (itemsStorage == null)
+            {
+                return;
+            }
+
+            items.AddRange(itemsStorage);
+
+            List<GameObject> removeableItems = new List<GameObject>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                GameObject item = items[i];
+
+                Dressable dressable = item.GetComponentInChildren<Dressable>();
+                if (dressable != null)
+                {
+                    person.DressClothe(item);
+                    removeableItems.Add(item);
+                } else
+                {
+                    addItemReal(personGa, item, 1);
+                    removeableItems.Add(item);
+                }
+            }
+
+            if (hands.StorageItems != null)
+            {
+                for (int i = 0; i < removeableItems.Count; i++)
+                {
+                    hands.StorageItems.Remove(removeableItems[i]);
+                }
+            }
         }
 
         public static void dropallbackpack()
@@ -6905,7 +6960,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 try
                 {
-                    _this.CloseEscMenu();
+                    BL_CloseEscMenu();
                 }
                 catch (Exception ex)
                 {
@@ -6913,7 +6968,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 try
                 {
-                    _this.CloseJournal();
+                    BL_CloseJournal();
                 }
                 catch (Exception ex)
                 {
@@ -9489,6 +9544,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "miningkit":
+                    {
+                        miningkit();
+                    }
+                    break;
+
+                case "npcequip":
+                case "npcequipfromhand":
+                    {
+                        npcequipfromhand();
+                    }
+                    break;
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -9508,6 +9575,84 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        private static void miningkit()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: miningkit");
+
+            Person person = Main.Instance.Player;
+
+            GameObject axe = getWeaponByName(null, "axe");
+            GameObject pickaxe = getWeaponByName(null, "pickaxe");
+            GameObject assault_rifle_2 = getWeaponByName(null, "assault_rifle_2");
+            GameObject backpack = getItemByName(null, "backpack2");
+
+            if (Main.Instance.Player.CurrentBackpack != null && Main.Instance.Player.CurrentBackpack.ThisStorage != null)
+            {
+                Main.Instance.Player.CurrentBackpack.ThisStorage.StorageMax = int.MaxValue;
+            }
+
+            if (backpack == null)
+            {
+                backpack = getItemByName(null, "backpack");
+            }
+
+            if (backpack != null)
+            {
+                GameObject[] spawnedBackpack = spawnItemReal(backpack, 1);
+
+                if (spawnedBackpack.Length > 0)
+                {
+                    backpack = spawnedBackpack[0];
+                }
+
+                Int_Storage storage = backpack.GetComponentInChildren<Int_Storage>(true);
+
+                if (storage != null)
+                {
+                    storage.StorageMax = int.MaxValue;
+                }
+            }
+
+            if (axe != null)
+            {
+                GameObject spawnedAxe = addWeaponReal(person.gameObject, axe);
+
+                if (spawnedAxe != null)
+                {
+                    axe = spawnedAxe;
+                }
+            }
+
+            if (pickaxe != null)
+            {
+                GameObject spawnedPickaxe = addWeaponReal(person.gameObject, pickaxe);
+
+                if (spawnedPickaxe != null)
+                {
+                    pickaxe = spawnedPickaxe;
+                }
+            }
+
+            if (assault_rifle_2 != null)
+            {
+                GameObject assault_rifle_2_spawned = addWeaponReal(person.gameObject, assault_rifle_2);
+
+                if (assault_rifle_2_spawned != null)
+                {
+                    assault_rifle_2 = assault_rifle_2_spawned;
+                }
+
+                Weapon assault_rifle_2_ = assault_rifle_2.GetComponent<Weapon>();
+
+                if (assault_rifle_2_ != null)
+                {
+                    assault_rifle_2_.infiniteAmmo = true;
+                }
+            }
+
+            person.WeaponInv.DropAllWeapons();
         }
 
         private static void releasefollowers()
@@ -12524,11 +12669,25 @@ namespace BitchlandCheatConsoleBepInEx
 
             Main.Instance.GameplayMenu.ShowNotification($"removewarp: warppoint {value} removed!");
         }
-        public static void addweapon(string value)
-        {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: addweapon");
 
-            GameObject weapon = getWeaponByName(null, value);
+        public static GameObject addWeaponReal(GameObject personGa, GameObject weapon)
+        {
+            if (personGa == null)
+            {
+                return null;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return null;
+            }
+
+            while (person.WeaponInv.weapons.Count < 3)
+            {
+                person.WeaponInv.weapons.Add(null);
+            }
 
             if (weapon != null)
             {
@@ -12536,12 +12695,24 @@ namespace BitchlandCheatConsoleBepInEx
 
                 if (weaponx == null)
                 {
-                    return;
+                    return null;
                 }
 
-                Main.Instance.Player.WeaponInv.DropAllWeapons();
-                Main.Instance.Player.WeaponInv.PickupWeapon(weaponx);
+                person.WeaponInv.DropAllWeapons();
+                person.WeaponInv.PickupWeapon(weaponx);
+
+                return weaponx;
             }
+
+            return null;
+        }
+        public static void addweapon(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: addweapon");
+
+            GameObject weapon = getWeaponByName(null, value);
+
+            GameObject weaponx = addWeaponReal(Main.Instance.Player.gameObject, weapon);
         }
         public static void setstoragesizebackpack(string value)
         {
@@ -13113,6 +13284,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseHarmonyListAnimsPatch;
         private static ConfigEntry<bool> configUseNewMultiFollowerUpgradeKeyPadInterface;
         private static ConfigEntry<bool> configUseHarmonySlaveSystemPatch;
+        private static ConfigEntry<bool> configUseHarmonyMoreWeaponSlotsPatch;
 
         private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
         private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
@@ -13170,6 +13342,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyListAnimsPatch = false;
         public static bool useNewMultiFollowerUpgradeKeyPadInterface = false;
         public static bool useHarmonySlaveSystemPatch = false;
+        public static bool useHarmonyMoreWeaponSlotsPatch = false;
 
         public static KeyCode KeyCodeFlyUp = 0;
         public static KeyCode KeyCodeFlyDown = 0;
@@ -13239,6 +13412,11 @@ namespace BitchlandCheatConsoleBepInEx
                                  "UseHarmonyGiveMe90MioCashChatOptionPatch",
                                   false,
                                  "Whether or not you want use harmony give me 90 mio cash chat option patch (default false also no, you don't want it, and true = yes)");
+
+            configUseHarmonyMoreWeaponSlotsPatch = Config.Bind(pluginKey,
+                     "UseHarmonyMoreWeaponSlotsPatch",
+                      true,
+                     "Whether or not you want use harmony more weapon slots patch (default false also no, you don't want it, and true = yes)");
 
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
@@ -13404,6 +13582,7 @@ namespace BitchlandCheatConsoleBepInEx
             useMultiFollowerUpgradeEx = configUseMultiFollowerUpgradeEx.Value;
             useHarmonyListAnimsPatch = configUseHarmonyListAnimsPatch.Value;
             useHarmonySlaveSystemPatch = configUseHarmonySlaveSystemPatch.Value;
+            useHarmonyMoreWeaponSlotsPatch = configUseHarmonyMoreWeaponSlotsPatch.Value;
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
 
             if (useMultiFollowerUpgradeEx)
@@ -13416,6 +13595,16 @@ namespace BitchlandCheatConsoleBepInEx
             Logger.LogInfo($"Plugin BitchlandCheatConsoleBepInEx BepInEx is loaded!");
         }
 
+        public static void BL_CloseEscMenu()
+        {
+            Main.Instance.GameplayMenu.OpenEscMenu();
+            Main.Instance.GameplayMenu.CloseEscMenu();
+        }
+        public static void BL_CloseJournal()
+        {
+            Main.Instance.GameplayMenu.OpenJournal();
+            Main.Instance.GameplayMenu.CloseJournal();
+        }
         public void onOpenCheatConsole()
         {
             if (onOpenCheat)
@@ -13423,7 +13612,8 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
             onOpenCheat = true;
-            Main.Instance.GameplayMenu.CloseEscMenu();
+            BL_CloseEscMenu();
+            BL_CloseJournal();
             Main.Instance.GameplayMenu.CloseJournal();
             Main.Instance.GameplayMenu.AllowCursor();
             Main.Instance.GameplayMenu.UpdateAmmo();
@@ -13438,8 +13628,8 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
             onOpenCheat = false;
-            Main.Instance.GameplayMenu.CloseEscMenu();
-            Main.Instance.GameplayMenu.CloseJournal();
+            BL_CloseEscMenu();
+            BL_CloseJournal();
             Main.Instance.GameplayMenu.DisallowCursor();
             Main.Instance.GameplayMenu.UpdateAmmo();
             Main.Instance.GameplayMenu.UpdateNeeds();
@@ -13452,7 +13642,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         private static bool onOpenCheat = false;
-        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix)
+        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix, Type[] parameters = null)
         {
             // Create a new Harmony instance with a unique ID
             var harmony = new Harmony("com.wolfitdm.BitchlandCheatConsoleBepInEx");
@@ -13464,7 +13654,15 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             // Or apply patches manually
-            MethodInfo original = AccessTools.Method(originalClass, originalMethodName);
+            MethodInfo original = null;
+
+            if (parameters == null)
+            {
+                original = AccessTools.Method(originalClass, originalMethodName);
+            } else
+            {
+                original = AccessTools.Method(originalClass, originalMethodName, parameters);
+            }
 
             if (original == null)
             {
@@ -13721,6 +13919,11 @@ namespace BitchlandCheatConsoleBepInEx
                     PatchHarmonyMethodUnity(typeof(bl_ThirdPersonUserControl), "Update", "bl_ThirdPersonUserControl_Update", false, true);
                     PatchHarmonyMethodUnity(typeof(bl_meleeHitBox), "OnTriggerEnter", "OnSlaveEnter", true, false);
                 }
+                if (useHarmonyMoreWeaponSlotsPatch)
+                {
+                    PatchHarmonyMethodUnity(typeof(WeaponSystem), "Update", "WeaponSystem_Update", true, false);
+                    PatchHarmonyMethodUnity(typeof(WeaponSystem), "SetActiveWeapon", "WeaponSystem_SetActiveWeapon", true, false, new Type[] { typeof(int) });
+                }
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
@@ -13783,6 +13986,103 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static bool WeaponSystem_SetActiveWeapon(object __instance, int index)
+        {
+            WeaponSystem _this = (WeaponSystem)__instance;
+
+            while (_this.weapons.Count < 9)
+            {
+                _this.weapons.Add(null);
+            }
+
+            if (index >= _this.weapons.Count || index < 0)
+            {
+                return true;
+            }
+            else
+            {
+                _this.SendMessageUpwards("OnEasyWeaponsSwitch", SendMessageOptions.DontRequireReceiver);
+                if (_this.CurrentWeapon != null)
+                    _this.CurrentWeapon.SetInRelax();
+                _this.weaponIndex = index;
+                for (int index1 = 1; index1 < _this.weapons.Count; ++index1)
+                {
+                    if (_this.weapons[index1] != null)
+                        _this.weapons[index1].SetActive(false);
+                }
+                switch (index)
+                {
+                    default:
+                        if (_this.weapons.Count >= 2 && _this.weapons[0] != null)
+                            _this.weapons[0].GetComponent<Weapon>().SetInHoldster1();
+                        if (_this.weapons.Count >= 3 && _this.weapons[1] != null)
+                        {
+                            _this.weapons[1].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 4 && _this.weapons[2] != null)
+                        {
+                            _this.weapons[2].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 5 && _this.weapons[3] != null)
+                        {
+                            _this.weapons[3].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 6 && _this.weapons[4] != null)
+                        {
+                            _this.weapons[4].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 7 && _this.weapons[5] != null)
+                        {
+                            _this.weapons[5].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 8 && _this.weapons[6] != null)
+                        {
+                            _this.weapons[6].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 9 && _this.weapons[7] != null)
+                        {
+                            _this.weapons[7].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        break;
+                }
+            }
+            return true;
+        }
+        public static bool WeaponSystem_Update(object __instance)
+        {
+            WeaponSystem _this = (WeaponSystem)__instance;
+
+            while (_this.weapons.Count < 9)
+            {
+                _this.weapons.Add(null);
+            }
+
+            if (!_this.isPlayer || _this.ThisPerson.Interacting || !_this.ThisPerson.CanMove)
+                return true;
+
+            if (Input.GetKeyUp(KeyCode.Alpha4) && _this.weapons.Count > 3)
+                _this.SetActiveWeapon(3);
+            if (Input.GetKeyUp(KeyCode.Alpha5) && _this.weapons.Count > 4)
+                _this.SetActiveWeapon(4);
+            if (Input.GetKeyUp(KeyCode.Alpha6) && _this.weapons.Count > 5)
+                _this.SetActiveWeapon(5);
+            if (Input.GetKeyUp(KeyCode.Alpha7) && _this.weapons.Count > 6)
+                _this.SetActiveWeapon(6);
+            if (Input.GetKeyUp(KeyCode.Alpha8) && _this.weapons.Count > 7)
+                _this.SetActiveWeapon(7);
+            if (Input.GetKeyUp(KeyCode.Alpha9) && _this.weapons.Count > 8)
+                _this.SetActiveWeapon(8);
+
+            return true;
+        }
+
         public static bool OnSlaveEnter(object __instance, Collider other)
         {
             bl_meleeHitBox _this = (bl_meleeHitBox)__instance;
@@ -13813,7 +14113,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        showLevelLabel = true;
+                        showLevelLabel = false;
                     }
                     break;
             }
@@ -13950,6 +14250,11 @@ namespace BitchlandCheatConsoleBepInEx
         private static List<string> animsList = new List<string>();
         public static bool PlayAnimator(string name)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
             if (!useHarmonyListAnimsPatch)
             {
                 return true;
@@ -14053,7 +14358,7 @@ namespace BitchlandCheatConsoleBepInEx
             MainThreadsAddedExecuted[MainThreadsAddedLength] = false;
             MainThreadsAddedLength++;
 
-            Logger.LogInfo("Execute MainThreadsAdd");
+            //Logger.LogInfo("Execute MainThreadsAdd");
 
             return true;
         }
@@ -14159,7 +14464,7 @@ namespace BitchlandCheatConsoleBepInEx
                     MainThreadsAdded[i] = null;
                 }
             }
-            Logger.LogInfo("Execute MainThreadsRemove");
+            //Logger.LogInfo("Execute MainThreadsRemove");
 
             return true;
         }
@@ -15819,6 +16124,11 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static void DefaultTalk_options_AddFollowingSexOption(object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return;
+            }
+
             if (!useHarmonyAddFollowingChatSexOptionPatch)
             {
                 return;

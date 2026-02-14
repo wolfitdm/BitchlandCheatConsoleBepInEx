@@ -295,6 +295,9 @@ commands with no params:
 * listallcommandkeys -> list all command key files in Assets\wolfitdm\objects\commandkeys
 * listcommandkeys -> list all command keys
 * clearcommandkeys -> clear the command keys list
+* miningkit -> spawn a backpack with unlimited storage, a pickaxe, a axe and a assault rifle with unlimited ammo, and set your current backpack to unlimited storage
+* npcequip -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with
+* npcequipfromhand -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with
 
 commands with 1 param:
 
