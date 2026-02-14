@@ -1976,7 +1976,7 @@ namespace BitchlandCheatConsoleBepInEx
             return item;
         }
 
-        public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true)
+        public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true, bool loadclothes = true)
         {
             bool LoadSpecificNPC = true;
             Person PersonGenerated = null;
@@ -2005,7 +2005,7 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated.StartingWeapons = new List<GameObject>();
                 PersonGenerated._StartingClothes = new List<string>();
                 PersonGenerated._StartingWeapons = new List<string>();
-                PersonGenerated._DontLoadClothing = true;
+                PersonGenerated._DontLoadClothing = !loadclothes;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
                 PersonGenerated.transform.position = Main.Instance.Player.transform.position;
@@ -2366,7 +2366,7 @@ namespace BitchlandCheatConsoleBepInEx
             DisplayPerson.PlayerKnowsName = false;
             UnityEngine.Object.Destroy(PresetLoaderNPC_F.gameObject);
         }
-        public static GameObject ChangeSkin(GameObject Person, string name, bool isPlayer)
+        public static GameObject ChangeSkin(GameObject Person, string name, bool isPlayer, bool loadclothes = true)
         {
             if (Person == null) return null;
             Person gettedPerson = Person.GetComponent<Person>();
@@ -2418,7 +2418,7 @@ namespace BitchlandCheatConsoleBepInEx
                 PersonGenerated.StartingWeapons = new List<GameObject>();
                 PersonGenerated._StartingClothes = new List<string>();
                 PersonGenerated._StartingWeapons = new List<string>();
-                PersonGenerated._DontLoadClothing = true;
+                PersonGenerated._DontLoadClothing = !loadclothes;
                 PersonGenerated._DontLoadInteraction = true;
                 PersonGenerated.LoadFromFile(filename);
                 PersonGenerated.Name = originalName;
@@ -2477,9 +2477,9 @@ namespace BitchlandCheatConsoleBepInEx
             return PersonGenerated.gameObject;
         }
 
-        public static GameObject ChangeSkin(string name)
+        public static GameObject ChangeSkin(string name, bool loadclothes = true)
         {
-            return ChangeSkin(Main.Instance.Player.gameObject, name, true);
+            return ChangeSkin(Main.Instance.Player.gameObject, name, true, loadclothes);
         }
 
         public static void StripPerson(GameObject personGa)
@@ -5743,7 +5743,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             int_HealthPod podAvailable = podAvailableFree.GetComponent<int_HealthPod>();
 
-            GameObject personGa = CreatePersonNew(parent, false, true);
+            GameObject personGa = CreatePersonNew(parent, false, true, false);
 
             if (personGa == null)
             {
@@ -5805,7 +5805,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 default:
                     {
-                        s = CreatePersonNew(value, save, false).GetComponent<Person>();
+                        s = CreatePersonNew(value, save, false, true).GetComponent<Person>();
                     }
                     break;
             }
@@ -5814,7 +5814,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnmalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
-            Person s = CreatePersonNew(value, save, false).GetComponent<Person>();
+            Person s = CreatePersonNew(value, save, false, false).GetComponent<Person>();
         }
         public static void spawnfemale(string value, bool save = false)
         {
@@ -5824,7 +5824,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = CreatePersonNew("jeanne", save).GetComponent<Person>();
+                        s = CreatePersonNew("jeanne", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -5838,7 +5838,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = CreatePersonNew("sarahoffwork", save).GetComponent<Person>();
+                        s = CreatePersonNew("sarahoffwork", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -5849,7 +5849,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = CreatePersonNew("uniformedsarah", save).GetComponent<Person>();
+                        s = CreatePersonNew("uniformedsarah", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -5865,7 +5865,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = CreatePersonNew("nameless", save).GetComponent<Person>();
+                        s = CreatePersonNew("nameless", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -5887,7 +5887,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = CreatePersonNew("rit", save).GetComponent<Person>();
+                        s = CreatePersonNew("rit", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -5900,7 +5900,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = CreatePersonNew("carol", save).GetComponent<Person>();
+                        s = CreatePersonNew("carol", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -5914,7 +5914,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = CreatePersonNew("beth", save).GetComponent<Person>();
+                        s = CreatePersonNew("beth", save, true, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -5928,7 +5928,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = CreatePersonNew(value, save).GetComponent<Person>();
+                        s = CreatePersonNew(value, save, true, true).GetComponent<Person>();
                     }
                     break;
             }
@@ -5936,7 +5936,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void spawnfemalenude(string value, bool save = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
-            Person s = CreatePersonNew(value, save).GetComponent<Person>();
+            Person s = CreatePersonNew(value, save, true, false).GetComponent<Person>();
         }
 
         public static void changeskintoperson(GameObject changedSkinPerson, string value, bool isPlayer)
@@ -5947,7 +5947,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = ChangeSkin(changedSkinPerson, "jeanne", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "jeanne", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -5961,7 +5961,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = ChangeSkin(changedSkinPerson, "sarahoffwork", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "sarahoffwork", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -5972,7 +5972,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = ChangeSkin(changedSkinPerson, "uniformedsarah", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "uniformedsarah", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -5988,7 +5988,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = ChangeSkin(changedSkinPerson, "nameless", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "nameless", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -6010,7 +6010,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = ChangeSkin(changedSkinPerson, "rit", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "rit", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -6023,7 +6023,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = ChangeSkin(changedSkinPerson, "carol", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "carol", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -6037,7 +6037,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = ChangeSkin(changedSkinPerson, "beth", isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, "beth", isPlayer, false).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -6051,14 +6051,14 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = ChangeSkin(changedSkinPerson, value, isPlayer).GetComponent<Person>();
+                        s = ChangeSkin(changedSkinPerson, value, isPlayer, true).GetComponent<Person>();
                     }
                     break;
             }
         }
         public static void changeskinnudetoperson(GameObject changedSkinPerson, string value, bool isPlayer)
         {
-            Person s = ChangeSkin(changedSkinPerson, value, isPlayer).GetComponent<Person>();
+            Person s = ChangeSkin(changedSkinPerson, value, isPlayer, false).GetComponent<Person>();
         }
 
         public static void changeskin(string value)
