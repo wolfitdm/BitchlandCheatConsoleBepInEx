@@ -312,6 +312,7 @@ commands with no params:
 * maxtrainingvalue -> set the TrainingValue variable from the player to 1000000000, if the player is listed in the population menu, otherwise it don't have any effect
 * npcmintrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 0, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
 * npcmaxtrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 100000000, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
+* nobuildtime -> toggle instant build mode, every plan you want placed, can Build instantly without any waiting time, if you get the message on  the screen nobuildtime: on, then, instantly build mode is on, otherwise instantly build mode is off
 
 commands with 1 param:
 

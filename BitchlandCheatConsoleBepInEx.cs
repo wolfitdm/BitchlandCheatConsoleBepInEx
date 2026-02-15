@@ -9889,6 +9889,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "nobuildtime":
+                    {
+                        nobuildtimecommand();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -9907,6 +9913,21 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        private static void nobuildtimecommand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: nobuildtime");
+
+            nobuildtime = !nobuildtime;
+
+            if (nobuildtime)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("nobuildtime: on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("nobuildtime: off");
             }
         }
 
@@ -10521,7 +10542,9 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            build(plan.FinalPrefab);
+            plan.BuiltProgress = plan.BuiltProgresspointsNeeded;
+
+            Main.Instance.GameplayMenu.ShowNotification("buildplan: done, if you have all resources in, you can build them");
         }
         public static void fullgallery()
         {
@@ -14088,6 +14111,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseNewMultiFollowerUpgradeKeyPadInterface;
         private static ConfigEntry<bool> configUseHarmonySlaveSystemPatch;
         private static ConfigEntry<bool> configUseHarmonyMoreWeaponSlotsPatch;
+        private static ConfigEntry<bool> configUseHarmonyNoBuildTimePatch;
 
         private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
         private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
@@ -14146,6 +14170,9 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useNewMultiFollowerUpgradeKeyPadInterface = false;
         public static bool useHarmonySlaveSystemPatch = false;
         public static bool useHarmonyMoreWeaponSlotsPatch = false;
+        public static bool useHarmonyNoBuildTimePatch = false;
+
+        public static bool nobuildtime = false;
 
         public static KeyCode KeyCodeFlyUp = 0;
         public static KeyCode KeyCodeFlyDown = 0;
@@ -14220,6 +14247,11 @@ namespace BitchlandCheatConsoleBepInEx
                      "UseHarmonyMoreWeaponSlotsPatch",
                       true,
                      "Whether or not you want use harmony more weapon slots patch (default false also no, you don't want it, and true = yes)");
+
+            configUseHarmonyNoBuildTimePatch = Config.Bind(pluginKey,
+                    "UseHarmonyNoBuildTimePatch",
+                    true,
+                    "Whether or not you want use harmony no build time patch (default false also no, you don't want it, and true = yes)");
 
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
@@ -14386,6 +14418,7 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyListAnimsPatch = configUseHarmonyListAnimsPatch.Value;
             useHarmonySlaveSystemPatch = configUseHarmonySlaveSystemPatch.Value;
             useHarmonyMoreWeaponSlotsPatch = configUseHarmonyMoreWeaponSlotsPatch.Value;
+            useHarmonyNoBuildTimePatch = configUseHarmonyNoBuildTimePatch.Value;
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
 
             if (useMultiFollowerUpgradeEx)
@@ -14727,9 +14760,12 @@ namespace BitchlandCheatConsoleBepInEx
                     PatchHarmonyMethodUnity(typeof(bl_ThirdPersonUserControl), "Update", "bl_ThirdPersonUserControl_Update", false, true);
                     PatchHarmonyMethodUnity(typeof(bl_meleeHitBox), "OnTriggerEnter", "OnSlaveEnter", true, false);
                 }
-                if (useHarmonyMoreWeaponSlotsPatch)
+                if (useHarmonyMoreWeaponSlotsPatch || useHarmonyNoBuildTimePatch)
                 {
                     PatchHarmonyMethodUnity(typeof(WeaponSystem), "Update", "WeaponSystem_Update", true, false);
+                }
+                if (useHarmonyMoreWeaponSlotsPatch)
+                {
                     PatchHarmonyMethodUnity(typeof(WeaponSystem), "SetActiveWeapon", "WeaponSystem_SetActiveWeapon", true, false, new Type[] { typeof(int) });
                 }
             } catch (Exception ex)
@@ -14737,7 +14773,6 @@ namespace BitchlandCheatConsoleBepInEx
                 Logger.LogError(ex.ToString());
             }
         }
-
         public static bool isPersonLeashed(GameObject personGa)
         {
             if (personGa == null)
@@ -14818,6 +14853,16 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool WeaponSystem_SetActiveWeapon(object __instance, int index)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
+            if (!useHarmonyMoreWeaponSlotsPatch)
+            {
+                return true;
+            }
+
             WeaponSystem _this = (WeaponSystem)__instance;
 
             while (_this.weapons.Count < 9)
@@ -14887,7 +14932,49 @@ namespace BitchlandCheatConsoleBepInEx
         }
         public static bool WeaponSystem_Update(object __instance)
         {
+            if (!useHarmonyPatches)
+            {
+                return true;
+            }
+
             WeaponSystem _this = (WeaponSystem)__instance;
+
+            if (useHarmonyNoBuildTimePatch)
+            {
+                if (nobuildtime)
+                {
+                    try
+                    {
+                        RaycastHit hitInfo;
+                        if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
+                        {
+                            int_ConstructionPlan obj = hitInfo.transform.GetComponent<int_ConstructionPlan>();
+                            int_ConstructionPlan obj2 = hitInfo.transform.root.GetComponent<int_ConstructionPlan>();
+
+                            if (obj != null)
+                            {
+                                obj.AllResourcesIn = true;
+                                obj.BuiltProgress = obj.BuiltProgresspointsNeeded;
+                            }
+
+                            if (obj2  != null)
+                            {
+                                obj2.AllResourcesIn = true;
+                                obj2.BuiltProgress = obj2.BuiltProgresspointsNeeded;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+
+            if (!useHarmonyMoreWeaponSlotsPatch)
+            {
+                return true;
+            }
 
             while (_this.weapons.Count < 9)
             {
