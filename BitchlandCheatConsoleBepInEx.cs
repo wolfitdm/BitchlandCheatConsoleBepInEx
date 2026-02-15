@@ -7475,6 +7475,26 @@ namespace BitchlandCheatConsoleBepInEx
             return amount;
         }
 
+        public static int stringValueToInt(string value)
+        {
+            int amount = 0;
+
+            if (int.TryParse(value, out int amount2))
+            {
+                if (amount2 <= 0)
+                {
+                    amount2 = 0;
+                }
+                amount = amount2;
+            }
+            else
+            {
+                amount = 0;
+            }
+
+            return amount;
+        }
+
         public static void setmaxarousal(GameObject personGa, int level)
         {
             if (personGa == null)
@@ -9845,6 +9865,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "mintraingvalue":
+                    {
+                        mintrainingvalue();
+                    }
+                    break;
+
+                case "maxtrainingvalue":
+                    {
+                        maxtrainingvalue();
+                    }
+                    break;
+
+                case "npcmintraingvalue":
+                    {
+                        npcmintrainingvalue();
+                    }
+                    break;
+
+                case "npcmaxtrainingvalue":
+                    {
+                        npcmaxtrainingvalue();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -9864,6 +9908,70 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        public static void settrainingvalue(GameObject personGa, int value)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            try
+            {
+                person.TrainingValue = value;
+            }
+            catch { }
+
+            Main.Instance.GameplayMenu.ShowNotification("set training value to " + value.ToString());
+        }
+
+        private static void maxtrainingvalue()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxtrainingvalue");
+
+            settrainingvalue(Main.Instance.Player.gameObject, 10000000);
+        }
+
+        private static void mintrainingvalue()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: mintrainingvalue");
+
+            settrainingvalue(Main.Instance.Player.gameObject, 0);
+        }
+
+        private static void npcmaxtrainingvalue()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmaxtrainingvalue");
+
+            settrainingvalue(getPersonInteract(), 10000000);
+        }
+
+        private static void npcmintrainingvalue()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcmintrainingvalue");
+
+            settrainingvalue(getPersonInteract(), 0);
+        }
+
+        private static void trainingvalue(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: trainingvalue");
+
+            settrainingvalue(Main.Instance.Player.gameObject, stringValueToInt(value));
+        }
+        private static void npctrainingvalue(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npctrainingvalue");
+
+            settrainingvalue(getPersonInteract(), stringValueToInt(value));
         }
 
         private static void miningkit()
@@ -11219,6 +11327,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcinfiniteammoall":
                     {
                         npcinfiniteammoall(value);
+                    }
+                    break;
+
+                case "trainingvalue":
+                    {
+                        trainingvalue(value);
+                    }
+                    break;
+
+                case "npctrainingvalue":
+                    {
+                        npctrainingvalue(value);
                     }
                     break;
 

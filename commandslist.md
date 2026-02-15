@@ -308,7 +308,10 @@ commands with no params:
 * npcgodmode -> toggle godmode from the npc the you looked at or chatted with, sure you want that?, if godmode is on, the npc have everything, unlimited health, all weapons have unlimited ammo, all perks, fetishes, full gallery, all items
 * infiniteammoall -> toggle all ammos have all weapons infinite ammo
 * npcinfiniteammoall -> toggle from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
-* buildplannew value -> new version from build plan, dont work in 10e
+* mintrainingvalue -> set the TrainingValue variable from the player to 0, if the player is listed in the population menu, otherwise it don't have any effect
+* maxtrainingvalue -> set the TrainingValue variable from the player to 1000000000, if the player is listed in the population menu, otherwise it don't have any effect
+* npcmintrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 0, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
+* npcmaxtrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 100000000, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
 
 commands with 1 param:
 
@@ -446,7 +449,10 @@ commands with 1 param:
 * npcaddallitems amount -> add all items * amount to the npc the you looked at or chatted with 
 * saveplayertofile name -> save player card to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
 * savenpctofile name -> save from the npc the you looked at or chatted with to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
+* buildplannew value -> new version from build plan, dont work in 10e
 * npcinfiniteammoall value -> toggle value from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
+* trainingvalue number -> set the training value from the player to number (population menu)
+* npctrainingvalue number -> set the training value from the npc the you looked at or chatted with (population menu)
 
 commands with 2 params:
 
