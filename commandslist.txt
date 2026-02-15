@@ -297,6 +297,16 @@ clearcommandkeys -> clear the command keys list
 miningkit -> spawn a backpack with unlimited storage, a pickaxe, a axe and a assault rifle with unlimited ammo, and set your current backpack to unlimited storage
 npcequip -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with
 npcequipfromhand -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with
+minrs -> all your relationships are really pissed on you, sure you want that?
+minrelationships -> all your relationships are really pissed on you, sure you want that?
+maxnpcrelationship -> maxed out the relationship from the npc the you looked at or chatted with
+maxnpcrs -> maxed out the relationship from the npc the you looked at or chatted with
+minnpcrelationship -> make the relationship from the npc the you looked at or chatted with really pissed on you
+minnpcrs -> make the relationship from the npc the you looked at or chatted with really pissed on you
+godmode -> toggle godmode, if godmode is on, you have everything, unlimited health, all weapons have unlimited ammo, all perks, fetishes, full gallery, all items
+npcgodmode -> toggle godmode from the npc the you looked at or chatted with, sure you want that?, if godmode is on, the npc have everything, unlimited health, all weapons have unlimited ammo, all perks, fetishes, full gallery, all items
+infiniteammoall -> toggle all ammos have all weapons infinite ammo
+npcinfiniteammoall -> toggle from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
 
 commands with 1 param:
 
@@ -434,6 +444,7 @@ addallitems amount -> add the player all items * amount
 npcaddallitems amount -> add all items * amount to the npc the you looked at or chatted with 
 saveplayertofile name -> save player card to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
 savenpctofile name -> save from the npc the you looked at or chatted with to file Assets\wolfitdm\females\name.chr or  Assets\wolfitdm\males\name.chr
+npcinfiniteammoall value -> toggle value from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
 
 commands with 2 params:
 

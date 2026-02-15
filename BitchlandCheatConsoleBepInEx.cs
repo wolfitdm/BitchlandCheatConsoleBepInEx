@@ -24,6 +24,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Transactions;
 using TinyJson;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -4984,7 +4985,165 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("infiniteammo: you need a weapon in your main hand in order to use this command!");
             }
         }
+        public static void setinfiniteammoall(GameObject personGa, bool value)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
 
+            Person player = personGa.GetComponent<Person>();
+
+            if (player == null)
+            {
+                return;
+            }
+
+            WeaponSystem weaponInv = player.WeaponInv;
+
+            if (weaponInv != null && weaponInv.weapons != null)
+            {   
+                for (int i = 0; i < weaponInv.weapons.Count; i++)
+                {
+                    if (weaponInv.weapons[i] == null)
+                    {
+                        continue;
+                    }
+                    
+                    Weapon weapon = weaponInv.weapons[i].GetComponent<Weapon>();
+                    
+                    if (weapon == null)
+                    {
+                        continue;
+                    }
+
+                    weapon.infiniteAmmo = value;
+                    weapon.infiniteBeam = value;
+                }
+
+                if (infiniteammoallvar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("infiniteammoall: on");
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("infiniteammoall: off");
+                }
+            }
+        }
+
+        public static bool infiniteammoallvar = false;
+        public static void infiniteammoall()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: infiniteammoall");
+
+            setinfiniteammoall(Main.Instance.Player.gameObject, !infiniteammoallvar);
+        }
+
+        public static bool npcinfiniteammoallvar = false;
+        public static void npcinfiniteammoall(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcinfiniteammoall");
+
+            if (bool.TryParse(value, out bool set)) {
+                npcinfiniteammoallvar = set;
+            } else
+            {
+                npcinfiniteammoallvar = !npcinfiniteammoallvar;
+            }
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            setinfiniteammoall(personGa, npcinfiniteammoallvar);
+        }
+
+        public static void setgodmode(GameObject personGa, bool value)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.NoEnergyLoss = value;
+            person.CantBeHit = value;
+
+            person.TheHealth.canDie = value;
+
+            setinfiniteammoall(personGa, value);
+
+            if (value)
+            {
+                person.Hunger = 0;
+                person.Toilet = 0;
+                person.Energy = person.EnergyMax;
+
+                addAllFetishesToPerson(personGa, true);
+
+                addallperkstoperson(personGa);
+
+                setmaxallskills(personGa, 300);
+
+                setPersonaltyToNympho(personGa);
+
+                addallitemstoperson(personGa, "1");
+
+                if (person.IsPlayer)
+                    fullgallery();
+            }
+
+            if (value)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("godmode: on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("godmode: off");
+            }
+        }
+
+        public static void godmode()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: godmode");
+            setgodmode(Main.Instance.Player.gameObject, !Main.Instance.Player.CantBeHit);
+        }
+        public static void npcgodmode()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcgodmode");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            setgodmode(personGa, !person.CantBeHit); 
+        }
         public static void npcshit()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npcshit");
@@ -7037,6 +7196,64 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void minrelationships()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: minrelationships");
+            if (Main.Instance.GameplayMenu.Relationships != null)
+            {
+                int length = Main.Instance.GameplayMenu.Relationships.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    Main.Instance.GameplayMenu.Relationships[i].Favor = -100000000;
+                }
+            }
+        }
+
+        public static void maxnpcrelationship()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maxnpcrelationship");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.CreatePersonRelationship();
+
+            person.Favor = 100000000;
+        }
+        public static void minnpcrelationship()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: minnpcrelationship");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.CreatePersonRelationship();
+
+            person.Favor = -100000000;
+        }
+
         public static void pregnancy(bool realpregnancy)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: pregnancy");
@@ -8142,6 +8359,27 @@ namespace BitchlandCheatConsoleBepInEx
                 case "maxrelationships":
                     {
                         maxrelationships();
+                    }
+                    break;
+
+                case "minrs":
+                case "minrelationships":
+                    {
+                        minrelationships();
+                    }
+                    break;
+
+                case "maxnpcrs":
+                case "maxnpcrelationship":
+                    {
+                        maxnpcrelationship();
+                    }
+                    break;
+
+                case "minnpcrs":
+                case "minnpcrelationship":
+                    {
+                        minnpcrelationship();
                     }
                     break;
 
@@ -9557,6 +9795,31 @@ namespace BitchlandCheatConsoleBepInEx
                         npcequipfromhand();
                     }
                     break;
+
+                case "infiniteammoall":
+                    {
+                        infiniteammoall();    
+                    }
+                    break;
+
+                case "npcinfiniteammoall":
+                    {
+                        npcinfiniteammoall("");
+                    }
+                    break;
+
+                case "godmode":
+                    {
+                        godmode();
+                    }
+                    break;
+
+                case "npcgodmode":
+                    {
+                        npcgodmode();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10645,6 +10908,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "savenpctofile":
                     {
                         savenpctofile(value);
+                    }
+                    break;
+
+                case "npcinfiniteammoall":
+                    {
+                        npcinfiniteammoall(value);
                     }
                     break;
 
