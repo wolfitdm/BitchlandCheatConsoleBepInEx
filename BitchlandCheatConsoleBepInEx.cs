@@ -14300,6 +14300,11 @@ namespace BitchlandCheatConsoleBepInEx
                         PatchHarmonyMethodUnity(typeof(Mis_Zea3), "ChatSephie", "DefaultTalk_options_AddSexOption", false, true);
                     }
                     catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Person), "RestrainedInteraction_options", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
                 }
                 if (useHarmonyGiveMe90MioCashChatOptionPatch)
                 {
@@ -14325,6 +14330,28 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static bool isPersonLeashed(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return false;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return person.Leashed;
+            } catch
+            {
+                return false;
+            }
+        }
         public enum MeleeSlaveOptions
         {
             None,
