@@ -5635,6 +5635,14 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     hands.RemoveItem(removeableItems[i]);
                 }
+
+                for (int i = 0; i < removeableItems.Count; i++)
+                {
+                    try
+                    {
+                        UnityEngine.Object.Destroy(removeableItems[i]);
+                    } catch { }
+                }
             }
         }
 
