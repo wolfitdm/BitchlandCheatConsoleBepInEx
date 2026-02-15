@@ -5633,7 +5633,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 for (int i = 0; i < removeableItems.Count; i++)
                 {
-                    hands.StorageItems.Remove(removeableItems[i]);
+                    hands.RemoveItem(removeableItems[i]);
                 }
             }
         }
