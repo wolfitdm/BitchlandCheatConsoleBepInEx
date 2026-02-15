@@ -10069,9 +10069,27 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
-        public static void buildplan(string value)
+        public static void buildplanold(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: buildplan");
+            List<GameObject> plans = getallbuildplans();
+            if (plans.Count > 0)
+            {
+                for (int i = 0; i < plans.Count; i++)
+                {
+                    string name = plans[i].name;
+                    if (name == value)
+                    {
+                        build10e(plans[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public static void buildplan(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: buildplannew");
             List<GameObject> plans = getallbuildplans();
             if (plans.Count > 0)
             {
@@ -10086,7 +10104,36 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
-        public static void build(GameObject plan)
+
+        public static void BuildThread10e()
+        {
+            UI_Gameplay _this = Main.Instance.GameplayMenu;
+            RaycastHit hitInfo;
+            if (Physics.Raycast(Main.Instance.Player.WeaponInv.transform.position, Main.Instance.Player.WeaponInv.transform.TransformDirection(Vector3.forward), out hitInfo, 10f, (int)_this.PlacePlanLayers, QueryTriggerInteraction.Ignore))
+                _this._BuildindPlan.transform.position = hitInfo.point;
+            if (Main.Instance.CancelKey() || Input.GetMouseButtonUp(UI_Settings.RightMouseButton))
+            {
+                Main.Instance.MainThreads.Remove(new Action(BuildThread10e));
+                UnityEngine.Object.Destroy((UnityEngine.Object)_this._BuildindPlan);
+                _this._BuildindPlan = (GameObject)null;
+            }
+            if (!Input.GetKeyUp(KeyCode.E) && !Input.GetKeyUp(KeyCode.F) && !Input.GetKeyUp(KeyCode.KeypadEnter) && !Input.GetKeyUp(KeyCode.Return) && !Input.GetMouseButtonUp(UI_Settings.LeftMouseButton))
+                return;
+            PlacePlan10e(_this._BuildindPlan);
+        }
+
+        public static void PlacePlan10e(GameObject obj)
+        {
+            UI_Gameplay _this = Main.Instance.GameplayMenu;
+            _this._BuildindPlan = (GameObject)null;
+            Main.Instance.MainThreads.Remove(new Action(BuildThread10e));
+            Main.RunInNextFrame((Action)(() =>
+            {
+                obj.GetComponentInChildren<Interactible>().RemoveBlocker("PlanPlacing");
+                _this.LatestPlacedPlan = obj;
+            }), 5);
+        }
+        public static void build10e(GameObject plan)
         {
             UI_Gameplay _this = Main.Instance.GameplayMenu;
             _this.CloseJournal();
@@ -10096,7 +10143,45 @@ namespace BitchlandCheatConsoleBepInEx
             if (_this._BuildindPlan == null)
                 return;
 
-            Main.RunInNextFrame((Action)(() => Main.Instance.MainThreads.Add(new Action(_this.BuildThread))), 5);
+            Main.RunInNextFrame((Action)(() => Main.Instance.MainThreads.Add(new Action(BuildThread10e))), 5);
+        }
+        public static void build(GameObject plan)
+        {
+            UI_Gameplay _this = Main.Instance.GameplayMenu;
+            _this.CloseJournal();
+            _this._BuildindPlan = Main.Spawn(plan);
+            _this._BuildindPlan.GetComponentInChildren<Interactible>().AddBlocker("PlanPlacing");
+
+            if (_this._BuildindPlan == null)
+            {
+                Logger.LogError("build plan not found: " + plan.name);
+                return;
+            }
+
+            int_ConstructionPlan int_ConstructionPlan2 = (_this.ThisPlan = _this._BuildindPlan.GetComponentInChildren<int_ConstructionPlan>());
+            if (int_ConstructionPlan2 == null)
+            {
+                Logger.LogError("Invalid Plan: " + _this._BuildindPlan.name);
+                UnityEngine.Object.Destroy(_this._BuildindPlan);
+                return;
+            }
+
+            int_ConstructionPlan2.BeingMoved = true;
+            int_ConstructionPlan2.BuildFill.enabled = false;
+            _this.CurrentSnapType = int_ConstructionPlan2.BuildSnapType;
+            if (int_ConstructionPlan2.BuildSnapType != 0)
+            {
+                bl_ObjWithConstructionSnap[] array = UnityEngine.Object.FindObjectsOfType<bl_ObjWithConstructionSnap>();
+                for (int j = 0; j < array.Length; j++)
+                {
+                    array[j].Show(int_ConstructionPlan2.BuildSnapType);
+                }
+            }
+
+            Main.RunInNextFrame(delegate
+            {
+                Main.Instance.MainThreads.Add(_this.BuildThread);
+            }, 5);
         }
 
         public static void additemsforplan()
@@ -10816,9 +10901,15 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "buildplannew":
+                    {
+                       buildplan(valueOriginal);
+                    }
+                    break;
+
                 case "buildplan":
                     {
-                        buildplan(valueOriginal);
+                        buildplanold(valueOriginal);
                     }
                     break;
 

@@ -308,6 +308,7 @@ commands with no params:
 * npcgodmode -> toggle godmode from the npc the you looked at or chatted with, sure you want that?, if godmode is on, the npc have everything, unlimited health, all weapons have unlimited ammo, all perks, fetishes, full gallery, all items
 * infiniteammoall -> toggle all ammos have all weapons infinite ammo
 * npcinfiniteammoall -> toggle from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
+* buildplannew value -> new version from build plan, dont work in 10e
 
 commands with 1 param:
 
