@@ -5021,7 +5021,7 @@ namespace BitchlandCheatConsoleBepInEx
                     weapon.infiniteBeam = value;
                 }
 
-                if (infiniteammoallvar)
+                if (value)
                 {
                     Main.Instance.GameplayMenu.ShowNotification("infiniteammoall: on");
                 }
@@ -5607,8 +5607,25 @@ namespace BitchlandCheatConsoleBepInEx
                     removeableItems.Add(item);
                 } else
                 {
-                    addItemReal(personGa, item, 1);
-                    removeableItems.Add(item);
+                    MultiInteractible component = item.GetComponent<MultiInteractible>();
+                    if (component != null)
+                    {
+                        int_PickableClothingPackage component2 = component.Parts[0].gameObject.GetComponent<int_PickableClothingPackage>();
+                        if (component2 != null)
+                        {
+                            person.DressClothe(item);
+                            removeableItems.Add(item);
+                        } else
+                        {
+                            addItemReal(personGa, item, 1);
+                            removeableItems.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        addItemReal(personGa, item, 1);
+                        removeableItems.Add(item);
+                    }
                 }
             }
 
@@ -11141,6 +11158,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -11211,6 +11240,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setcommandkey":
                     {
                         setcommandkey(key, value + " " + value2);
+                    }
+                    break;
+
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2);
                     }
                     break;
 
@@ -11288,6 +11329,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -11352,6 +11405,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setcommandkey":
                     {
                         setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4);
                     }
                     break;
 
@@ -11422,6 +11487,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -11486,6 +11563,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setcommandkey":
                     {
                         setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
                     }
                     break;
 
@@ -11556,6 +11645,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -11623,6 +11724,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -11687,6 +11800,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "setcommandkey":
                     {
                         setcommandkey(key, value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "animplay":
+                    {
+                        animplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
+                    }
+                    break;
+
+                case "npcanimplay":
+                    {
+                        npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8 + " " + value9);
                     }
                     break;
 
