@@ -10145,43 +10145,232 @@ namespace BitchlandCheatConsoleBepInEx
 
             Main.RunInNextFrame((Action)(() => Main.Instance.MainThreads.Add(new Action(BuildThread10e))), 5);
         }
+
+        public static GameObject plan11 = null;
+        public static void Click_Build11()
+        {
+            try
+            {
+                if (plan11 == null)
+                    return;
+                UI_Gameplay _this = Main.Instance.GameplayMenu;
+                _this.CloseJournal();
+                _this._BuildindPlan = Main.Spawn(plan11);
+                _this._BuildindPlan.GetComponentInChildren<Interactible>().AddBlocker("PlanPlacing");
+
+                if (_this._BuildindPlan == null)
+                {
+                    Logger.LogError("build plan not found: " + plan11.name);
+                    return;
+                }
+
+                int_ConstructionPlan int_ConstructionPlan2 = (_this.ThisPlan = _this._BuildindPlan.GetComponentInChildren<int_ConstructionPlan>());
+                if (int_ConstructionPlan2 == null)
+                {
+                    Logger.LogError("Invalid Plan: " + _this._BuildindPlan.name);
+                    UnityEngine.Object.Destroy(_this._BuildindPlan);
+                    return;
+                }
+
+                int_ConstructionPlan2.BeingMoved = true;
+                int_ConstructionPlan2.BuildFill.enabled = false;
+                _this.CurrentSnapType = int_ConstructionPlan2.BuildSnapType;
+                if (int_ConstructionPlan2.BuildSnapType != 0)
+                {
+                    bl_ObjWithConstructionSnap[] array = UnityEngine.Object.FindObjectsOfType<bl_ObjWithConstructionSnap>();
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        array[j].Show(int_ConstructionPlan2.BuildSnapType);
+                    }
+                }
+
+                Main.RunInNextFrame(delegate
+                {
+                    Main.Instance.MainThreads.Add(BuildThread11);
+                }, 5);
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+        }
+        public static void PlacePlan11(GameObject obj)
+        {
+            try
+            {
+                plan11 = obj;
+                UI_Gameplay _this = Main.Instance.GameplayMenu;
+                int_ConstructionPlan componentInChildren = _this._BuildindPlan.GetComponentInChildren<int_ConstructionPlan>();
+                _this._BuildindPlan.GetComponentInChildren<bl_ObjWithConstructionSnap>();
+                bool _placeAnother = false;
+                if (_this.IsSnapping)
+                {
+                    _ = _this.CurrentSnapType;
+                    _ = 1;
+                }
+
+                _placeAnother = componentInChildren.PlanAnotherAfter;
+                componentInChildren.BeingMoved = false;
+                componentInChildren.GetPlaced();
+                _this.ThisPlan = null;
+                _this._BuildindPlan = null;
+                Main.Instance.MainThreads.Remove(BuildThread11);
+                _this.HideAllSnaps();
+                Main.RunInNextFrame(delegate
+                {
+                    obj.GetComponentInChildren<Interactible>().RemoveBlocker("PlanPlacing");
+                    _this.LatestPlacedPlan = obj;
+                    if (_placeAnother)
+                    {
+                        Click_Build11();
+                    }
+                    else
+                    {
+                        _this.SelectedPlanRotation = 0;
+                    }
+                }, 5);
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+        }
+        public static void BuildThread11()
+        {
+            try
+            {
+                UI_Gameplay _this = Main.Instance.GameplayMenu;
+                bool flag = true;
+                if (Physics.Raycast(Main.Instance.Player.WeaponInv.transform.position, Main.Instance.Player.WeaponInv.transform.TransformDirection(Vector3.forward), out var hitInfo, 10f, _this.PlacePlanLayers, QueryTriggerInteraction.Collide))
+                {
+                    if (hitInfo.transform.tag == "NoBuild")
+                    {
+                        flag = false;
+                    }
+                    else
+                    {
+                        _this._CurrentSnap = hitInfo.transform.GetComponent<bl_ConstructionSnapSpot>();
+                        if (_this._CurrentSnap != null)
+                        {
+                            if (_this.CurrentSnapType == int_ConstructionPlan.e_BuildSnapType.Floor)
+                            {
+                                _this.IsSnapping = true;
+                                _this._BuildindPlan.transform.position = _this._CurrentSnap.Spot_Floor.position;
+                                _this._BuildindPlan.transform.rotation = _this._CurrentSnap.Spot_Floor.rotation;
+                                if (Input.GetKeyUp(KeyCode.LeftAlt))
+                                {
+                                    _this.SelectedPlanRotation++;
+                                    if (_this.SelectedPlanRotation > 3)
+                                    {
+                                        _this.SelectedPlanRotation = 0;
+                                    }
+                                }
+
+                                _this._BuildindPlan.transform.eulerAngles = new Vector3(_this._BuildindPlan.transform.eulerAngles.x, _this._BuildindPlan.transform.eulerAngles.y + (float)(90 * _this.SelectedPlanRotation), _this._BuildindPlan.transform.eulerAngles.z);
+                            }
+                            else
+                            {
+                                _this.IsSnapping = true;
+                                _this._BuildindPlan.transform.position = _this._CurrentSnap.Spot_Wall.position;
+                                _this._BuildindPlan.transform.rotation = _this._CurrentSnap.Spot_Wall.rotation;
+                                if (Input.GetKeyUp(KeyCode.LeftAlt))
+                                {
+                                    _this.SelectedPlanRotation++;
+                                    if (_this.SelectedPlanRotation > 3)
+                                    {
+                                        _this.SelectedPlanRotation = 0;
+                                    }
+                                }
+
+                                _this._BuildindPlan.transform.eulerAngles = new Vector3(_this._BuildindPlan.transform.eulerAngles.x, _this._BuildindPlan.transform.eulerAngles.y + (float)(90 * _this.SelectedPlanRotation), _this._BuildindPlan.transform.eulerAngles.z);
+                            }
+                        }
+                        else
+                        {
+                            _this._CurrentSnap = null;
+                            _this.IsSnapping = false;
+                            _this._BuildindPlan.transform.position = hitInfo.point;
+                            if (_this.ThisPlan != null && _this.ThisPlan.Foundation)
+                            {
+                                bl_WorldChunk component = hitInfo.transform.GetComponent<bl_WorldChunk>();
+                                if (component != null && component.CanUseFoundations)
+                                {
+                                    _this._BuildindPlan.transform.position = new Vector3(hitInfo.point.x, component.transform.position.y + _this.ThisPlan.ExtraBuildHeight, hitInfo.point.z);
+                                }
+                            }
+
+                            if (Input.GetKey(KeyCode.LeftAlt))
+                            {
+                                _this._BuildindPlan.transform.eulerAngles = new Vector3(_this._BuildindPlan.transform.eulerAngles.x, Main.Instance.PlayerCam.transform.eulerAngles.y, _this._BuildindPlan.transform.eulerAngles.z);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _this._CurrentSnap = null;
+                    _this.IsSnapping = false;
+                    flag = false;
+                }
+
+                if (Main.Instance.CancelKey() || Input.GetMouseButtonUp(UI_Settings.RightMouseButton))
+                {
+                    Main.Instance.MainThreads.Remove(BuildThread11);
+                    UnityEngine.Object.Destroy(_this._BuildindPlan);
+                    _this._BuildindPlan = null;
+                    _this.HideAllSnaps();
+                }
+
+                if (flag && (Input.GetKeyUp(KeyCode.E) || Input.GetKeyUp(KeyCode.F) || Input.GetKeyUp(KeyCode.KeypadEnter) || Input.GetKeyUp(KeyCode.Return) || Input.GetMouseButtonUp(UI_Settings.LeftMouseButton)))
+                {
+                    PlacePlan11(_this._BuildindPlan);
+                }
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+        }
         public static void build(GameObject plan)
         {
-            UI_Gameplay _this = Main.Instance.GameplayMenu;
-            _this.CloseJournal();
-            _this._BuildindPlan = Main.Spawn(plan);
-            _this._BuildindPlan.GetComponentInChildren<Interactible>().AddBlocker("PlanPlacing");
-
-            if (_this._BuildindPlan == null)
+            try
             {
-                Logger.LogError("build plan not found: " + plan.name);
-                return;
-            }
+                UI_Gameplay _this = Main.Instance.GameplayMenu;
+                _this.CloseJournal();
+                _this._BuildindPlan = Main.Spawn(plan);
+                _this._BuildindPlan.GetComponentInChildren<Interactible>().AddBlocker("PlanPlacing");
 
-            int_ConstructionPlan int_ConstructionPlan2 = (_this.ThisPlan = _this._BuildindPlan.GetComponentInChildren<int_ConstructionPlan>());
-            if (int_ConstructionPlan2 == null)
-            {
-                Logger.LogError("Invalid Plan: " + _this._BuildindPlan.name);
-                UnityEngine.Object.Destroy(_this._BuildindPlan);
-                return;
-            }
-
-            int_ConstructionPlan2.BeingMoved = true;
-            int_ConstructionPlan2.BuildFill.enabled = false;
-            _this.CurrentSnapType = int_ConstructionPlan2.BuildSnapType;
-            if (int_ConstructionPlan2.BuildSnapType != 0)
-            {
-                bl_ObjWithConstructionSnap[] array = UnityEngine.Object.FindObjectsOfType<bl_ObjWithConstructionSnap>();
-                for (int j = 0; j < array.Length; j++)
+                if (_this._BuildindPlan == null)
                 {
-                    array[j].Show(int_ConstructionPlan2.BuildSnapType);
+                    Logger.LogError("build plan not found: " + plan.name);
+                    return;
                 }
-            }
 
-            Main.RunInNextFrame(delegate
+                int_ConstructionPlan int_ConstructionPlan2 = (_this.ThisPlan = _this._BuildindPlan.GetComponentInChildren<int_ConstructionPlan>());
+                if (int_ConstructionPlan2 == null)
+                {
+                    Logger.LogError("Invalid Plan: " + _this._BuildindPlan.name);
+                    UnityEngine.Object.Destroy(_this._BuildindPlan);
+                    return;
+                }
+
+                int_ConstructionPlan2.BeingMoved = true;
+                int_ConstructionPlan2.BuildFill.enabled = false;
+                _this.CurrentSnapType = int_ConstructionPlan2.BuildSnapType;
+                if (int_ConstructionPlan2.BuildSnapType != 0)
+                {
+                    bl_ObjWithConstructionSnap[] array = UnityEngine.Object.FindObjectsOfType<bl_ObjWithConstructionSnap>();
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        array[j].Show(int_ConstructionPlan2.BuildSnapType);
+                    }
+                }
+
+                Main.RunInNextFrame(delegate
+                {
+                    Main.Instance.MainThreads.Add(BuildThread11);
+                }, 5);
+            } catch (Exception ex)
             {
-                Main.Instance.MainThreads.Add(_this.BuildThread);
-            }, 5);
+                Logger.LogError(ex.ToString());
+            }
         }
 
         public static void additemsforplan()
