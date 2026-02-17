@@ -7,11 +7,13 @@ using Den.Tools;
 using HarmonyLib;
 using MapMagic.Expose;
 using MapMagic.Nodes;
+using Microsoft.Win32.SafeHandles;
 using SemanticVersioning;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -3671,6 +3673,44 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+        private static void removeItemReal(GameObject playerGa, GameObject item, int value)
+        {
+            if (playerGa == null)
+            {
+                return;
+            }
+
+            Person player = playerGa.GetComponent<Person>();
+
+            if (player == null)
+            {
+                return;
+            }
+
+            if (player.CurrentBackpack == null)
+            {
+                GameObject backpack2 = getItemByName(null, "backpack2");
+                if (backpack2 == null)
+                {
+                    backpack2 = getItemByName(null, "backpack");
+                }
+                if (backpack2 == null)
+                {
+                    return;
+                }
+                player.DressClothe(Main.Spawn(backpack2));
+            }
+
+            if (player.CurrentBackpack != null && player.CurrentBackpack.ThisStorage != null)
+            {
+                value = value <= 0 ? 1 : value;
+
+                for (int i = 0; i < value; i++)
+                {
+                    player.CurrentBackpack.ThisStorage.RemoveItem(item);
+                }
+            }
+        }
 
         private static GameObject[] spawnItemReal(GameObject item, int value)
         {
@@ -5229,12 +5269,46 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("npcadditem: No item found");
             }
         }
+        public static void npcremoveitembyitem(GameObject personGa, string key, string value)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person player = personGa.GetComponent<Person>();
+            int amount = 1;
+            GameObject item = getAllItemByName(key);
+
+            if (item != null)
+            {
+                try
+                {
+                    amount = int.Parse(value);
+                    amount = amount > 0 ? amount : 1;
+                }
+                catch (Exception e)
+                {
+                    amount = 1;
+                }
+                removeItemReal(player.gameObject, item, amount);
+                Main.Instance.GameplayMenu.ShowNotification("npcremoveitem: " + item.name.ToString() + " " + amount.ToString() + " added");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("npcremoveitem: No item found");
+            }
+        }
         public static void npcadditem(string key, string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npcadditem");
             npcadditembyitem(getPersonInteract(), key, value);
         }
-
+        public static void npcremoveitem(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcremoveitem");
+            npcremoveitembyitem(getPersonInteract(), key, value);
+        }
 
         public static void npcmaxhunger()
         {
@@ -5600,6 +5674,11 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 GameObject item = items[i];
 
+                if (item == null)
+                {
+                    continue;
+                }
+
                 Dressable dressable = item.GetComponentInChildren<Dressable>();
                 if (dressable != null)
                 {
@@ -5643,6 +5722,263 @@ namespace BitchlandCheatConsoleBepInEx
                         UnityEngine.Object.Destroy(removeableItems[i]);
                     } catch { }
                 }
+            }
+        }
+
+        public static void npcunequipfromhand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcunequipfromhand");
+
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            List<Dressable> allDressables = new List<Dressable>();
+
+            if (person.CurrentTop != null)
+            {
+                allDressables.Add(person.CurrentTop);
+            }
+
+            if (person.CurrentUnderwearTop != null)
+            {
+                allDressables.Add(person.CurrentUnderwearTop);
+            }
+
+            if (person.CurrentUnderwearLower != null)
+            {
+                allDressables.Add(person.CurrentUnderwearLower);
+            }
+
+            if (person.CurrentPants != null)
+            {
+                allDressables.Add(person.CurrentPants);
+            }
+
+            if (person.CurrentShoes != null)
+            {
+                allDressables.Add(person.CurrentShoes);
+            }
+
+            if (person.CurrentSocks != null)
+            {
+                allDressables.Add(person.CurrentSocks);
+            }
+
+            if (person.CurrentHat != null)
+            {
+                allDressables.Add(person.CurrentHat);
+            }
+
+            if (person.CurrentGarter != null)
+            {
+                allDressables.Add(person.CurrentGarter);
+            }
+
+            if (person.CurrentAnys != null)
+            {
+                for (int i = 0; i < person.CurrentAnys.Count; i++)
+                {
+                    if (person.CurrentAnys[i] == null)
+                        continue;
+
+                    allDressables.Add(person.CurrentAnys[i]);
+                }
+            }
+
+            if (person.CurrentBeard != null)
+            {
+                allDressables.Add(person.CurrentBeard);
+            }
+
+            if (Main.Instance.Player.WeaponInv.CurrentWeapon != null)
+            {
+                person.WeaponInv.DropAllWeapons();
+                return;
+            }
+
+            Int_Storage hands = Main.Instance.Player.Storage_Hands;
+
+            if (hands == null)
+            {
+                return;
+            }
+
+            List<GameObject> items = new List<GameObject>();
+
+            List<GameObject> itemsStorage = hands.StorageItems;
+
+            if (itemsStorage == null)
+            {
+                return;
+            }
+
+            items.AddRange(itemsStorage);
+
+            try
+            {
+                List<GameObject> removeableItems = new List<GameObject>();
+                List<Dressable> undressClothes = new List<Dressable>();
+                for (int i = 0; i < items.Count; i++)
+                {
+                    GameObject item = items[i];
+
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    Dressable dressable = item.GetComponentInChildren<Dressable>();
+                    if (dressable != null)
+                    {
+                        person.UndressClothe(dressable);
+                    }
+                    else
+                    {
+                        MultiInteractible component = item.GetComponent<MultiInteractible>();
+                        if (component != null)
+                        {
+                            int_PickableClothingPackage component2 = component.Parts[0].gameObject.GetComponent<int_PickableClothingPackage>();
+                            if (component2 != null)
+                            {
+                                GameObject gameObject = ((!(person is Guy)) ? component2.Clothing : component2.MaleClothing);
+                                if (gameObject == null)
+                                {
+                                    continue;
+                                }
+                                gameObject = Main.Spawn(gameObject);
+                                if (gameObject == null)
+                                {
+                                    continue;
+                                }
+                                Dressable componentInChildren = gameObject.GetComponentInChildren<Dressable>();
+                                if (componentInChildren == null)
+                                {
+                                    continue;
+                                }
+                                string clothingData = component2.ClothingData;
+                                if (clothingData != null && clothingData.Length > 0) {
+                                    try
+                                    {
+                                        componentInChildren.sv_LoadData(clothingData, ':', removeFirst: false);
+                                    } catch (Exception ex)
+                                    {
+                                    }
+                                }
+                                GameObject dropablePrefab = componentInChildren.DropablePrefab;
+                                componentInChildren.DropablePrefab = null;
+                                person.UndressClothe(componentInChildren);
+                                componentInChildren.DropablePrefab = dropablePrefab;
+
+                                for (int j = 0; j < allDressables.Count; j++)
+                                {
+                                    Dressable dressableTemp = allDressables[j];
+
+
+                                    if (dressableTemp == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (dressableTemp.name == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (dressableTemp.gameObject == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (dressableTemp.gameObject.name == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (dressableTemp == componentInChildren)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (dressableTemp.gameObject.name == componentInChildren.gameObject.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (dressableTemp.name == componentInChildren.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (component.gameObject.name == dressableTemp.gameObject.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                    }
+
+                                    if (component.name == dressableTemp.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (component2.gameObject.name == dressableTemp.gameObject.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (component2.name == dressableTemp.name)
+                                    {
+                                        undressClothes.Add(dressableTemp);
+                                        continue;
+                                    }
+
+                                    if (dropablePrefab != null && dropablePrefab.name == dressableTemp.gameObject.name)
+                                    {
+                                         undressClothes.Add(dressableTemp);
+                                         continue;
+                                    }
+
+                                    if (dropablePrefab != null && dropablePrefab.name == dressableTemp.name)
+                                    {
+                                         undressClothes.Add(dressableTemp);
+                                         continue;
+                                    }
+                                 }
+                                 UnityEngine.Object.Destroy(gameObject);
+                            }
+                            else
+                            {
+                                removeItemReal(personGa, item, 1);
+                            }
+                        }
+                        else
+                        {
+                            removeItemReal(personGa, item, 1);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < undressClothes.Count; i++)
+                {
+                    person.UndressClothe(undressClothes[i]);
+                }
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
             }
         }
 
@@ -9841,6 +10177,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "npcunequip":
+                case "npcunequipfromhand":
+                    {
+                        npcunequipfromhand();
+                    }
+                    break;
+
                 case "infiniteammoall":
                     {
                         infiniteammoall();    
@@ -10563,6 +10906,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "additem":
                     {
                         additem(value, "1");
+                    }
+                    break;
+
+                case "removeitem":
+                    {
+                        removeitem(value, "1");
                     }
                     break;
 
@@ -11455,6 +11804,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "removeitem":
+                    {
+                        removeitem(key, value);
+                    }
+                    break;
+
                 case "setstate":
                     {
                         setstate(key, value);
@@ -11470,6 +11825,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcadditem":
                     {
                         npcadditem(key, value);
+                    }
+                    break;
+
+                case "npcremoveitem":
+                    {
+                        npcremoveitem(key, value);
                     }
                     break;
 
@@ -14068,6 +14429,33 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void removeitem(string key, string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removeitem");
+            int amount = 1;
+            GameObject item = getAllItemByName(key);
+
+            if (item != null)
+            {
+                try
+                {
+                    amount = int.Parse(value);
+                    amount = amount > 0 ? amount : 1;
+                }
+                catch (Exception e)
+                {
+                    amount = 1;
+                }
+                removeItemReal(Main.Instance.Player.gameObject, item, amount);
+                Main.Instance.GameplayMenu.ShowNotification("removeitem: " + item.name.ToString() + " " + amount.ToString() + " added");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("removeitem: No item found");
+            }
+        }
+
+
         public static void spawnitem(string key, string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnitem");
@@ -14102,6 +14490,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseHarmonyGameAudioSourcePatch;
         private static ConfigEntry<bool> configUseHarmonyGameMainThreadsPatch;
         private static ConfigEntry<bool> configUseHarmonyAddChatSexOptionPatch;
+        private static ConfigEntry<bool> configUseHarmonyAddXoxaChatSexOptionPatch;
         private static ConfigEntry<bool> configUseHarmonyAddFollowingChatSexOptionPatch;
         private static ConfigEntry<bool> configUseHarmonyGiveMe90MioCashChatOptionPatch;
         private static ConfigEntry<bool> configUseMultiFollower;
@@ -14164,6 +14553,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyGameAudioSourcePatch = false;
         public static bool useHarmonyGameMainThreadsPatch = false;
         public static bool useHarmonyAddChatSexOptionPatch = false;
+        public static bool useHarmonyAddXoxaChatSexOptionPatch = false;
         public static bool useHarmonyAddFollowingChatSexOptionPatch = false;
         public static bool useHarmonyGiveMe90MioCashChatOptionPatch = false;
         public static bool useHarmonyListAnimsPatch = false;
@@ -14229,14 +14619,18 @@ namespace BitchlandCheatConsoleBepInEx
 
             configUseHarmonyAddFollowingChatSexOptionPatch = Config.Bind(pluginKey,
                                   "UseHarmonyAddFollowingChatSexOptionPatch",
-                                  true,
-                                 "Whether or not you want use harmony add following chat sex option patch (default true also yes, you want it, and false = no)");
+                                  false,
+                                 "Whether or not you want use harmony add following chat sex option patch (default false also no, you dont want it, and true = yes)");
 
             configUseHarmonyAddChatSexOptionPatch = Config.Bind(pluginKey,
                                   "UseHarmonyAddChatSexOptionPatch",
-                                  true,
-                                 "Whether or not you want use harmony add chat sex option patch (default true also yes, you want it, and false = no)");
+                                  false,
+                                 "Whether or not you want use harmony add chat sex option patch (default false also no, you dont want it, and true = yes)");
 
+            configUseHarmonyAddXoxaChatSexOptionPatch = Config.Bind(pluginKey,
+                               "UseHarmonyAddXoxaChatSexOptionPatch",
+                               true,
+                              "Whether or not you want use harmony add xoxa chat sex option patch (default true also yes, you want it, and false = no)");
 
             configUseHarmonyGiveMe90MioCashChatOptionPatch = Config.Bind(pluginKey, 
                                  "UseHarmonyGiveMe90MioCashChatOptionPatch",
@@ -14245,13 +14639,13 @@ namespace BitchlandCheatConsoleBepInEx
 
             configUseHarmonyMoreWeaponSlotsPatch = Config.Bind(pluginKey,
                      "UseHarmonyMoreWeaponSlotsPatch",
-                      true,
+                      false,
                      "Whether or not you want use harmony more weapon slots patch (default false also no, you don't want it, and true = yes)");
 
             configUseHarmonyNoBuildTimePatch = Config.Bind(pluginKey,
                     "UseHarmonyNoBuildTimePatch",
                     true,
-                    "Whether or not you want use harmony no build time patch (default false also no, you don't want it, and true = yes)");
+                    "Whether or not you want use harmony no build time patch (default true also yes, you want it, and false = no)");
 
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
@@ -14410,6 +14804,7 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyGameAudioSourcePatch = configUseHarmonyGameAudioSourcePatch.Value;
             useHarmonyGameMainThreadsPatch = configUseHarmonyGameMainThreadsPatch.Value;
             useHarmonyAddChatSexOptionPatch = configUseHarmonyAddChatSexOptionPatch.Value;
+            useHarmonyAddXoxaChatSexOptionPatch = configUseHarmonyAddXoxaChatSexOptionPatch.Value;
             useHarmonyAddFollowingChatSexOptionPatch = configUseHarmonyAddFollowingChatSexOptionPatch.Value;
             useHarmonyGiveMe90MioCashChatOptionPatch = configUseHarmonyGiveMe90MioCashChatOptionPatch.Value;
             multiFollower = configUseMultiFollower.Value;
@@ -14592,6 +14987,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "useharmonyaddxoxachatsexoptionpatch":
+                    {
+                        set = useHarmonyAddXoxaChatSexOptionPatch = !useHarmonyAddXoxaChatSexOptionPatch;
+                        configUseHarmonyAddXoxaChatSexOptionPatch.Value = useHarmonyAddXoxaChatSexOptionPatch;
+                    }
+                    break;
+
                 case "useharmonyaddchatsexoptionpatch":
                     {
                         set = useHarmonyAddChatSexOptionPatch = !useHarmonyAddChatSexOptionPatch;
@@ -14650,13 +15052,16 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     catch { }
                 }
-                if (useHarmonyAddChatSexOptionPatch)
+                if (useHarmonyAddXoxaChatSexOptionPatch)
                 {
                     try
                     {
                         PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa", "Chat_Xoxa", true, false);
                     }
                     catch { }
+                }
+                if (useHarmonyAddChatSexOptionPatch)
+                {
                     //try
                     //{
                     //    PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa2", "DefaultTalk_options_AddSexOption", false, true);
