@@ -297,6 +297,8 @@ clearcommandkeys -> clear the command keys list
 miningkit -> spawn a backpack with unlimited storage, a pickaxe, a axe and a assault rifle with unlimited ammo, and set your current backpack to unlimited storage
 npcequip -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with; if the item is wearable, it will be put on the npc, otherwise the npc will get a backpack and the item will be added to it.
 npcequipfromhand -> take your item or your weapon in hand, and give it to the npc the you looked at or chatted with; if the item is wearable, it will be put on the npc, otherwise the npc will get a backpack and the item will be added to it.
+npcunequip -> It's the counterpart to the npcequip command: if the NPC has the item you're holding attached to their body, then the NPC will drop that item. If you have a weapon in your hand, the NPC will drop all of their weapons.
+npcunequipfromhand -> It's the counterpart to the npcequip command: if the NPC has the item you're holding attached to their body, then the NPC will drop that item. If you have a weapon in your hand, the NPC will drop all of their weapons.
 minrs -> all your relationships are really pissed on you, sure you want that?
 minrelationships -> all your relationships are really pissed on you, sure you want that?
 maxnpcrelationship -> maxed out the relationship from the npc the you looked at or chatted with
@@ -457,9 +459,11 @@ npctrainingvalue number -> set the training value from the npc the you looked at
 commands with 2 params:
 
 additem name amount -> add the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
+removeitem name amount -> remove the item (amount) to your backpack, if you don't have a backpack, it gives you a backpack
 setstate number true -> set a player state (getstate 0) and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 setnpcstate number true -> set a npc state (getstate 0) from the npc the you looked at and you see what setstate is can be 0 or 1, or true or false, for example setstate 7 true, means that you are now pregnant, setstate 2 true, means that you are horny, setstate 11 true, set the clothing vibe to sexy
 npcadditem name amount -> add the npc the you are looked at this item (amount) to your backpack, if the npc don't have a backpack, it gives him a backpack
+npcremoveitem name amount -> remove the npc the you are looked at this item (amount) to your backpack, if the npc don't have a backpack, it gives him a backpack
 spawnitem name amount -> spawns the item (amount) on the ground where you are standing
 playersetvar name value -> set the value of the var, from the player
 npcsetvar name value -> set the value of the var, from the npc,object,container and so on, the you looked at
