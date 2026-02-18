@@ -14790,6 +14790,8 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static ConfigEntry<bool> configUseHarmonyStripModePatch;
 
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon1;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon2;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon3;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon4;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon5;
@@ -14797,6 +14799,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon7;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon8;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon9;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon10;
 
         public BitchlandCheatConsoleBepInEx()
         {
@@ -14869,6 +14872,8 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static KeyCode stripModeSexKey = 0;
 
+        public static KeyCode KeyCodeSwitchWeapon1 = 0;
+        public static KeyCode KeyCodeSwitchWeapon2 = 0;
         public static KeyCode KeyCodeSwitchWeapon3 = 0;
         public static KeyCode KeyCodeSwitchWeapon4 = 0;
         public static KeyCode KeyCodeSwitchWeapon5 = 0;
@@ -14876,6 +14881,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static KeyCode KeyCodeSwitchWeapon7 = 0;
         public static KeyCode KeyCodeSwitchWeapon8 = 0;
         public static KeyCode KeyCodeSwitchWeapon9 = 0;
+        public static KeyCode KeyCodeSwitchWeapon10 = 0;
 
         public static int personalityStripMode = -1;
 
@@ -15076,6 +15082,16 @@ namespace BitchlandCheatConsoleBepInEx
                                   KeyCode.F6,
                                  "Key to start sex in stripmode variants, default F6");
 
+            configMoreWeaponSlotsSwitchWeapon1 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon1",
+                     KeyCode.Alpha1,
+                     "KeyCode to switch weapon 1, default Number 1");
+
+            configMoreWeaponSlotsSwitchWeapon2 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon2",
+                      KeyCode.Alpha2,
+                     "KeyCode to switch weapon 2, default Number 2");
+
             configMoreWeaponSlotsSwitchWeapon3 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
                                  "KeyCodeSwitchWeapon3",
                                   KeyCode.Alpha3,
@@ -15111,6 +15127,11 @@ namespace BitchlandCheatConsoleBepInEx
                       KeyCode.Alpha9,
                      "KeyCode to switch weapon 9, default Number 9");
 
+            configMoreWeaponSlotsSwitchWeapon10 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                    "KeyCodeSwitchWeapon10",
+                    KeyCode.Alpha0,
+                    "KeyCode to switch weapon 10, default Number 0");
+
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
             KeyCodeFlySpeedMore = configKeyCodeFlySpeedMore.Value;
@@ -15132,6 +15153,8 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeMultiFollowerPosition8 = configKeyCodeMultiFollowerPosition8.Value;
             KeyCodeMultiFollowerPosition9 = configKeyCodeMultiFollowerPosition9.Value;
 
+            KeyCodeSwitchWeapon1 = configMoreWeaponSlotsSwitchWeapon1.Value;
+            KeyCodeSwitchWeapon2 = configMoreWeaponSlotsSwitchWeapon2.Value;
             KeyCodeSwitchWeapon3 = configMoreWeaponSlotsSwitchWeapon3.Value;
             KeyCodeSwitchWeapon4 = configMoreWeaponSlotsSwitchWeapon4.Value;
             KeyCodeSwitchWeapon5 = configMoreWeaponSlotsSwitchWeapon5.Value;
@@ -15139,6 +15162,7 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeSwitchWeapon7 = configMoreWeaponSlotsSwitchWeapon7.Value;
             KeyCodeSwitchWeapon8 = configMoreWeaponSlotsSwitchWeapon8.Value;
             KeyCodeSwitchWeapon9 = configMoreWeaponSlotsSwitchWeapon9.Value;
+            KeyCodeSwitchWeapon10 = configMoreWeaponSlotsSwitchWeapon10.Value;
 
             stripModeSexKey = configKeyCodeStripModeStartSex.Value;
 
@@ -15619,7 +15643,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             WeaponSystem _this = (WeaponSystem)__instance;
 
-            while (_this.weapons.Count < 9)
+            while (_this.weapons.Count < 10)
             {
                 _this.weapons.Add(null);
             }
@@ -15677,6 +15701,11 @@ namespace BitchlandCheatConsoleBepInEx
                         if (_this.weapons.Count >= 9 && _this.weapons[7] != null)
                         {
                             _this.weapons[7].GetComponent<Weapon>().SetInHoldster2();
+                            break;
+                        }
+                        if (_this.weapons.Count >= 10 && _this.weapons[8] != null)
+                        {
+                            _this.weapons[8].GetComponent<Weapon>().SetInHoldster2();
                             break;
                         }
                         break;
@@ -15830,7 +15859,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return true;
             }
 
-            while (_this.weapons.Count < 9)
+            while (_this.weapons.Count < 10)
             {
                 _this.weapons.Add(null);
             }
@@ -15838,6 +15867,10 @@ namespace BitchlandCheatConsoleBepInEx
             if (!_this.isPlayer || _this.ThisPerson.Interacting || !_this.ThisPerson.CanMove)
                 return true;
 
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon1) && _this.weapons.Count > 0)
+                _this.SetActiveWeapon(0);
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon2) && _this.weapons.Count > 1)
+                _this.SetActiveWeapon(1);
             if (Input.GetKeyUp(KeyCodeSwitchWeapon3) && _this.weapons.Count > 2)
                 _this.SetActiveWeapon(2);
             if (Input.GetKeyUp(KeyCodeSwitchWeapon4) && _this.weapons.Count > 3)
@@ -15852,6 +15885,8 @@ namespace BitchlandCheatConsoleBepInEx
                 _this.SetActiveWeapon(7);
             if (Input.GetKeyUp(KeyCodeSwitchWeapon9) && _this.weapons.Count > 8)
                 _this.SetActiveWeapon(8);
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon10) && _this.weapons.Count > 9)
+                _this.SetActiveWeapon(9);
 
             return true;
         }
