@@ -7991,6 +7991,41 @@ namespace BitchlandCheatConsoleBepInEx
             person.ArmyXpThisLvl = armyMax;
         }
 
+        public static void setsexaddicted(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            person.SexMultiplier = 1.5f;
+            person.SexMAddictionultiplier = 2.0f;
+
+            List<string> perks = new List<string>();
+
+            perks.Add("Love Potion");
+            perks.Add("Longer Orgasm");
+            perks.Add("Sensetivity");
+            perks.Add("Masochist");
+            perks.Add("Gaping");
+
+            for (int i = 0; i < perks.Count; i++)
+            {
+                if (person.Perks.Contains(perks[i]))
+                {
+                    continue;
+                }
+
+                person.Perks.Add(perks[i]);
+            }
+        }
         public static void setmaxallskills(GameObject personGa, int level)
         {
             if (personGa == null)
@@ -8016,8 +8051,7 @@ namespace BitchlandCheatConsoleBepInEx
             person.ClitTraining = level;
             person.BodyTraining = level;
 
-            person.SexMultiplier = 1.5f;
-            person.SexMAddictionultiplier = 2.0f;
+            setsexaddicted(personGa);
         }
 
         public static void maxarousal(int level)
@@ -10487,6 +10521,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "sexaddict":
+                    {
+                        sexaddict();
+                    }
+                    break;
+
+                case "npcsexaddict":
+                    {
+                        npcsexaddict();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10506,6 +10552,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        private static void npcsexaddict()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcsexaddict");
+            setsexaddicted(getPersonInteract());
+        }
+
+        private static void sexaddict()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: sexaddict");
+            setsexaddicted(Main.Instance.Player.gameObject);
         }
 
         private static void lastcommandslookat()
