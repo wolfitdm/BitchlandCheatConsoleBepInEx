@@ -35,6 +35,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
+using static MonoMod.RuntimeDetour.Platforms.DetourNativeMonoPosixPlatform;
 using static UnityEngine.InputSystem.InputRemoting;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.VolumeComponent;
@@ -3128,6 +3129,25 @@ namespace BitchlandCheatConsoleBepInEx
             setmaxallskills(personGa, 300);
         }
 
+        public static void setPersonaltyToUltimate(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            addallperkstoperson(personGa);
+            addAllFetishesToPerson(personGa);
+            setmaxallskills(personGa, 300);
+        }
+
         public static void setPersonaltyTo(GameObject personGa, string personalty, bool cleanOrDirt = true)
         {
             if (personGa == null)
@@ -3155,6 +3175,39 @@ namespace BitchlandCheatConsoleBepInEx
             addAllFetishesToPerson(personGa, cleanOrDirt);
             setmaxallskills(personGa, 300);
         }
+        public static void setPersonaltyToInt(GameObject personGa, int personalty, bool cleanOrDirt = true)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person PersonGenerated = personGa.GetComponent<Person>();
+
+            if (PersonGenerated == null)
+            {
+                return;
+            }
+
+            addallperkstoperson(personGa);
+
+            Personality_Type personality = PersonGenerated.Personality;
+            Personality_Type newPersonality = personality;
+
+            try
+            {
+                newPersonality = (Personality_Type)personalty;
+
+            } catch (Exception ex)
+            {
+                newPersonality = personality;
+            }
+
+            PersonGenerated.Personality = newPersonality;
+            addAllFetishesToPerson(personGa, cleanOrDirt);
+            setmaxallskills(personGa, 300);
+        }
+
         public static void setPersonState(GameObject personGa, string personState)
         {
             if (personGa == null)
@@ -5982,15 +6035,24 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static void dropallbackpack()
+        public static void dropallbackpacktoperson(GameObject personGa)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallbackpack");
+            if (personGa == null)
+            {
+                return;
+            }
 
-            Person person = Main.Instance.Player;
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
 
             if (person.CurrentBackpack == null)
             {
-                Main.Instance.GameplayMenu.ShowNotification("dropallbackpack: No backpack equipped!");
+                if (person.IsPlayer) 
+                    Main.Instance.GameplayMenu.ShowNotification("dropallbackpack: No backpack equipped!");
                 return;
             }
 
@@ -6014,6 +6076,13 @@ namespace BitchlandCheatConsoleBepInEx
             bp.RemoveAllItems();
             backpack.ThisStorage = bp;
             person.CurrentBackpack = backpack;
+        }
+
+        public static void dropallbackpack()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: dropallbackpack");
+
+            dropallbackpacktoperson(Main.Instance.Player.gameObject);
         }
 
         public static void equiptobackpack()
@@ -8087,6 +8156,40 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
         }
+
+        public static void removeallitemsfromperson(GameObject personGa)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = personGa.GetComponent<Person>();
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.CurrentBackpack == null)
+            {
+                GameObject backpack2 = getItemByName(null, "backpack2");
+                if (backpack2 == null)
+                {
+                    backpack2 = getItemByName(null, "backpack");
+                }
+                if (backpack2 == null)
+                {
+                    return;
+                }
+                person.DressClothe(Main.Spawn(backpack2));
+            }
+
+            if (person.CurrentBackpack != null && person.CurrentBackpack.ThisStorage != null)
+            {
+                dropallbackpacktoperson(person.gameObject);
+            }
+        }
         public static void addallitems(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: addallitems");
@@ -8096,6 +8199,16 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npcaddallitems");
             addallitemstoperson(getPersonInteract(), value);
+        }
+        public static void removeallitems()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: removeallitems");
+            removeallitemsfromperson(Main.Instance.Player.gameObject);
+        }
+        public static void npcremoveallitems()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcremoveallitems");
+            removeallitemsfromperson(getPersonInteract());
         }
 
         public static void addallperkstoperson(GameObject personGa)
@@ -10238,6 +10351,49 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "stripmode":
+                    {
+                        stripmodecommand();
+                    }
+                    break;
+
+                case "stripmodenympho":
+                    {
+                        stripmodenymphocommand();
+                    }
+                    break;
+
+                case "stripmodebroken":
+                    {
+                        stripmodebrokencommand();
+                    }
+                    break;
+
+                case "stripmodeultimate":
+                    {
+                        stripmodeultimateommand();
+                    }
+                    break;
+
+                case "stripmodepersonality":
+                    {
+                        stripmodepersonalityommand("XXXX");
+                    }
+                    break;
+
+                case "npcdropallbackpack":
+                case "npcremoveallitems":
+                    {
+                        npcremoveallitems();
+                    }
+                    break;
+
+                case "removeallitems":
+                    {
+                        removeallitems();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10273,6 +10429,105 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("nobuildtime: off");
             }
         }
+        private static void stripmodecommand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stripmode");
+
+            stripmode = !stripmode;
+
+            if (stripmode)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmode: on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmode: off");
+                setstripmodeoff();
+            }
+        }
+
+        private static void stripmodenymphocommand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stripmodenympho");
+
+            stripmodenympho = !stripmodenympho;
+
+            if (stripmodenympho)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodenympho: on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodenympho: off");
+                setstripmodeoff();
+            }
+        }
+
+        private static void stripmodebrokencommand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stripmodebroken");
+
+            stripmodebroken = !stripmodebroken;
+
+            if (stripmodebroken)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodebroken: on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodebroken: off");
+                setstripmodeoff();
+            }
+        }
+
+        private static void stripmodeultimateommand()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stripmodeultimate");
+
+            stripmodeultimate = !stripmodeultimate;
+
+            if (stripmodeultimate)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodeultimate: on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodeultimate: off");
+                setstripmodeoff();
+            }
+        }
+
+        private static void stripmodepersonalityommand(string personality)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: stripmodepersonality");
+
+            stripmodepersonality = !stripmodepersonality;
+
+            if (stripmodepersonality)
+            {
+                Personality_Type personalityE = Main.Instance.Player.Personality;
+
+                if (Enum.TryParse<Personality_Type>(personality, ignoreCase: true, out Personality_Type personaltyType))
+                {
+                    personalityE = personaltyType;
+                }
+
+                personalityStripMode = (int)personalityE;
+                Main.Instance.GameplayMenu.ShowNotification("stripmodepersonality: on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("stripmodepersonality: off");
+                setstripmodeoff();
+            }
+        }
+
+        private static void setstripmodeoff()
+        {
+            stripmode = stripmodebroken = stripmodenympho = stripmodeultimate = stripmodepersonality = false;
+            personalityStripMode = -1;
+        }
+
 
         public static void settrainingvalue(GameObject personGa, int value)
         {
@@ -11711,6 +11966,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npctrainingvalue":
                     {
                         npctrainingvalue(value);
+                    }
+                    break;
+
+                case "stripmodepersonality":
+                    {
+                        stripmodepersonalityommand(value);
                     }
                     break;
 
@@ -14525,6 +14786,18 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static ConfigEntry<KeyCode> configKeyCodeMultiFollowerGKey;
 
+        private static ConfigEntry<KeyCode> configKeyCodeStripModeStartSex;
+
+        private static ConfigEntry<bool> configUseHarmonyStripModePatch;
+
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon3;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon4;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon5;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon6;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon7;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon8;
+        private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon9;
+
         public BitchlandCheatConsoleBepInEx()
         {
         }
@@ -14544,6 +14817,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static string pluginKeyControls = "General.KeyControls";
         private static string pluginKeyControlsFly = "Fly.KeyControls";
         private static string pluginKeyControlsMultiFollower = "MultiFollower.KeyControls";
+        private static string pluginKeyControlsStripMode = "StripMode.KeyControls";
+        private static string pluginKeyControlsMoreWeaponSlots = "NoreWeaponSlots.KeyControls";
 
         public static bool useHarmonyPatches = false;
 
@@ -14561,8 +14836,14 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonySlaveSystemPatch = false;
         public static bool useHarmonyMoreWeaponSlotsPatch = false;
         public static bool useHarmonyNoBuildTimePatch = false;
+        public static bool useHarmonySexModePatch = false;
 
         public static bool nobuildtime = false;
+        public static bool stripmode = false;
+        public static bool stripmodeultimate = false;
+        public static bool stripmodebroken = false;
+        public static bool stripmodenympho = false;
+        public static bool stripmodepersonality = false;
 
         public static KeyCode KeyCodeFlyUp = 0;
         public static KeyCode KeyCodeFlyDown = 0;
@@ -14585,6 +14866,18 @@ namespace BitchlandCheatConsoleBepInEx
         public static KeyCode KeyCodeMultiFollowerPosition9 = 0;
 
         public static KeyCode MultiFollowerKeyCodeGKey = 0;
+
+        public static KeyCode stripModeSexKey = 0;
+
+        public static KeyCode KeyCodeSwitchWeapon3 = 0;
+        public static KeyCode KeyCodeSwitchWeapon4 = 0;
+        public static KeyCode KeyCodeSwitchWeapon5 = 0;
+        public static KeyCode KeyCodeSwitchWeapon6 = 0;
+        public static KeyCode KeyCodeSwitchWeapon7 = 0;
+        public static KeyCode KeyCodeSwitchWeapon8 = 0;
+        public static KeyCode KeyCodeSwitchWeapon9 = 0;
+
+        public static int personalityStripMode = -1;
 
         private void Awake()
         {
@@ -14646,6 +14939,11 @@ namespace BitchlandCheatConsoleBepInEx
                     "UseHarmonyNoBuildTimePatch",
                     true,
                     "Whether or not you want use harmony no build time patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyStripModePatch = Config.Bind(pluginKey,
+                    "UseHarmonyStripModePatch",
+                    true,
+                    "Whether or not you want use harmony strip mode patch (default true also yes, you want it, and false = no)");
 
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
@@ -14773,6 +15071,46 @@ namespace BitchlandCheatConsoleBepInEx
                                   KeyCode.G,
                                  "Alternative for the F Key, default G");
 
+            configKeyCodeStripModeStartSex = Config.Bind(pluginKeyControlsStripMode,
+                                 "KeyCodeStripModeStartSex",
+                                  KeyCode.F6,
+                                 "Key to start sex in stripmode variants, default F6");
+
+            configMoreWeaponSlotsSwitchWeapon3 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                                 "KeyCodeSwitchWeapon3",
+                                  KeyCode.Alpha3,
+                                 "KeyCode to switch weapon 3, default Number 3");
+
+            configMoreWeaponSlotsSwitchWeapon4 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon4",
+                      KeyCode.Alpha4,
+                     "KeyCode to switch weapon 4, default Number 4");
+
+            configMoreWeaponSlotsSwitchWeapon5 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon5",
+                      KeyCode.Alpha5,
+                     "KeyCode to switch weapon 5, default Number 5");
+
+            configMoreWeaponSlotsSwitchWeapon6 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon6",
+                      KeyCode.Alpha6,
+                     "KeyCode to switch weapon 6, default Number 6");
+
+            configMoreWeaponSlotsSwitchWeapon7 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon7",
+                      KeyCode.Alpha7,
+                     "KeyCode to switch weapon 7, default Number 7");
+
+            configMoreWeaponSlotsSwitchWeapon8 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon8",
+                      KeyCode.Alpha8,
+                     "KeyCode to switch weapon 8, default Number 8");
+
+            configMoreWeaponSlotsSwitchWeapon9 = Config.Bind(pluginKeyControlsMoreWeaponSlots,
+                     "KeyCodeSwitchWeapon9",
+                      KeyCode.Alpha9,
+                     "KeyCode to switch weapon 9, default Number 9");
+
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
             KeyCodeFlySpeedMore = configKeyCodeFlySpeedMore.Value;
@@ -14794,6 +15132,16 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeMultiFollowerPosition8 = configKeyCodeMultiFollowerPosition8.Value;
             KeyCodeMultiFollowerPosition9 = configKeyCodeMultiFollowerPosition9.Value;
 
+            KeyCodeSwitchWeapon3 = configMoreWeaponSlotsSwitchWeapon3.Value;
+            KeyCodeSwitchWeapon4 = configMoreWeaponSlotsSwitchWeapon4.Value;
+            KeyCodeSwitchWeapon5 = configMoreWeaponSlotsSwitchWeapon5.Value;
+            KeyCodeSwitchWeapon6 = configMoreWeaponSlotsSwitchWeapon6.Value;
+            KeyCodeSwitchWeapon7 = configMoreWeaponSlotsSwitchWeapon7.Value;
+            KeyCodeSwitchWeapon8 = configMoreWeaponSlotsSwitchWeapon8.Value;
+            KeyCodeSwitchWeapon9 = configMoreWeaponSlotsSwitchWeapon9.Value;
+
+            stripModeSexKey = configKeyCodeStripModeStartSex.Value;
+
             MultiFollowerKeyCodeGKey = configKeyCodeMultiFollowerGKey.Value;
 
             useHarmonyPatches = configEnableMe.Value;
@@ -14807,6 +15155,7 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyAddXoxaChatSexOptionPatch = configUseHarmonyAddXoxaChatSexOptionPatch.Value;
             useHarmonyAddFollowingChatSexOptionPatch = configUseHarmonyAddFollowingChatSexOptionPatch.Value;
             useHarmonyGiveMe90MioCashChatOptionPatch = configUseHarmonyGiveMe90MioCashChatOptionPatch.Value;
+            useHarmonySexModePatch = configUseHarmonyStripModePatch.Value;
             multiFollower = configUseMultiFollower.Value;
             useMultiFollowerUpgrade = configUseMultiFollowerUpgrade.Value;
             useMultiFollowerUpgradeEx = configUseMultiFollowerUpgradeEx.Value;
@@ -15165,7 +15514,7 @@ namespace BitchlandCheatConsoleBepInEx
                     PatchHarmonyMethodUnity(typeof(bl_ThirdPersonUserControl), "Update", "bl_ThirdPersonUserControl_Update", false, true);
                     PatchHarmonyMethodUnity(typeof(bl_meleeHitBox), "OnTriggerEnter", "OnSlaveEnter", true, false);
                 }
-                if (useHarmonyMoreWeaponSlotsPatch || useHarmonyNoBuildTimePatch)
+                if (useHarmonyMoreWeaponSlotsPatch || useHarmonyNoBuildTimePatch || useHarmonySexModePatch)
                 {
                     PatchHarmonyMethodUnity(typeof(WeaponSystem), "Update", "WeaponSystem_Update", true, false);
                 }
@@ -15344,28 +15693,128 @@ namespace BitchlandCheatConsoleBepInEx
 
             WeaponSystem _this = (WeaponSystem)__instance;
 
-            if (useHarmonyNoBuildTimePatch)
+            if (useHarmonyNoBuildTimePatch || useHarmonySexModePatch)
             {
-                if (nobuildtime)
+                if (nobuildtime || stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality)
                 {
                     try
                     {
                         RaycastHit hitInfo;
                         if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
                         {
-                            int_ConstructionPlan obj = hitInfo.transform.GetComponent<int_ConstructionPlan>();
-                            int_ConstructionPlan obj2 = hitInfo.transform.root.GetComponent<int_ConstructionPlan>();
+                            Interactible[] obj__ = hitInfo.transform.GetComponents<Interactible>();
+                            Interactible[] obj2__ = hitInfo.transform.root.GetComponents<Interactible>();
 
-                            if (obj != null)
+                            if (obj__ != null)
                             {
-                                obj.AllResourcesIn = true;
-                                obj.BuiltProgress = obj.BuiltProgresspointsNeeded;
+                                for (int i = 0; i < obj__.Length; i++)
+                                {
+                                    Interactible obj_ = obj__[i];
+                                    
+                                    if (obj_ == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (obj_ != null)
+                                    {
+                                        if (nobuildtime)
+                                        {
+                                            if (obj_ is int_ConstructionPlan)
+                                            {
+                                                int_ConstructionPlan obj = (int_ConstructionPlan)obj_;
+                                                obj.AllResourcesIn = true;
+                                                obj.BuiltProgress = obj.BuiltProgresspointsNeeded;
+                                            }
+                                        }
+
+                                        if (stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality)
+                                        {
+                                            if (obj_ is int_Person)
+                                            {
+                                                int_Person obj = (int_Person)obj_;
+                                                Person objPerson = obj.ThisPerson;
+                                                StripPerson(objPerson.gameObject);
+                                                if (stripmodebroken)
+                                                {
+                                                    setPersonaltyToInt(objPerson.gameObject, (int)Personality_Type.Broken);
+                                                }
+                                                if (stripmodenympho)
+                                                {
+                                                    setPersonaltyToNympho(objPerson.gameObject);
+                                                }
+                                                if (stripmodeultimate)
+                                                {
+                                                    setPersonaltyToUltimate(objPerson.gameObject);
+                                                }
+                                                if (stripmodepersonality && personalityStripMode != -1)
+                                                {
+                                                    setPersonaltyToInt(objPerson.gameObject, personalityStripMode);
+                                                }
+                                                if (Input.GetKeyUp(stripModeSexKey))
+                                                {
+                                                    npcspawnsexsceneex(true, Main.Instance.Player.gameObject, objPerson.gameObject, null);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
-                            if (obj2  != null)
+                            if (obj2__ != null)
                             {
-                                obj2.AllResourcesIn = true;
-                                obj2.BuiltProgress = obj2.BuiltProgresspointsNeeded;
+                                for (int i = 0; i < obj2__.Length; i++)
+                                {
+                                    Interactible obj2_ = (Interactible)obj2__[i];
+
+                                    if (obj2_ == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (obj2_ != null)
+                                    {
+                                        if (nobuildtime)
+                                        {
+                                            if (obj2_ is int_ConstructionPlan)
+                                            {
+                                                int_ConstructionPlan obj2 = (int_ConstructionPlan)obj2_;
+                                                obj2.AllResourcesIn = true;
+                                                obj2.BuiltProgress = obj2.BuiltProgresspointsNeeded;
+                                            }
+                                        }
+
+                                        if (stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality)
+                                        {
+                                            if (obj2_ is int_Person)
+                                            {
+                                                int_Person obj2 = (int_Person)obj2_;
+                                                Person obj2Person = obj2.ThisPerson;
+                                                StripPerson(obj2Person.gameObject);
+                                                if (stripmodebroken)
+                                                {
+                                                    setPersonaltyToInt(obj2Person.gameObject, (int)Personality_Type.Broken);
+                                                }
+                                                if (stripmodenympho)
+                                                {
+                                                    setPersonaltyToNympho(obj2Person.gameObject);
+                                                }
+                                                if (stripmodeultimate)
+                                                {
+                                                    setPersonaltyToUltimate(obj2Person.gameObject);
+                                                }
+                                                if (stripmodepersonality && personalityStripMode != -1)
+                                                {
+                                                    setPersonaltyToInt(obj2Person.gameObject, personalityStripMode);
+                                                }
+                                                if (Input.GetKeyUp(stripModeSexKey))
+                                                {
+                                                    npcspawnsexsceneex(true, Main.Instance.Player.gameObject, obj2Person.gameObject, null);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -15389,17 +15838,19 @@ namespace BitchlandCheatConsoleBepInEx
             if (!_this.isPlayer || _this.ThisPerson.Interacting || !_this.ThisPerson.CanMove)
                 return true;
 
-            if (Input.GetKeyUp(KeyCode.Alpha4) && _this.weapons.Count > 3)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon3) && _this.weapons.Count > 2)
+                _this.SetActiveWeapon(2);
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon4) && _this.weapons.Count > 3)
                 _this.SetActiveWeapon(3);
-            if (Input.GetKeyUp(KeyCode.Alpha5) && _this.weapons.Count > 4)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon5) && _this.weapons.Count > 4)
                 _this.SetActiveWeapon(4);
-            if (Input.GetKeyUp(KeyCode.Alpha6) && _this.weapons.Count > 5)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon6) && _this.weapons.Count > 5)
                 _this.SetActiveWeapon(5);
-            if (Input.GetKeyUp(KeyCode.Alpha7) && _this.weapons.Count > 6)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon7) && _this.weapons.Count > 6)
                 _this.SetActiveWeapon(6);
-            if (Input.GetKeyUp(KeyCode.Alpha8) && _this.weapons.Count > 7)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon8) && _this.weapons.Count > 7)
                 _this.SetActiveWeapon(7);
-            if (Input.GetKeyUp(KeyCode.Alpha9) && _this.weapons.Count > 8)
+            if (Input.GetKeyUp(KeyCodeSwitchWeapon9) && _this.weapons.Count > 8)
                 _this.SetActiveWeapon(8);
 
             return true;
