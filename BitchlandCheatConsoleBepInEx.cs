@@ -10,6 +10,7 @@ using MapMagic.Nodes;
 using Microsoft.Win32.SafeHandles;
 using SemanticVersioning;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8519,9 +8520,52 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification(vector3ToString(lastSpawnPoint));            
         }
 
-        public static void handleCommand(string inputText)
+        public static List<string> lastCommands = new List<string>();
+        public static bool lastCommandsLookAt = false;
+
+        public static void addCommandToLastCommands(string command, string inputText,  bool addLastCommand = true)
         {
-            if (inputText == null) { return; }
+
+            if (addLastCommand)
+            {
+                switch (command)
+                {
+                    case "listcommandkeys":
+                    case "clearcommandkeys":
+                    case "removeallcommandkeys":
+                    case "listallcommandkeys":
+                    case "removecommandkey":
+                    case "getcommandkey":
+                    case "setcommandkey":
+                    case "savecommandkeys":
+                    case "readcommandkeys":
+                    case "removecommandkeys":
+                    case "nobuildtime":
+                    case "stripmode":
+                    case "stripmodebroken":
+                    case "stripmodenympho":
+                    case "stripmodeultimate":
+                    case "stripmodepersonality":
+                    case "showlastcommands":
+                    case "lastcommands":
+                    case "lastcommandsclear":
+                    case "lastcommandslookat":
+                        break;
+
+                    default:
+                        {
+                            if (!lastCommands.Contains(inputText))
+                            {
+                                lastCommands.Add(inputText);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        public static void handleCommand(string inputText, bool addLastCommand = true)
+        {
+            if (inputText == null || inputText == string.Empty) { return; }
 
             Logger.LogInfo($"User entered: {inputText}");
 
@@ -8531,99 +8575,119 @@ namespace BitchlandCheatConsoleBepInEx
                 Regex rg11 = new Regex(pattern11, RegexOptions.IgnoreCase);
                 Match rg11Match = rg11.Match(inputText);
 
+                string command = rg11Match.Groups["command"].Value.ToLower();
                 if (rg11Match.Success)
                 {
-                    handleCommandLength11(rg11Match.Groups["command"].Value.ToLower(), rg11Match.Groups["key"].Value, rg11Match.Groups["value"].Value, rg11Match.Groups["value2"].Value, rg11Match.Groups["value3"].Value, rg11Match.Groups["value4"].Value, rg11Match.Groups["value5"].Value, rg11Match.Groups["value6"].Value, rg11Match.Groups["value7"].Value, rg11Match.Groups["value8"].Value, rg11Match.Groups["value9"].Value);
+                    handleCommandLength11(command, rg11Match.Groups["key"].Value, rg11Match.Groups["value"].Value, rg11Match.Groups["value2"].Value, rg11Match.Groups["value3"].Value, rg11Match.Groups["value4"].Value, rg11Match.Groups["value5"].Value, rg11Match.Groups["value6"].Value, rg11Match.Groups["value7"].Value, rg11Match.Groups["value8"].Value, rg11Match.Groups["value9"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern10 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)\s+(?<value7>\S+)\s+(?<value8>\S+)$)";
                 Regex rg10 = new Regex(pattern10, RegexOptions.IgnoreCase);
                 Match rg10Match = rg10.Match(inputText);
+                command = rg10Match.Groups["command"].Value.ToLower();
 
                 if (rg10Match.Success)
                 {
-                    handleCommandLength10(rg10Match.Groups["command"].Value.ToLower(), rg10Match.Groups["key"].Value, rg10Match.Groups["value"].Value, rg10Match.Groups["value2"].Value, rg10Match.Groups["value3"].Value, rg10Match.Groups["value4"].Value, rg10Match.Groups["value5"].Value, rg10Match.Groups["value6"].Value, rg10Match.Groups["value7"].Value, rg10Match.Groups["value8"].Value);
+                    handleCommandLength10(command, rg10Match.Groups["key"].Value, rg10Match.Groups["value"].Value, rg10Match.Groups["value2"].Value, rg10Match.Groups["value3"].Value, rg10Match.Groups["value4"].Value, rg10Match.Groups["value5"].Value, rg10Match.Groups["value6"].Value, rg10Match.Groups["value7"].Value, rg10Match.Groups["value8"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern9 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)\s+(?<value7>\S+)$)";
                 Regex rg9 = new Regex(pattern9, RegexOptions.IgnoreCase);
                 Match rg9Match = rg9.Match(inputText);
+                command = rg9Match.Groups["command"].Value.ToLower();
 
                 if (rg9Match.Success)
                 {
-                    handleCommandLength9(rg9Match.Groups["command"].Value.ToLower(), rg9Match.Groups["key"].Value, rg9Match.Groups["value"].Value, rg9Match.Groups["value2"].Value, rg9Match.Groups["value3"].Value, rg9Match.Groups["value4"].Value, rg9Match.Groups["value5"].Value, rg9Match.Groups["value6"].Value, rg9Match.Groups["value7"].Value);
+                    handleCommandLength9(command, rg9Match.Groups["key"].Value, rg9Match.Groups["value"].Value, rg9Match.Groups["value2"].Value, rg9Match.Groups["value3"].Value, rg9Match.Groups["value4"].Value, rg9Match.Groups["value5"].Value, rg9Match.Groups["value6"].Value, rg9Match.Groups["value7"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern8 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)\s+(?<value6>\S+)$)";
                 Regex rg8 = new Regex(pattern8, RegexOptions.IgnoreCase);
                 Match rg8Match = rg8.Match(inputText);
+                command = rg8Match.Groups["command"].Value.ToLower();
 
                 if (rg8Match.Success)
                 {
-                    handleCommandLength8(rg8Match.Groups["command"].Value.ToLower(), rg8Match.Groups["key"].Value, rg8Match.Groups["value"].Value, rg8Match.Groups["value2"].Value, rg8Match.Groups["value3"].Value, rg8Match.Groups["value4"].Value, rg8Match.Groups["value5"].Value, rg8Match.Groups["value6"].Value);
+                    handleCommandLength8(command, rg8Match.Groups["key"].Value, rg8Match.Groups["value"].Value, rg8Match.Groups["value2"].Value, rg8Match.Groups["value3"].Value, rg8Match.Groups["value4"].Value, rg8Match.Groups["value5"].Value, rg8Match.Groups["value6"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern7 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)\s+(?<value5>\S+)$)";
                 Regex rg7 = new Regex(pattern7, RegexOptions.IgnoreCase);
                 Match rg7Match = rg7.Match(inputText);
+                command = rg7Match.Groups["command"].Value.ToLower();
 
                 if (rg7Match.Success)
                 {
-                    handleCommandLength7(rg7Match.Groups["command"].Value.ToLower(), rg7Match.Groups["key"].Value, rg7Match.Groups["value"].Value, rg7Match.Groups["value2"].Value, rg7Match.Groups["value3"].Value, rg7Match.Groups["value4"].Value, rg7Match.Groups["value5"].Value);
+                    handleCommandLength7(command, rg7Match.Groups["key"].Value, rg7Match.Groups["value"].Value, rg7Match.Groups["value2"].Value, rg7Match.Groups["value3"].Value, rg7Match.Groups["value4"].Value, rg7Match.Groups["value5"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern6 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)\s+(?<value4>\S+)$)";
                 Regex rg6 = new Regex(pattern6, RegexOptions.IgnoreCase);
                 Match rg6Match = rg6.Match(inputText);
+                command = rg6Match.Groups["command"].Value.ToLower();
 
                 if (rg6Match.Success)
                 {
-                    handleCommandLength6(rg6Match.Groups["command"].Value.ToLower(), rg6Match.Groups["key"].Value, rg6Match.Groups["value"].Value, rg6Match.Groups["value2"].Value, rg6Match.Groups["value3"].Value, rg6Match.Groups["value4"].Value);
+                    handleCommandLength6(command, rg6Match.Groups["key"].Value, rg6Match.Groups["value"].Value, rg6Match.Groups["value2"].Value, rg6Match.Groups["value3"].Value, rg6Match.Groups["value4"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern5 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)\s+(?<value3>\S+)$)";
                 Regex rg5 = new Regex(pattern5, RegexOptions.IgnoreCase);
                 Match rg5Match = rg5.Match(inputText);
+                command = rg5Match.Groups["command"].Value.ToLower();
 
                 if (rg5Match.Success)
                 {
-                    handleCommandLength5(rg5Match.Groups["command"].Value.ToLower(), rg5Match.Groups["key"].Value, rg5Match.Groups["value"].Value, rg5Match.Groups["value2"].Value, rg5Match.Groups["value3"].Value);
+                    handleCommandLength5(command, rg5Match.Groups["key"].Value, rg5Match.Groups["value"].Value, rg5Match.Groups["value2"].Value, rg5Match.Groups["value3"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern4 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)\s+(?<value2>\S+)$)";
                 Regex rg4 = new Regex(pattern4, RegexOptions.IgnoreCase);
                 Match rg4Match = rg4.Match(inputText);
+                command = rg4Match.Groups["command"].Value.ToLower();
 
                 if (rg4Match.Success)
                 {
-                    handleCommandLength4(rg4Match.Groups["command"].Value.ToLower(), rg4Match.Groups["key"].Value, rg4Match.Groups["value"].Value, rg4Match.Groups["value2"].Value);
+                    handleCommandLength4(command, rg4Match.Groups["key"].Value, rg4Match.Groups["value"].Value, rg4Match.Groups["value2"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern3 = @"(?:^(?<command>\S+)\s+(?<key>\S+)\s+(?<value>\S+)$)";
                 Regex rg3 = new Regex(pattern3, RegexOptions.IgnoreCase);
                 Match rg3Match = rg3.Match(inputText);
+                command = rg3Match.Groups["command"].Value.ToLower();
 
                 if (rg3Match.Success)
                 {
-                    handleCommandLength3(rg3Match.Groups["command"].Value.ToLower(), rg3Match.Groups["key"].Value, rg3Match.Groups["value"].Value);
+                    handleCommandLength3(command, rg3Match.Groups["key"].Value, rg3Match.Groups["value"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
                 string pattern2 = @"(?:^(?<command>\S+)\s+(?<value>\S+)$)";
                 Regex rg2 = new Regex(pattern2, RegexOptions.IgnoreCase);
                 Match rg2Match = rg2.Match(inputText);
+                command = rg2Match.Groups["command"].Value.ToLower();
 
                 if (rg2Match.Success)
                 {
-                    handleCommandLength2(rg2Match.Groups["command"].Value.ToLower(), rg2Match.Groups["value"].Value);
+                    handleCommandLength2(command, rg2Match.Groups["value"].Value);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
@@ -8631,10 +8695,12 @@ namespace BitchlandCheatConsoleBepInEx
 
                 Regex rg1 = new Regex(pattern1, RegexOptions.IgnoreCase);
                 Match rg1Match = rg1.Match(inputText);
+                command = rg1Match.Groups["command"].Value.ToLower();
 
                 if (rg1Match.Success)
                 {
-                    handleCommandLength1(rg1Match.Groups["command"].Value.ToLower());
+                    handleCommandLength1(command);
+                    addCommandToLastCommands(command, inputText, addLastCommand);
                     return;
                 }
 
@@ -10394,6 +10460,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "showlastcommands":
+                    {
+                        showlastcommands();
+                    }
+                    break;
+
+                case "lastcommands":
+                    {
+                        lastcommands();
+                    }
+                    break;
+
+                case "lastcommandsclear":
+                    {
+                        lastcommandsclear();
+                    }
+                    break;
+
+                case "lastcommandslookat":
+                    {
+                        lastcommandslookat();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10412,6 +10502,45 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        private static void lastcommandslookat()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lastcommandslookat");
+            lastCommandsLookAt = !lastCommandsLookAt;
+
+            if (lastCommandsLookAt)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("lastcommandslookat: on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("lastcommandslookat: off");
+            }
+        }
+
+        private static void lastcommandsclear()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lastcommandsclear");
+            lastCommands.Clear();
+        }
+
+        private static void lastcommands()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lastcommands");
+            for (int i = 0; i < lastCommands.Count; i++)
+            {
+                handleCommand(lastCommands[i], false);
+            }
+        }
+
+        private static void showlastcommands()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: showlastcommands");
+            for (int i = 0; i < lastCommands.Count; i++)
+            {
+                Logger.LogInfo(lastCommands[i]);
+                Main.Instance.GameplayMenu.ShowNotification(lastCommands[i]);
             }
         }
 
@@ -12973,7 +13102,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 if (Input.GetKeyUp(key))
                 {
-                    handleCommand(commandKeys[key]);
+                    handleCommand(commandKeys[key], false);
                 }
             }
         }
@@ -14762,6 +14891,9 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseHarmonySlaveSystemPatch;
         private static ConfigEntry<bool> configUseHarmonyMoreWeaponSlotsPatch;
         private static ConfigEntry<bool> configUseHarmonyNoBuildTimePatch;
+        private static ConfigEntry<bool> configUseHarmonyLastCommandsPatch;
+        private static ConfigEntry<bool> configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants;
+        private static ConfigEntry<bool> configMaxRelationShipIfYouHaveSex;
 
         private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
         private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
@@ -14840,6 +14972,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyMoreWeaponSlotsPatch = false;
         public static bool useHarmonyNoBuildTimePatch = false;
         public static bool useHarmonySexModePatch = false;
+        public static bool useHarmonyLastCommandsPatch = false;
 
         public static bool nobuildtime = false;
         public static bool stripmode = false;
@@ -14884,6 +15017,9 @@ namespace BitchlandCheatConsoleBepInEx
         public static KeyCode KeyCodeSwitchWeapon10 = 0;
 
         public static int personalityStripMode = -1;
+
+        public static bool everyNPCstripsNudeIfYouLookAtThem = false;
+        public static bool maxRelationShipIfYouHaveSex = false;
 
         private void Awake()
         {
@@ -14951,6 +15087,11 @@ namespace BitchlandCheatConsoleBepInEx
                     true,
                     "Whether or not you want use harmony strip mode patch (default true also yes, you want it, and false = no)");
 
+            configUseHarmonyLastCommandsPatch = Config.Bind(pluginKey,
+                    "UseHarmonyLastCommandsPatch",
+                    true,
+                    "Whether or not you want use harmony lastcommands patch (default true also yes, you want it, and false = no)");
+
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
                       true,
@@ -14980,6 +15121,16 @@ namespace BitchlandCheatConsoleBepInEx
                 "UseNewMultiFollowerUpgradeKeyPadInterface",
                 true,
                 "Whether or not you want use new multi follower upgrade keypad interface patch (default true also yes, you want it, and false = no)");
+
+            configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants = Config.Bind(pluginKey,
+                                              "EveryNPCstripsNudeIfYouLookAtThemInStripModeVariants",
+                                              true,
+                                              "Whether or not you want that every npc strips nude if you look at them in stripmode variants commands (default true also yes, you want it, and false = no)");
+
+            configMaxRelationShipIfYouHaveSex = Config.Bind(pluginKey,
+                   "MaxRelationShipIfYouHaveSex",
+                   true,
+                  "Whether or not you want max relationship if you have sex (default true also yes, you want it, and false = no)");
 
             configKeyCodeFlyUp = Config.Bind(pluginKeyControlsFly,
                                                            "KeyCodeFlyUp",
@@ -15187,7 +15338,10 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonySlaveSystemPatch = configUseHarmonySlaveSystemPatch.Value;
             useHarmonyMoreWeaponSlotsPatch = configUseHarmonyMoreWeaponSlotsPatch.Value;
             useHarmonyNoBuildTimePatch = configUseHarmonyNoBuildTimePatch.Value;
+            useHarmonyLastCommandsPatch = configUseHarmonyLastCommandsPatch.Value;
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
+            everyNPCstripsNudeIfYouLookAtThem = configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants.Value;
+            maxRelationShipIfYouHaveSex = configMaxRelationShipIfYouHaveSex.Value;
 
             if (useMultiFollowerUpgradeEx)
             {
@@ -15246,10 +15400,14 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         private static bool onOpenCheat = false;
+
         public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix, Type[] parameters = null)
         {
+            string uniqueId = "com.wolfitdm.BitchlandCheatConsoleBepInEx";
+            Type uniqueType = typeof(BitchlandCheatConsoleBepInEx);
+
             // Create a new Harmony instance with a unique ID
-            var harmony = new Harmony("com.wolfitdm.BitchlandCheatConsoleBepInEx");
+            var harmony = new Harmony(uniqueId);
 
             if (originalClass == null)
             {
@@ -15257,30 +15415,108 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            // Or apply patches manually
-            MethodInfo original = null;
+            MethodInfo patched = null;
 
-            if (parameters == null)
+            try
             {
-                original = AccessTools.Method(originalClass, originalMethodName);
-            } else
+                patched = AccessTools.Method(uniqueType, patchedMethodName);
+            } catch (Exception ex)
             {
-                original = AccessTools.Method(originalClass, originalMethodName, parameters);
+                patched = null;
             }
-
-            if (original == null)
-            {
-                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
-                return;
-            }
-
-            MethodInfo patched = AccessTools.Method(typeof(BitchlandCheatConsoleBepInEx), patchedMethodName);
 
             if (patched == null)
             {
                 Logger.LogInfo($"AccessTool.Method patched {patchedMethodName} == null");
                 return;
 
+            }
+
+            // Or apply patches manually
+            MethodInfo original = null;
+
+            try
+            {
+                if (parameters == null)
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName);
+                }
+                else
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName, parameters);
+                }
+            }
+            catch (AmbiguousMatchException ex)
+            {
+                Type[] nullParameters = new Type[] { };
+                try
+                {
+                    if (patched == null)
+                    {
+                        parameters = nullParameters;
+                    }
+
+                    ParameterInfo[] parameterInfos = patched.GetParameters();
+
+                    if (parameterInfos == null || parameterInfos.Length == 0)
+                    {
+                        parameters = nullParameters;
+                    }
+
+                    List<Type> parametersN = new List<Type>();
+
+                    for (int i = 0; i < parameterInfos.Length; i++)
+                    {
+                        ParameterInfo parameterInfo = parameterInfos[i];
+
+                        if (parameterInfo == null)
+                        {
+                            continue;
+                        }
+
+                        if (parameterInfo.Name == null)
+                        {
+                            continue;
+                        }
+
+                        if (parameterInfo.Name.StartsWith("__"))
+                        {
+                            continue;
+                        }
+
+                        Type type = parameterInfos[i].ParameterType;
+                        
+                        if (type == null)
+                        {
+                            continue;
+                        }
+
+                        parametersN.Add(type);
+                    }
+
+                    parameters = parametersN.ToArray();
+                }
+                catch (Exception ex2)
+                {
+                    parameters = nullParameters;
+                }
+
+                try
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName, parameters);
+                } catch (Exception ex2)
+                {
+                    original = null;
+                }
+            } catch (Exception ex)
+            {
+                original = null;
+            }
+
+            if (original == null)
+            {
+                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
+                return;
             }
 
             HarmonyMethod patchedMethod = new HarmonyMethod(patched);
@@ -15722,9 +15958,9 @@ namespace BitchlandCheatConsoleBepInEx
 
             WeaponSystem _this = (WeaponSystem)__instance;
 
-            if (useHarmonyNoBuildTimePatch || useHarmonySexModePatch)
+            if (useHarmonyNoBuildTimePatch || useHarmonySexModePatch || useHarmonyLastCommandsPatch)
             {
-                if (nobuildtime || stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality)
+                if (nobuildtime || stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality || lastCommandsLookAt)
                 {
                     try
                     {
@@ -15747,6 +15983,11 @@ namespace BitchlandCheatConsoleBepInEx
 
                                     if (obj_ != null)
                                     {
+                                        if (lastCommandsLookAt)
+                                        {
+                                            lastcommands();
+                                        }
+
                                         if (nobuildtime)
                                         {
                                             if (obj_ is int_ConstructionPlan)
@@ -15763,7 +16004,10 @@ namespace BitchlandCheatConsoleBepInEx
                                             {
                                                 int_Person obj = (int_Person)obj_;
                                                 Person objPerson = obj.ThisPerson;
-                                                StripPerson(objPerson.gameObject);
+                                                if (everyNPCstripsNudeIfYouLookAtThem)
+                                                {
+                                                    StripPerson(objPerson.gameObject);
+                                                }
                                                 if (stripmodebroken)
                                                 {
                                                     setPersonaltyToInt(objPerson.gameObject, (int)Personality_Type.Broken);
@@ -15803,6 +16047,11 @@ namespace BitchlandCheatConsoleBepInEx
 
                                     if (obj2_ != null)
                                     {
+                                        if (lastCommandsLookAt)
+                                        {
+                                            lastcommands();
+                                        }
+
                                         if (nobuildtime)
                                         {
                                             if (obj2_ is int_ConstructionPlan)
@@ -15819,7 +16068,10 @@ namespace BitchlandCheatConsoleBepInEx
                                             {
                                                 int_Person obj2 = (int_Person)obj2_;
                                                 Person obj2Person = obj2.ThisPerson;
-                                                StripPerson(obj2Person.gameObject);
+                                                if (everyNPCstripsNudeIfYouLookAtThem)
+                                                {
+                                                    StripPerson(obj2Person.gameObject);
+                                                }
                                                 if (stripmodebroken)
                                                 {
                                                     setPersonaltyToInt(obj2Person.gameObject, (int)Personality_Type.Broken);
@@ -16556,11 +16808,16 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
                 person1Ex.transform.position = Main.Instance.Player.transform.position;
-                if (person1Ex != Main.Instance.Player)
+
+                if (maxRelationShipIfYouHaveSex)
                 {
-                    person1Ex.CreatePersonRelationship();
+                    if (!person1Ex.IsPlayer)
+                    {
+                        person1Ex.CreatePersonRelationship();
+                        person1Ex.Favor = 100000000;
+                    }
                 }
-                person1Ex.Favor = 100000000;
+
                 if (sextype == 1)
                 {
                     putdildoonhand(person1Ex.gameObject, "dildo8large");
@@ -16575,11 +16832,14 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
                 person2Ex.transform.position = Main.Instance.Player.transform.position;
-                if (person2Ex != Main.Instance.Player)
+                if (maxRelationShipIfYouHaveSex)
                 {
-                    person2Ex.CreatePersonRelationship();
+                    if (!person2Ex.IsPlayer)
+                    {
+                        person2Ex.CreatePersonRelationship();
+                        person2Ex.Favor = 100000000;
+                    }
                 }
-                person2Ex.Favor = 100000000;
                 if (sextype == 1)
                 {
                     putdildoonhand(person2Ex.gameObject, "dildo8large");
@@ -16594,11 +16854,14 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
                 person3Ex.transform.position = Main.Instance.Player.transform.position;
-                if (person3Ex != Main.Instance.Player)
+                if (maxRelationShipIfYouHaveSex)
                 {
-                    person3Ex.CreatePersonRelationship();
+                    if (!person3Ex.IsPlayer)
+                    {
+                        person3Ex.CreatePersonRelationship();
+                        person3Ex.Favor = 100000000;
+                    }
                 }
-                person3Ex.Favor = 100000000;
                 if (sextype == 1)
                 {
                     putdildoonhand(person3Ex.gameObject, "dildo8large");
@@ -17969,15 +18232,38 @@ namespace BitchlandCheatConsoleBepInEx
                 _this = person != null ? person.ThisPersonInt : Main.Instance.Player.ThisPersonInt;
             }
 
+            Person personEx = _this != null ? _this.ThisPerson : Main.Instance.Player;
+
             _gameplay.AddChatOption("Lets have sex here", (Action)(() =>
             {
-                _this.ThisPerson.Favor += 10000;
+                if (_this == null)
+                {
+                    return;
+                }
+
+                if (personEx == null)
+                {
+                    return;
+                }
+
+                if (personEx.IsPlayer)
+                {
+                    _this.EndTheChat();
+                    return;
+                }
+
+                if (maxRelationShipIfYouHaveSex)
+                {
+                    personEx.CreatePersonRelationship();
+                    personEx.Favor = 100000000;
+                }
+
                 if (Main.Instance.Player.HasPenis)
-                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, _this.ThisPerson);
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, personEx);
                 else if (_this.ThisPerson.HasPenis)
-                    Main.Instance.SexScene.SpawnSexScene(2, 0, _this.ThisPerson, Main.Instance.Player);
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, personEx, Main.Instance.Player);
                 else
-                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, _this.ThisPerson);
+                    Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, personEx);
                 _this.EndTheChat();
             }));
         }
