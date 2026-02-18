@@ -315,6 +315,19 @@ commands with no params:
 * npcmintrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 0, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
 * npcmaxtrainingvalue -> set the TrainingValue variable from the npc the you looked at or chatted with to 100000000, if you have the npc in the population menu,  you see a difference (it is the training value from the population menu)
 * nobuildtime -> toggle instant build mode, every plan you want placed, can Build instantly without any waiting time, if you get the message on  the screen nobuildtime: on, then, instantly build mode is on, otherwise instantly build mode is off
+* removeallitems -> if you don't have a backpack, it gives you a backpack, and drops all items from the backpack
+* npcremoveallitems -> if the npc don't have a backpack, it gives the npc a backpack, and let the npc drops all items, from the npc the you looked at or chatted with
+* stripmode -> toggle every npc the you looked at strips nude for you
+* stripmodebroken -> toggle every npc the you looked at strips nude for you, and set the npc to personality broken
+* stripmodenympho -> toggle every npc the you looked at strips nude for you, and set the npc to personality nympho
+* stripmodeultimate -> toggle every npc the you looked at strips nude for you, and set the npc to the ultimate sex monster bitch
+* stripmodepersonality ->  toggle every npc the you looked at strips nude for you, and set the npc to the same personality like the player (you) have, if you have personality nympho, it sets the npc to personality nympho
+* showlastcommands -> show your last typed commands
+* lastcommands -> execute your last typed commands
+* lastcommandsclear -> clears the last commands list
+* lastcommandslookat -> toggle lastcommandslookat mode, it executes the lastcommands on every "interactible" thing you are looked at
+* sexaddict -> sets you to really sex addicted bitch
+* npcsexaddict -> set the npc the you looked at or chatted with to a really sex addicted bitch
 
 commands with 1 param:
 
@@ -456,6 +469,7 @@ commands with 1 param:
 * npcinfiniteammoall value -> toggle value from the npc the you looked at or chatted with, have all weapons infinite ammo, sure you want that?
 * trainingvalue number -> set the training value from the player to number (population menu)
 * npctrainingvalue number -> set the training value from the npc the you looked at or chatted with (population menu)
+* stripmodepersonality personality ->  toggle every npc the you looked at strips nude for you, and set the npc to the personality personality e.g stripmodepersonality broken
 
 commands with 2 params:
 
