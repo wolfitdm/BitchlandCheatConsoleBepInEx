@@ -3825,13 +3825,16 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: saveobject");
             if (copyObj != null)
             {
-                string filename = SaveGameObjectFile(copyObj, value);
-                try
+                for (int i = 0; i < copyObj.Length; i++)
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"saveobject: loaded or copied object '{copyObj.name}' saved to '{filename}' ");
-                }
-                catch (Exception ex)
-                {
+                    string filename = SaveGameObjectFile(copyObj[i], value);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"saveobject: loaded or copied object '{copyObj[i].name}' saved to '{filename}' ");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
         }
@@ -3840,13 +3843,16 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: saveobject2");
             if (copyObj2 != null)
             {
-                string filename = SaveGameObjectFile(copyObj2, value);
-                try
+                for (int i = 0; i < copyObj2.Length; i++)
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"saveobject2: loaded or copied object '{copyObj2.name}' saved to '{filename}' ");
-                }
-                catch (Exception ex)
-                {
+                    string filename = SaveGameObjectFile(copyObj2[i], value);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"saveobject2: loaded or copied object '{copyObj2[i].name}' saved to '{filename}' ");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
         }
@@ -3858,10 +3864,10 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (obj != null)
             {
-                copyObj = obj;
+                copyObj = new GameObject[] { obj };
                 try
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"loadobject: object '{copyObj.name}' loaded, now you can use the command 'paste'");
+                    Main.Instance.GameplayMenu.ShowNotification($"loadobject: object '{copyObj[0].name}' loaded, now you can use the command 'paste'");
                 }
                 catch (Exception ex)
                 {
@@ -3875,10 +3881,10 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (obj != null)
             {
-                copyObj2 = obj;
+                copyObj2 = new GameObject[] { obj };
                 try
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"loadobject2: object '{copyObj2.name}' loaded, now you can use the command 'paste2'");
+                    Main.Instance.GameplayMenu.ShowNotification($"loadobject2: object '{copyObj2[0].name}' loaded, now you can use the command 'paste2'");
                 }
                 catch (Exception ex)
                 {
@@ -4455,8 +4461,8 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static GameObject copyObj = null;
-        public static GameObject copyObj2 = null;
+        public static GameObject[] copyObj = null;
+        public static GameObject[] copyObj2 = null;
 
         public static bool active1 = true;
         public static bool active2 = true;
@@ -4473,64 +4479,86 @@ namespace BitchlandCheatConsoleBepInEx
                 WeaponSystem _this = Main.Instance.Player.WeaponInv;
                 if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
                 {
-                    Component obj = hitInfo.transform.GetComponent<Component>();
-                    Component obj2 = hitInfo.transform.root.GetComponent<Component>();
-                    
-                    if (obj != null)
+                    Component[] obj_ = hitInfo.transform.GetComponents<Component>();
+                    Component[] obj2_ = hitInfo.transform.root.GetComponents<Component>();
+
+                    if (obj_ != null)
                     {
-                        copyObj = obj.gameObject;
+                        copyObj = new GameObject[obj_.Length];
+                        for (int i = 0; i < obj_.Length; i++)
+                        {
+                            copyObj[i] = null;
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'paste' or the command 'toggleactive' to toggle the active state, paste = to spawn the object!");
-                        }
-                        catch (Exception ex)
-                        {
-                        }
+                            Component obj = obj_[i];
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'saveobject name' or the command 'toggleactive' to toggle the active state, saveobject = to save the object to file!");
-                        }
-                        catch (Exception ex)
-                        {
-                        }
+                            if (obj != null)
+                            {
+                                copyObj[i] = obj.gameObject;
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj.name}' copied/selected, now you can use the command 'toggleactive/togglecollision', to toggle active/collision of this object!");
-                        }
-                        catch (Exception ex)
-                        {
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste' or the command 'toggleactive' to toggle the active state, paste = to spawn the object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'saveobject name' or the command 'toggleactive' to toggle the active state, saveobject = to save the object to file!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive/togglecollision', to toggle active/collision of this object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
                         }
                     }
 
-                    if (obj2 != null)
+                    if (obj2_ != null) 
                     {
-                        copyObj2 = obj2.gameObject;
+                        copyObj2 = new GameObject[obj2_.Length];
+                        for (int i = 0; i < obj2_.Length; i++)
+                        {
+                            copyObj2[i] = null;
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'paste2', to spawn the object!");
-                        }
-                        catch (Exception ex)
-                        {
-                        }
+                            Component obj2 = obj2_[i];
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'saveobject2 name', to save the object to file!");
-                        }
-                        catch (Exception ex)
-                        {
-                        }
+                            if (obj2 != null)
+                            {
+                                copyObj2[i] = obj2.gameObject;
 
-                        try
-                        {
-                            Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2.name}' copied/selected, now you can use the command 'toggleactive2/togglecollision2', to toggle active/collision of this object!");
-                        }
-                        catch (Exception ex)
-                        {
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2[i].name}' copied/selected, now you can use the command 'paste2', to spawn the object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2[i].name}' copied/selected, now you can use the command 'saveobject2 name', to save the object to file!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"copy: object '{copyObj2[i].name}' copied/selected, now you can use the command 'toggleactive2/togglecollision2', to toggle active/collision of this object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
                         }
                     }
                 }
@@ -4546,19 +4574,27 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste");
             if (copyObj != null)
             {
+                for (int i = 0; i < copyObj.Length; i++)
+                {
+                    if (copyObj[i] == null)
+                    {
+                        continue;
+                    }
 
-                GameObject newElement = Main.Spawn(copyObj);
-                Person player = Main.Instance.Player;
-                newElement.transform.position = player.transform.position;
-                newElement.transform.rotation = player.transform.rotation;
-                newElement.transform.parent = player.transform.parent;
-                newElement.SetActive(true);
-                try
-                {
-                    Main.Instance.GameplayMenu.ShowNotification($"paste: object '{newElement.name}' pastied!");
-                }
-                catch (Exception ex)
-                {
+                    GameObject obj = copyObj[i];
+                    GameObject newElement = Main.Spawn(obj);
+                    Person player = Main.Instance.Player;
+                    newElement.transform.position = player.transform.position;
+                    newElement.transform.rotation = player.transform.rotation;
+                    newElement.transform.parent = player.transform.parent;
+                    newElement.SetActive(true);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"paste: object '{newElement.name}' pastied!");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             else
@@ -4572,19 +4608,27 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste2");
             if (copyObj2 != null)
             {
+                for (int i = 0; i < copyObj2.Length; i++)
+                {
+                    if (copyObj2[i] == null)
+                    {
+                        continue;
+                    }
 
-                GameObject newElement = Main.Spawn(copyObj2);
-                Person player = Main.Instance.Player;
-                newElement.transform.position = player.transform.position;
-                newElement.transform.rotation = player.transform.rotation;
-                newElement.transform.parent = player.transform.parent;
-                newElement.SetActive(true);
-                try
-                {
-                    Main.Instance.GameplayMenu.ShowNotification($"paste2: object '{newElement.name}' pastied!");
-                }
-                catch (Exception ex)
-                {
+                    GameObject obj = copyObj2[i];
+                    GameObject newElement = Main.Spawn(obj);
+                    Person player = Main.Instance.Player;
+                    newElement.transform.position = player.transform.position;
+                    newElement.transform.rotation = player.transform.rotation;
+                    newElement.transform.parent = player.transform.parent;
+                    newElement.SetActive(true);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"paste2: object '{newElement.name}' pastied!");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             else
@@ -4599,13 +4643,22 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj != null)
             {
                 active1 = !active1;
-                copyObj.SetActive(active1);
-                try
+                for (int i = 0; i < copyObj.Length; i++)
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"toggleactive: object '{copyObj.name}' is set to " + (active1 ? "active" : "not active"));
-                }
-                catch (Exception ex)
-                {
+                    if (copyObj[i] == null)
+                    {
+                        continue;
+                    }
+
+                    GameObject obj = copyObj[i];
+                    obj.SetActive(active1);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive: object '{obj.name}' is set to " + (active1 ? "active" : "not active"));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             else
@@ -4619,13 +4672,22 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj2 != null)
             {
                 active2 = !active2;
-                copyObj2.SetActive(active2);
-                try
+                for (int i = 0; i < copyObj2.Length; i++)
                 {
-                    Main.Instance.GameplayMenu.ShowNotification($"toggleactive2: object '{copyObj2.name}' is set to " + (active2 ? "active" : "not active"));
-                }
-                catch (Exception ex)
-                {
+                    if (copyObj2[i] == null)
+                    {
+                        continue;
+                    }
+
+                    GameObject obj = copyObj2[i];
+                    obj.SetActive(active2);
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive2: object '{obj.name}' is set to " + (active2 ? "active" : "not active"));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             else
@@ -4640,18 +4702,26 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj != null)
             {
                 collision1 = !collision1;
-                Collider collider = copyObj.GetComponent<Collider>();
-                if (collider == null)
+                for (int i = 0; i < copyObj.Length; i++)
                 {
-                    return;
-                }
-                collider.enabled = collision1;
-                try
-                {
-                    Main.Instance.GameplayMenu.ShowNotification($"togglecollision: object collision '{copyObj.name}' is set to " + (collision1 ? "on" : "off"));
-                }
-                catch (Exception ex)
-                {
+                    if (copyObj[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = copyObj[i];
+                    Collider collider = obj.GetComponent<Collider>();
+                    if (collider == null)
+                    {
+                        return;
+                    }
+                    collider.enabled = collision1;
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision: object collision '{obj.name}' is set to " + (collision1 ? "on" : "off"));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             } else
             {
@@ -4664,18 +4734,26 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj2 != null)
             {
                 collision2 = !collision2;
-                Collider collider = copyObj2.GetComponent<Collider>();
-                if (collider == null)
+                for (int i = 0; i < copyObj2.Length; i++)
                 {
-                    return;
-                }
-                collider.enabled = collision2;
-                try
-                {
-                    Main.Instance.GameplayMenu.ShowNotification($"togglecollision2: object collision '{copyObj2.name}' is set to " + (collision2 ? "on" : "off"));
-                }
-                catch (Exception ex)
-                {
+                    if (copyObj2[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = copyObj2[i];
+                    Collider collider = obj.GetComponent<Collider>();
+                    if (collider == null)
+                    {
+                        return;
+                    }
+                    collider.enabled = collision2;
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision2: object collision '{obj.name}' is set to " + (collision2 ? "on" : "off"));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             else
