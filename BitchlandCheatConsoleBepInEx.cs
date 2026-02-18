@@ -8015,6 +8015,9 @@ namespace BitchlandCheatConsoleBepInEx
             person.NippleTraining = level;
             person.ClitTraining = level;
             person.BodyTraining = level;
+
+            person.SexMultiplier = 1.5f;
+            person.SexMAddictionultiplier = 2.0f;
         }
 
         public static void maxarousal(int level)
@@ -16815,6 +16818,8 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         person1Ex.CreatePersonRelationship();
                         person1Ex.Favor = 100000000;
+                        person1Ex.SexMultiplier = 1.5f;
+                        person1Ex.SexMAddictionultiplier = 2.0f;
                     }
                 }
 
@@ -16838,6 +16843,8 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         person2Ex.CreatePersonRelationship();
                         person2Ex.Favor = 100000000;
+                        person2Ex.SexMultiplier = 1.5f;
+                        person2Ex.SexMAddictionultiplier = 2.0f;
                     }
                 }
                 if (sextype == 1)
@@ -16860,6 +16867,8 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         person3Ex.CreatePersonRelationship();
                         person3Ex.Favor = 100000000;
+                        person3Ex.SexMultiplier = 1.5f;
+                        person3Ex.SexMAddictionultiplier = 2.0f;
                     }
                 }
                 if (sextype == 1)
