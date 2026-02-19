@@ -1763,6 +1763,76 @@ namespace BitchlandCheatConsoleBepInEx
                     int_Lockable int_Lo = (int_Lockable)la;
                     return int_Lo.gameObject;
                 }
+
+                if (la is int_SexTubeBike)
+                {
+                    int_Lockable int_Lo = (int_Lockable)la;
+                    return int_Lo.gameObject;
+                }
+
+                if (la is Int_SexMachine)
+                {
+                    int_Lockable int_Lo = (int_Lockable)la;
+                    return int_Lo.gameObject;
+                }
+
+                try
+                {
+                    if (la is bl_int_LockUnlockPrompt)
+                    {
+                        int_Lockable int_Lo = ((bl_int_LockUnlockPrompt)la).Lockable;
+                        return int_Lo.gameObject;
+                    }
+                } catch(Exception ex)
+                {
+
+                }
+
+
+                if (la is MultiInteractible)
+                {
+                    MultiInteractible multi = (MultiInteractible)la;
+
+                    Interactible[] parts = multi.Parts;
+
+                    if (parts != null)
+                    {
+                        for (int i = 0; i <  parts.Length; i++)
+                        {
+                            if (parts[i] is int_Lockable)
+                            {
+                                int_Lockable int_Lo = (int_Lockable)parts[i];
+                                return int_Lo.gameObject;
+                            }
+
+                            if (parts[i] is int_SexTubeBike)
+                            {
+                                int_Lockable int_Lo = (int_Lockable)parts[i];
+                                return int_Lo.gameObject;
+                            }
+
+                            if (parts[i] is Int_SexMachine)
+                            {
+                                int_Lockable int_Lo = (int_Lockable)parts[i];
+                                return int_Lo.gameObject;
+                            }
+
+
+                            try
+                            {
+                                if (parts[i] is bl_int_LockUnlockPrompt)
+                                {
+                                    int_Lockable int_Lo = ((bl_int_LockUnlockPrompt)parts[i]).Lockable;
+                                    return int_Lo.gameObject;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                }
             }
 
             return null;

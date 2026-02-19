@@ -328,6 +328,8 @@ commands with no params:
 * lastcommandslookat -> toggle lastcommandslookat mode, it executes the lastcommands on every "interactible" thing you are looked at
 * sexaddict -> sets you to really sex addicted bitch
 * npcsexaddict -> set the npc the you looked at or chatted with to a really sex addicted bitch
+* playerowned -> set player owned to true
+* playernotowned -> set player owned to false
 
 commands with 1 param:
 
