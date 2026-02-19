@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using Assets.Scripts.Interactibles;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.Mono;
@@ -9241,6 +9242,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "locksexmachines":
+                    {
+                        locksexmachines();
+                    }
+                    break;
+
+                case "unlocksexmachines":
+                    {
+                        unlocksexmachines();
+                    }
+                    break;
+
                 case "playerowned":
                     {
                         playerowned_unlock_int();
@@ -15207,6 +15220,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<KeyCode> configKeyCodeStripModeStartSex;
 
         private static ConfigEntry<bool> configUseHarmonyStripModePatch;
+        private static ConfigEntry<bool> configUseHarmonyExtendedLockPatch;
 
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon1;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon2;
@@ -15259,6 +15273,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonyNoBuildTimePatch = false;
         public static bool useHarmonySexModePatch = false;
         public static bool useHarmonyLastCommandsPatch = false;
+        public static bool useHarmonyExtendedLockPatch = true;
 
         public static bool nobuildtime = false;
         public static bool stripmode = false;
@@ -15377,6 +15392,11 @@ namespace BitchlandCheatConsoleBepInEx
                     "UseHarmonyLastCommandsPatch",
                     true,
                     "Whether or not you want use harmony lastcommands patch (default true also yes, you want it, and false = no)");
+
+            configUseHarmonyExtendedLockPatch = Config.Bind(pluginKey,
+                    "UseHarmonyExtendedLockPatch",
+                    true,
+                    "Whether or not you want use harmony extended lock patch (default true also yes, you want it, and false = no)");
 
             configUseMultiFollower = Config.Bind(pluginKey,
                      "UseMultiFollower",
@@ -15625,6 +15645,7 @@ namespace BitchlandCheatConsoleBepInEx
             useHarmonyMoreWeaponSlotsPatch = configUseHarmonyMoreWeaponSlotsPatch.Value;
             useHarmonyNoBuildTimePatch = configUseHarmonyNoBuildTimePatch.Value;
             useHarmonyLastCommandsPatch = configUseHarmonyLastCommandsPatch.Value;
+            useHarmonyExtendedLockPatch = configUseHarmonyExtendedLockPatch.Value;
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
             everyNPCstripsNudeIfYouLookAtThem = configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants.Value;
             maxRelationShipIfYouHaveSex = configMaxRelationShipIfYouHaveSex.Value;
@@ -16068,10 +16089,151 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     PatchHarmonyMethodUnity(typeof(WeaponSystem), "SetActiveWeapon", "WeaponSystem_SetActiveWeapon", true, false, new Type[] { typeof(int) });
                 }
+                if (useHarmonyExtendedLockPatch)
+                {
+                    try {
+                        PatchHarmonyMethodUnity(typeof(int_SexTubeBike), "StopInteracting", "int_SexTubeBike_StopInteracting", true, false);
+                    } catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Int_SexMachine), "StopInteracting", "Int_SexMachine_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_SexLocker), "StopInteracting", "int_SexLocker_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_DildoPole), "StopInteracting", "int_DildoPole_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_wallpussy), "StopInteracting", "int_wallpussy_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Bathe), "StopInteracting", "int_Bathe_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_dildo), "StopInteracting", "int_dildo_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Piss), "StopInteracting", "int_Piss_StopInteracting", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(bl_NoItemSexSpot), "StopInteracting", "bl_NoItemSexSpot_StopInteracting", true, false);
+                    }
+                    catch { }
+                }
+
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
             }
+        }
+
+        public static bool extendedLock = false;
+        public static bool int_DildoPole_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_DildoPole _this = (int_DildoPole)__instance;
+            return true;
+        }
+        public static bool int_SexTubeBike_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_SexTubeBike _this = (int_SexTubeBike)__instance;
+            return true;
+        }
+        public static bool Int_SexMachine_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            Int_SexMachine _this = (Int_SexMachine)__instance;
+            return true;
+        }
+        public static bool int_SexLocker_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_SexLocker _this = (int_SexLocker)__instance;
+            return true;
+        }
+        public static bool int_wallpussy_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_wallpussy _this = (int_wallpussy)__instance;
+            return true;
+        }
+        public static bool int_Bathe_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_Bathe _this = (int_Bathe)__instance;
+            return true;
+        }
+        public static bool int_dildo_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_dildo _this = (int_dildo)__instance;
+            return true;
+        }
+
+        public static bool int_Piss_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            int_Piss _this = (int_Piss)__instance;
+            return true;
+        }
+        public static bool bl_NoItemSexSpot_StopInteracting(object __instance)
+        {
+            if (extendedLock)
+            {
+                return false;
+            }
+            bl_NoItemSexSpot _this = (bl_NoItemSexSpot)__instance;
+            return true;
+        }
+        public static void locksexmachines()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: locksexmachines");
+            extendedLock = true;
+        }
+        public static void unlocksexmachines()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlocksexmachines");
+            extendedLock = false;
         }
         public static bool isPersonLeashed(GameObject personGa)
         {

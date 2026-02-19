@@ -330,6 +330,8 @@ commands with no params:
 * npcsexaddict -> set the npc the you looked at or chatted with to a really sex addicted bitch
 * playerowned -> set player owned to true
 * playernotowned -> set player owned to false
+* locksexmachines -> lock sex machines
+* unlocksexmachines -> unlock sex machines
 
 commands with 1 param:
 
