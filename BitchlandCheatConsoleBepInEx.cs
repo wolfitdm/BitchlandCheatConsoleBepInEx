@@ -50,6 +50,106 @@ namespace BitchlandCheatConsoleBepInEx
     [BepInPlugin("com.wolfitdm.BitchlandCheatConsoleBepInEx", "BitchlandCheatConsoleBepInEx Plugin", "1.0.0.0")]
     public class BitchlandCheatConsoleBepInEx : BaseUnityPlugin
     {
+        public static T MyGetComponent<T>(GameObject obj) where T : Interactible
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+            T component = obj.GetComponent<T>();
+
+            if (component != null && component.gameObject == obj)
+            {
+                return component;
+            }
+
+            T[] components = obj.GetComponents<T>();
+
+            if (components != null)
+            {
+                for (int i = 0; i < components.Length; i++)
+                {
+                    if (components[i].gameObject == obj)
+                    {
+                        return components[i];
+                    }
+                }
+            }
+            return default;
+        }
+        public static T MyGetComponentMulti<T>(GameObject obj) where T : MultiInteractible
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+            T component = obj.GetComponent<T>();
+
+            if (component != null && component.gameObject == obj)
+            {
+                return component;
+            }
+
+            T[] components = obj.GetComponents<T>();
+
+            if (components != null)
+            {
+                for (int i = 0; i < components.Length; i++)
+                {
+                    if (components[i].gameObject == obj)
+                    {
+                        return components[i];
+                    }
+                }
+            }
+            return default;
+        }
+        public static T MyGetComponentCollider<T>(GameObject obj) where T : Collider
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+            return obj.GetComponent<T>();
+        }
+
+        public static T MyGetComponentSave<T>(GameObject obj) where T : SaveableBehaviour
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+            return obj.GetComponent<T>();
+        }
+
+        public static T MyGetComponentPerson<T>(GameObject obj) where T : Person
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+            T component = obj.GetComponent<T>();
+
+            if (component != null && component.gameObject == obj)
+            {
+                return component;
+            }
+
+            T[] components = obj.GetComponents<T>();
+
+            if (components != null)
+            {
+                for (int i = 0; i < components.Length; i++)
+                {
+                    if (components[i].gameObject == obj)
+                    {
+                        return components[i];
+                    }
+                }
+            }
+            return default;
+        }
+
         private static bool showGUI = false;       // Toggle GUI visibility
         private bool pressEnter = false;
         private string inputText = "";      // Stores user input
@@ -1528,7 +1628,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
-                SaveableBehaviour s = rootObject.GetComponent<SaveableBehaviour>();
+                SaveableBehaviour s = MyGetComponentSave<SaveableBehaviour>(rootObject);
                 s.SaveToFile(filename);
                 return filename;
             }
@@ -1654,7 +1754,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible interactible = interact.GetComponent<Interactible>();
+            Interactible interactible = MyGetComponent<Interactible>(interact);
 
             if (interactible == null)
             {
@@ -1681,7 +1781,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            MultiInteractible multiInteractible = multi.GetComponent<MultiInteractible>();
+            MultiInteractible multiInteractible = MyGetComponentMulti<MultiInteractible>(multi);
 
             if (multiInteractible.Parts == null)
             {
@@ -1714,7 +1814,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             if (la != null)
             {
@@ -1741,7 +1841,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             if (la != null)
             {
@@ -1766,7 +1866,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             if (la != null)
             {
@@ -1788,7 +1888,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             if (la != null)
             {
@@ -1880,7 +1980,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             if (la is Int_Storage)
             {
@@ -1900,7 +2000,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             int_PickupToHand pi = null;
 
@@ -1914,7 +2014,7 @@ namespace BitchlandCheatConsoleBepInEx
                 GameObject piGa = la.gameObject;
                 if (piGa != null)
                 {
-                    Interactible pis = piGa.GetComponent<Interactible>();
+                    Interactible pis = MyGetComponent<Interactible>(piGa);
                     if (pis != null)
                     {
                         pi = pis.GetComponentInChildren<int_PickupToHand>(true);
@@ -1939,7 +2039,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             int_PickupToBag pi = null;
 
@@ -1953,7 +2053,7 @@ namespace BitchlandCheatConsoleBepInEx
                 GameObject piGa = la.gameObject;
                 if (piGa != null)
                 {
-                    Interactible pis = piGa.GetComponent<Interactible>();
+                    Interactible pis = MyGetComponent<Interactible>(piGa);
                     if (pis != null)
                     {
                         pi = pis.GetComponentInChildren<int_PickupToBag>(true);
@@ -1977,7 +2077,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Interactible la = ga.GetComponent<Interactible>();
+            Interactible la = MyGetComponent<Interactible>(ga);
 
             Interactible[] pi = null;
 
@@ -1991,7 +2091,7 @@ namespace BitchlandCheatConsoleBepInEx
                 GameObject piGa = la.gameObject;
                 if (piGa != null)
                 {
-                    Interactible pis = piGa.GetComponent<Interactible>();
+                    Interactible pis = MyGetComponent<Interactible>(piGa);
                     if (pis != null)
                     {
                         pi = pis.GetComponentsInChildren<Interactible>(true);
@@ -2164,7 +2264,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return Main.Instance.Player.gameObject;
             }
 
-            Person person = personPrefab.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personPrefab);
 
             if (person == null)
             {
@@ -2380,7 +2480,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return; 
             }
 
-            Person DisplayPerson = DisplayPersonGa.GetComponent<Person>();
+            Person DisplayPerson = MyGetComponentPerson<Person>(DisplayPersonGa);
             DisplayPerson._SkinStates = new bool[15];
             DisplayPerson._FaceSkinStates = new bool[16];
             DisplayPerson._CustomSkinStates = new bool[Main.Instance._CustomBodySkinsName.Count];
@@ -2478,7 +2578,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static GameObject ChangeSkin(GameObject Person, string name, bool isPlayer, bool loadclothes = true)
         {
             if (Person == null) return null;
-            Person gettedPerson = Person.GetComponent<Person>();
+            Person gettedPerson = MyGetComponentPerson<Person>(Person);
             if (gettedPerson == null) return null; 
             bool LoadSpecificNPC = true;
             Person PersonGenerated = null;
@@ -2595,7 +2695,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             if (personGa == null) return;
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null) return;
 
@@ -2663,7 +2763,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             if (personGa == null) return;
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null) return;
 
@@ -2834,7 +2934,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
             person.ClothingCondition = e_ClothingCondition.Nude;
             person.States[9] = true; // Nude Clothing Vipe
             person.States[10] = false; // Casual Clothing Vipe
@@ -2892,7 +2992,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -2919,7 +3019,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -2983,7 +3083,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -3014,7 +3114,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -3077,7 +3177,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -3108,7 +3208,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person _this = _thisGa.GetComponent<Person>();
+            Person _this = MyGetComponentPerson<Person>(_thisGa);
 
             if (_this == null)
             {
@@ -3142,7 +3242,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3204,7 +3304,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3220,7 +3320,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3241,7 +3341,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3260,7 +3360,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3287,7 +3387,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3320,7 +3420,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3345,7 +3445,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3401,7 +3501,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3443,7 +3543,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3470,7 +3570,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3493,7 +3593,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person PersonGenerated = personGa.GetComponent<Person>();
+            Person PersonGenerated = MyGetComponentPerson<Person>(personGa);
 
             if (PersonGenerated == null)
             {
@@ -3516,7 +3616,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -3785,7 +3885,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = playerGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(playerGa);
 
             if (player == null)
             {
@@ -3838,7 +3938,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = playerGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(playerGa);
 
             if (player == null)
             {
@@ -4023,7 +4123,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
             setPersonaltyToNympho(thisPerson.gameObject);
             Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to nympho!");
         }
@@ -4210,7 +4310,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
             setPersonType(thisPerson.gameObject, personType);
             Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to person type!");
         }
@@ -4242,7 +4342,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
             setPersonaltyTo(thisPerson.gameObject, personality, cleanOrDirt);
             Main.Instance.GameplayMenu.ShowNotification("Set person the you looked at to personality!");
         }
@@ -4274,7 +4374,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
             setPersonState(thisPerson.gameObject, personState);
             Main.Instance.GameplayMenu.ShowNotification("Set personstate the you looked at to person state!");
         }
@@ -4326,7 +4426,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
 
             try
@@ -4350,7 +4450,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4414,7 +4514,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
 
             try
@@ -4438,7 +4538,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4466,7 +4566,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4493,7 +4593,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4521,7 +4621,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4548,7 +4648,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = personInteract.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(personInteract);
 
             if (thisPerson == null)
             {
@@ -4833,7 +4933,7 @@ namespace BitchlandCheatConsoleBepInEx
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
-                    Collider collider = obj.GetComponent<Collider>();
+                    Collider collider = MyGetComponentCollider<Collider>(obj);
                     if (collider == null)
                     {
                         return;
@@ -4869,7 +4969,7 @@ namespace BitchlandCheatConsoleBepInEx
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
-                    Collider collider = obj.GetComponent<Collider>();
+                    Collider collider = MyGetComponentCollider<Collider>(obj);
                     if (collider == null)
                     {
                         return;
@@ -4912,7 +5012,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             player.AnalTraining += 10;
             player.VaginalTraining += 10;
             player.NippleTraining += 10;
@@ -5087,7 +5187,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             int amount = 0;
             try
@@ -5118,7 +5218,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             int amount = 0;
             try
@@ -5149,7 +5249,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             int amount = 0;
             try
@@ -5181,7 +5281,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             int amount = 0;
             try
@@ -5212,7 +5312,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             int amount = 0;
             try
@@ -5244,7 +5344,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             player.Energy = 0;
         }
 
@@ -5292,7 +5392,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
 
             if (player == null)
             {
@@ -5359,7 +5459,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -5376,7 +5476,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -5435,7 +5535,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -5454,7 +5554,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             player.Toilet = player.ToiletMax;
         }
 
@@ -5468,7 +5568,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             Weapon weapon = player.WeaponInv.CurrentWeapon;
             if (weapon != null)
             {
@@ -5506,7 +5606,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             int amount = 1;
             GameObject item = getAllItemByName(key);
 
@@ -5536,7 +5636,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             int amount = 1;
             GameObject item = getAllItemByName(key);
 
@@ -5580,7 +5680,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             player.Hunger = player.HungerMax;
         }
         public static void npcnohunger()
@@ -5593,7 +5693,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             player.Hunger = 0;
         }
 
@@ -5607,7 +5707,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person player = personGa.GetComponent<Person>();
+            Person player = MyGetComponentPerson<Person>(personGa);
             if (player.TheHealth != null)
             {
                 bool canDie = player.TheHealth.canDie;
@@ -5875,7 +5975,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Interactible pih = pi.GetComponent<Interactible>();
+            Interactible pih = MyGetComponent<Interactible>(pi);
 
             if (pih == null)
             {
@@ -5896,7 +5996,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -5946,7 +6046,7 @@ namespace BitchlandCheatConsoleBepInEx
                     removeableItems.Add(item);
                 } else
                 {
-                    MultiInteractible component = item.GetComponent<MultiInteractible>();
+                    MultiInteractible component = MyGetComponentMulti<MultiInteractible>(item);
                     if (component != null)
                     {
                         int_PickableClothingPackage component2 = component.Parts[0].gameObject.GetComponent<int_PickableClothingPackage>();
@@ -5996,7 +6096,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -6105,7 +6205,7 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     else
                     {
-                        MultiInteractible component = item.GetComponent<MultiInteractible>();
+                        MultiInteractible component = MyGetComponentMulti<MultiInteractible>(item);
                         if (component != null)
                         {
                             int_PickableClothingPackage component2 = component.Parts[0].gameObject.GetComponent<int_PickableClothingPackage>();
@@ -6249,7 +6349,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -6342,7 +6442,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -6371,7 +6471,7 @@ namespace BitchlandCheatConsoleBepInEx
                     continue;
                 }
 
-                Interactible gasInt = gass.GetComponent<Interactible>();
+                Interactible gasInt = MyGetComponent<Interactible>(gass);
 
                 if (gasInt == null)
                 {
@@ -6434,7 +6534,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -6450,7 +6550,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Interactible i = interact.GetComponent<Interactible>();
+            Interactible i = MyGetComponent<Interactible>(interact);
 
             if (i == null)
             {
@@ -6547,7 +6647,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person s = personGa.GetComponent<Person>();
+            Person s = MyGetComponentPerson<Person>(personGa);
 
             if (s == null)
             {
@@ -6582,7 +6682,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -6953,7 +7053,7 @@ namespace BitchlandCheatConsoleBepInEx
         public static void MasturbatePerson(GameObject personGa)
         {
             if (personGa == null) return;
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -7065,7 +7165,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -7098,7 +7198,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -7254,7 +7354,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
            
-            Person thisPerson = thisPersonFree.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(thisPersonFree);
                         
             if (thisPerson.State == Person_State.Free)
             {
@@ -7292,7 +7392,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = thisPersonFree.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(thisPersonFree);
 
             if (thisPerson.State == Person_State.Free)
             {
@@ -7332,7 +7432,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = thisPersonFree.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(thisPersonFree);
 
             if (thisPerson.State == Person_State.Free)
             {
@@ -7372,7 +7472,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = thisPersonFree.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(thisPersonFree);
 
             if (thisPerson.State == Person_State.Free)
             {
@@ -7569,7 +7669,7 @@ namespace BitchlandCheatConsoleBepInEx
                 if (personGa != null)
                 {
                     Main.Instance.GameplayMenu.ShowNotification("unstuck me from the chat");
-                    Person person = personGa.GetComponent<Person>();
+                    Person person = MyGetComponentPerson<Person>(personGa);
                     if (person != null)
                     {
                         Main.Instance.GameplayMenu.ShowNotification("unstuck me from the chat really");
@@ -7898,7 +7998,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -7920,7 +8020,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -7990,7 +8090,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8050,7 +8150,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             person.CantBeHit = !person.CantBeHit;
             if (person.CantBeHit)
@@ -8098,7 +8198,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8155,7 +8255,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8176,7 +8276,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8199,7 +8299,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8222,7 +8322,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8245,7 +8345,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8280,7 +8380,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8369,7 +8469,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8449,7 +8549,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8503,7 +8603,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8600,7 +8700,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8640,7 +8740,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8719,7 +8819,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -8757,7 +8857,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             setSexyStates(person.gameObject, true, false);
 
@@ -10997,7 +11097,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -12454,7 +12554,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -13685,7 +13785,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -14586,7 +14686,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return null;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -14908,7 +15008,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -15076,7 +15176,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person thisPerson = thisPersonGa.GetComponent<Person>();
+            Person thisPerson = MyGetComponentPerson<Person>(thisPersonGa);
 
             if (thisPerson == null)
             {
@@ -16266,7 +16366,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return false;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -17089,7 +17189,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person1Select == null || !person1IsSelected)
             {
@@ -17131,7 +17231,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person1Select == null || !person1IsSelected)
             {
@@ -17169,7 +17269,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person1Ex = personGa.GetComponent<Person>();
+            Person person1Ex = MyGetComponentPerson<Person>(personGa);
 
             if (person1Ex == null)
             {
@@ -17739,7 +17839,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -17888,7 +17988,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -17963,7 +18063,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -18018,7 +18118,7 @@ namespace BitchlandCheatConsoleBepInEx
                         return;
                     }
 
-                    Interactible i = interacted.GetComponent<Interactible>();
+                    Interactible i = MyGetComponent<Interactible>(interacted);
 
                     if (i == null)
                     {
@@ -18133,7 +18233,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Person person = personGa.GetComponent<Person>();
+            Person person = MyGetComponentPerson<Person>(personGa);
 
             if (person == null)
             {
@@ -18193,7 +18293,7 @@ namespace BitchlandCheatConsoleBepInEx
                         return;
                     }
 
-                    Interactible i = interacted.GetComponent<Interactible>();
+                    Interactible i = MyGetComponent<Interactible>(interacted);
 
                     if (i == null)
                     {
@@ -19203,7 +19303,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                Interactible interact = ga.GetComponent<Interactible>();
+                Interactible interact = MyGetComponent<Interactible>(ga);
 
                 if (interact == null)
                 {
@@ -19344,7 +19444,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                Interactible interact = ga.GetComponent<Interactible>();
+                Interactible interact = MyGetComponent<Interactible>(ga);
 
                 if (interact == null)
                 {
@@ -19533,7 +19633,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return;
                 }
 
-                Interactible interact = ga.GetComponent<Interactible>();
+                Interactible interact = MyGetComponent<Interactible>(ga);
 
                 if (interact == null)
                 {
