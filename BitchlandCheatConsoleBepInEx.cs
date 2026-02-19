@@ -16149,7 +16149,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_DildoPole _this = (int_DildoPole)__instance;
             return true;
         }
         public static bool int_SexTubeBike_StopInteracting(object __instance)
@@ -16158,7 +16157,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_SexTubeBike _this = (int_SexTubeBike)__instance;
             return true;
         }
         public static bool Int_SexMachine_StopInteracting(object __instance)
@@ -16167,7 +16165,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            Int_SexMachine _this = (Int_SexMachine)__instance;
             return true;
         }
         public static bool int_SexLocker_StopInteracting(object __instance)
@@ -16176,7 +16173,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_SexLocker _this = (int_SexLocker)__instance;
             return true;
         }
         public static bool int_wallpussy_StopInteracting(object __instance)
@@ -16185,7 +16181,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_wallpussy _this = (int_wallpussy)__instance;
             return true;
         }
         public static bool int_Bathe_StopInteracting(object __instance)
@@ -16194,7 +16189,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_Bathe _this = (int_Bathe)__instance;
             return true;
         }
         public static bool int_dildo_StopInteracting(object __instance)
@@ -16203,7 +16197,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_dildo _this = (int_dildo)__instance;
             return true;
         }
 
@@ -16213,7 +16206,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            int_Piss _this = (int_Piss)__instance;
             return true;
         }
         public static bool bl_NoItemSexSpot_StopInteracting(object __instance)
@@ -16222,7 +16214,6 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 return false;
             }
-            bl_NoItemSexSpot _this = (bl_NoItemSexSpot)__instance;
             return true;
         }
         public static void locksexmachines()
