@@ -1581,6 +1581,31 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         private static GameObject interacted_ = null;
+
+        private static object interacted__ = null;
+
+        public static object getInteractNew()
+        {
+            try
+            {
+                if (Main.Instance.Player == null || Main.Instance.Player.WeaponInv == null || Main.Instance.Player.WeaponInv.IntLookingAt == null)
+                {
+                    return null;
+                }
+
+                Interactible la = Main.Instance.Player.WeaponInv.IntLookingAt;
+
+                if (la != null)
+                {
+                    interacted__ = la;
+                    return la;
+                }
+            }
+            catch (Exception e)
+            {
+            }
+            return null;
+        }
         public static GameObject getInteract()
         {
             try
@@ -1611,6 +1636,14 @@ namespace BitchlandCheatConsoleBepInEx
         private static GameObject getLastInteract()
         {
             return interacted_;
+        }
+        private static bool haveInteractNew()
+        {
+            return interacted__ != null;
+        }
+        private static object getLastInteractNew()
+        {
+            return interacted__;
         }
         public static GameObject getMultiInteract()
         {
@@ -17916,7 +17949,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static void followeruse(GameObject personGa, GameObject interactGa)
+        public static void followeruse(GameObject personGa, object interactGa)
         {
             bool use = true;
 
@@ -17937,7 +17970,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Interactible interact = interactGa.GetComponent<Interactible>();
+            Interactible interact = (Interactible)interactGa;
 
             if (interact == null)
             {
@@ -18086,7 +18119,7 @@ namespace BitchlandCheatConsoleBepInEx
             }    
         }
 
-        public static void followerstopuse(GameObject personGa, GameObject interactGa)
+        public static void followerstopuse(GameObject personGa, object interactGa)
         {
             bool stopuse = true;
 
@@ -18107,7 +18140,7 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            Interactible interact = interactGa.GetComponent<Interactible>();
+            Interactible interact = (Interactible)interactGa;
 
             if (interact == null)
             {
@@ -18237,7 +18270,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static bool followerCanUse_(GameObject interactGa, string key)
+        public static bool followerCanUse_(object interactGa, string key)
         {
             if (interactGa == null)
             {
@@ -18288,7 +18321,12 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool followerCanUse(string key)
         {
-            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+            object interactGa = haveInteractNew() ? getLastInteractNew() : getInteractNew();
+
+            if (interactGa == null)
+            {
+                return false;
+            }
 
             return followerCanUse_(interactGa, key);
         }
@@ -18297,7 +18335,12 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: followerusing");
 
-            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+            object interactGa = haveInteractNew() ? getLastInteractNew() : getInteractNew();
+
+            if (interactGa == null)
+            {
+                return;
+            }
 
             interacted_ = null;
 
@@ -18358,9 +18401,9 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: followerstopusing");
             
-            GameObject interactGa = haveInteract() ? getLastInteract() : getInteract();
+            object interactGa = haveInteractNew() ? getLastInteractNew() : getInteractNew();
 
-            interacted_ = null;
+            interacted__ = null;
 
             if (key == "all")
             {
