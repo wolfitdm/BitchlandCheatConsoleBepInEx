@@ -4574,6 +4574,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste");
             if (copyObj != null)
             {
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj.Length; i++)
                 {
                     if (copyObj[i] == null)
@@ -4582,6 +4583,9 @@ namespace BitchlandCheatConsoleBepInEx
                     }
 
                     GameObject obj = copyObj[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     GameObject newElement = Main.Spawn(obj);
                     Person player = Main.Instance.Player;
                     newElement.transform.position = player.transform.position;
@@ -4608,6 +4612,7 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste2");
             if (copyObj2 != null)
             {
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj2.Length; i++)
                 {
                     if (copyObj2[i] == null)
@@ -4616,6 +4621,9 @@ namespace BitchlandCheatConsoleBepInEx
                     }
 
                     GameObject obj = copyObj2[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     GameObject newElement = Main.Spawn(obj);
                     Person player = Main.Instance.Player;
                     newElement.transform.position = player.transform.position;
@@ -4643,6 +4651,7 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj != null)
             {
                 active1 = !active1;
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj.Length; i++)
                 {
                     if (copyObj[i] == null)
@@ -4651,6 +4660,9 @@ namespace BitchlandCheatConsoleBepInEx
                     }
 
                     GameObject obj = copyObj[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     obj.SetActive(active1);
                     try
                     {
@@ -4672,6 +4684,7 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj2 != null)
             {
                 active2 = !active2;
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj2.Length; i++)
                 {
                     if (copyObj2[i] == null)
@@ -4680,6 +4693,9 @@ namespace BitchlandCheatConsoleBepInEx
                     }
 
                     GameObject obj = copyObj2[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     obj.SetActive(active2);
                     try
                     {
@@ -4702,6 +4718,7 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj != null)
             {
                 collision1 = !collision1;
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj.Length; i++)
                 {
                     if (copyObj[i] == null)
@@ -4709,6 +4726,9 @@ namespace BitchlandCheatConsoleBepInEx
                         continue;
                     }
                     GameObject obj = copyObj[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     Collider collider = obj.GetComponent<Collider>();
                     if (collider == null)
                     {
@@ -4734,6 +4754,7 @@ namespace BitchlandCheatConsoleBepInEx
             if (copyObj2 != null)
             {
                 collision2 = !collision2;
+                List<GameObject> pasties = new List<GameObject>();
                 for (int i = 0; i < copyObj2.Length; i++)
                 {
                     if (copyObj2[i] == null)
@@ -4741,6 +4762,9 @@ namespace BitchlandCheatConsoleBepInEx
                         continue;
                     }
                     GameObject obj = copyObj2[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
                     Collider collider = obj.GetComponent<Collider>();
                     if (collider == null)
                     {
@@ -7344,6 +7368,47 @@ namespace BitchlandCheatConsoleBepInEx
             int_Lo.Locked = false;
         }
 
+        public static void playerowned_lock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playernotowned");
+
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
+            {
+                return;
+            }
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            try
+            {
+                int_Lo.PlayerOwned = false;
+            } catch (Exception ex)
+            {
+            }
+        }
+        public static void playerowned_unlock_int()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playerowned");
+            GameObject lockable = getLockableInteract();
+
+            if (lockable == null)
+            {
+                return;
+            }
+
+            int_Lockable int_Lo = lockable.GetComponent<int_Lockable>();
+
+            try
+            {
+                int_Lo.PlayerOwned = true;
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
         public static void storagemax_int()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: storagemax");
@@ -9103,6 +9168,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "unlock":
                     {
                         unlock_int();
+                    }
+                    break;
+
+                case "playerowned":
+                    {
+                        playerowned_unlock_int();
+                    }
+                    break;
+
+                case "playernotowned":
+                    {
+                        playerowned_lock_int();
                     }
                     break;
 
