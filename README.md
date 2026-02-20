@@ -332,6 +332,12 @@ commands with no params:
 * playernotowned -> set player owned to false
 * locksexmachines -> lock sex machines
 * unlocksexmachines -> unlock sex machines
+* leashplayer -> leash the player
+* unleashplayer -> unleash the player
+* leash -> leashes the npc the you looked at or  chatted with
+* unleash -> unleashes the npc the you looked at or chatted with
+* npcleash -> alias for leash
+* npcunleash -> alias for unleash
 
 commands with 1 param:
 

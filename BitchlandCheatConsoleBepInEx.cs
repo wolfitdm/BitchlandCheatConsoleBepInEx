@@ -10904,6 +10904,31 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "leashplayer":
+                    {
+                        leashplayer();
+                    }
+                    break;
+                case "unleashplayer":
+                    {
+                        unleashplayer();
+                    }
+                    break;
+
+                case "leash":
+                case "npcleash":
+                    {
+                        npcleash();
+                    }
+                    break;
+
+                case "unleash":
+                case "npcunleash":
+                    {
+                        npcunleash();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10923,6 +10948,68 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        private static void npcunleash()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcunleash");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.ThisPersonInt.Unleash();
+            }
+            catch { }
+        }
+
+        private static void npcleash()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcleash");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.ThisPersonInt.Leash();
+            }
+            catch { }
+        }
+
+        private static void unleashplayer()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unleashplayer");
+            Person person = Main.Instance.Player;
+            
+            
+            try
+            {
+                person.ThisPersonInt.Unleash();
+            }
+            catch { }
+        }
+
+        private static void leashplayer()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: leashplayer");
+            Person person = Main.Instance.Player;
+
+            try
+            {
+                person.ThisPersonInt.Leash();
+            } catch { }
         }
 
         private static void npcsexaddict()
