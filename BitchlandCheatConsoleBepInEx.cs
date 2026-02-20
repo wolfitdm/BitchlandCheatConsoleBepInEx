@@ -10929,6 +10929,17 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "lockfollower":
+                    {
+                        lockfollower();
+                    }
+                    break;
+
+                case "unlockfollower":
+                    {
+                        unlockfollower();
+                    }
+                    break;
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -16354,6 +16365,11 @@ namespace BitchlandCheatConsoleBepInEx
                         PatchHarmonyMethodUnity(typeof(bl_NoItemSexSpot), "StopInteracting", "bl_NoItemSexSpot_StopInteracting", true, false);
                     }
                     catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Person), "StopFollowing", "Person_StopInteracting", true, false);
+                    }
+                    catch { }
                 }
 
             } catch (Exception ex)
@@ -16363,6 +16379,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         public static bool extendedLock = false;
+        public static bool lockFollowing = false;
         public static bool int_DildoPole_StopInteracting(object __instance)
         {
             if (extendedLock)
@@ -16436,6 +16453,16 @@ namespace BitchlandCheatConsoleBepInEx
             }
             return true;
         }
+
+        public static bool Person_StopFollowing(object __instance)
+        {
+            if (lockFollowing)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void locksexmachines()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: locksexmachines");
@@ -16446,6 +16473,17 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: unlocksexmachines");
             extendedLock = false;
         }
+        public static void lockfollower()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lockfollower");
+            lockFollowing = true;
+        }
+        public static void unlockfollower()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlockfollower");
+            lockFollowing = false;
+        }
+
         public static bool isPersonLeashed(GameObject personGa)
         {
             if (personGa == null)

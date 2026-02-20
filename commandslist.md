@@ -338,6 +338,8 @@ commands with no params:
 * unleash -> unleashes the npc the you looked at or chatted with
 * npcleash -> alias for leash
 * npcunleash -> alias for unleash
+* lockfollower -> lock followers so they can no longer break free from the leash
+* unlockfollower -> unlock followers so they can break free from the leash
 
 commands with 1 param:
 
