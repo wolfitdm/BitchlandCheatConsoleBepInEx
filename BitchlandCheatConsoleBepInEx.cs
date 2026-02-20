@@ -10916,6 +10916,11 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
 
                 case "leash":
+                    {
+                        npcleashex();
+                    }
+                    break;
+
                 case "npcleash":
                     {
                         npcleash();
@@ -10923,6 +10928,11 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
 
                 case "unleash":
+                    {
+                        npcunleashex();
+                    }
+                    break;
+
                 case "npcunleash":
                     {
                         npcunleash();
@@ -11035,6 +11045,25 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
         }
 
+        private static void npcunleashex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unleash");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.ThisPersonInt.Unleash();
+            }
+            catch { }
+        }
+
         private static void npcleash()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: npcleash");
@@ -11064,6 +11093,26 @@ namespace BitchlandCheatConsoleBepInEx
             }
             catch { }
         }
+
+        private static void npcleashex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: leash");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.ThisPersonInt.Leash();
+            }
+            catch { }
+        }
+
 
         private static void unleashplayer()
         {
