@@ -339,6 +339,10 @@ npcleash -> alias for leash
 npcunleash -> alias for unleash
 lockfollower -> lock followers so they can no longer break free from the leash
 unlockfollower -> unlock followers so they can break free from the leash
+npcforce -> toggle npc the you looked at or chatted with, can be forced to sex
+npcrestrain -> toggle npc the you looked at or chatted with, can be restrained
+forceplayer -> toggle player can be forced to sex
+restrainplayer -> toggle player can be restrained
 
 commands with 1 param:
 

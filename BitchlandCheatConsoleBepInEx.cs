@@ -10940,6 +10940,30 @@ namespace BitchlandCheatConsoleBepInEx
                         unlockfollower();
                     }
                     break;
+
+                case "npcforce":
+                    {
+                        npcforce();
+                    }
+                    break;
+
+                case "npcerstrain":
+                    {
+                        npcrestrain();
+                    }
+                    break;
+
+                case "restrainplayer":
+                    {
+                        restrainplayer();
+                    }
+                    break;
+
+                case "forceplayer":
+                    {
+                        forceplayer();
+                    }
+                    break;
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -10975,6 +10999,37 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
+                GameObject item = getAllItemByName("portable_pillory");
+
+                if (item != null)
+                {
+                    Int_Storage hands = Main.Instance.Player.Storage_Hands;
+
+                    List<GameObject> items = new List<GameObject>();
+                    if (hands == null)
+                    {
+                        goto label_end_unleash;
+                    }
+
+                    items.AddRange(hands.StorageItems);
+                    hands.RemoveAllItems();
+
+                    hands.AddItem(item);
+
+                    npcunequipfromhand();
+
+                    hands.RemoveAllItems();
+
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        hands.AddItem(items[i]);
+                    }
+                }
+            } catch { }
+
+        label_end_unleash:
+            try
+            {
                 person.ThisPersonInt.Unleash();
             }
             catch { }
@@ -10994,6 +11049,17 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
+                GameObject item = getAllItemByName("portable_pillory");
+
+                if (item != null)
+                {
+                    person.DressClothe(item);
+                }
+            }
+            catch { }
+
+            try
+            {
                 person.ThisPersonInt.Leash();
             }
             catch { }
@@ -11003,8 +11069,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unleashplayer");
             Person person = Main.Instance.Player;
-            
-            
+
             try
             {
                 person.ThisPersonInt.Unleash();
@@ -11019,8 +11084,117 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
+                GameObject item = getAllItemByName("portable_pillory");
+
+                if (item != null)
+                {
+                    person.DressClothe(item);
+                }
+            }
+            catch { }
+
+            try
+            {
                 person.ThisPersonInt.Leash();
             } catch { }
+        }
+
+        public static void npcrestrain()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcrestrain");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.CantBeRestrained = !person.CantBeRestrained;
+
+                if (person.CantBeRestrained)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npc can not be restrained");
+                } else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npc can be restrained");
+                }
+            } catch { }
+        }
+
+        public static void npcforce()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: npcforce");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                person.CantBeForced = !person.CantBeForced;
+
+                if (person.CantBeForced)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npc can not be forced to sex");
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("npc can be forced to sex");
+                }
+            }
+            catch { }
+        }
+
+        public static void restrainplayer()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: restrainplayer");
+
+            Person person = Main.Instance.Player;
+
+            try
+            {
+                person.CantBeRestrained = !person.CantBeRestrained;
+
+                if (person.CantBeRestrained)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("player can not be restrained");
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("player can be restrained");
+                }
+            }
+            catch { }
+        }
+
+        public static void forceplayer()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: forceplayer");
+
+            Person person = Main.Instance.Player;
+
+            try
+            {
+                person.CantBeForced = !person.CantBeForced;
+
+                if (person.CantBeForced)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("player can not be forced to sex");
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("player can be forced to sex");
+                }
+            }
+            catch { }
         }
 
         private static void npcsexaddict()
