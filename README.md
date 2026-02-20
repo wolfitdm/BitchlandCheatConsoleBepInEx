@@ -896,3 +896,15 @@ PLAN_WoodPillarBJ
 PLAN_WoodPole1
 PLAN_woodpole2
 PLAN_woodpoleWide
+
+Objects:
+Vehicles:
+
+* spawn car
+* spawn car2
+* spawn tank
+* spawn tank2
+
+for more objects see listobjects.json file
+
+https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/listobjects.json

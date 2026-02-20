@@ -14366,6 +14366,23 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static GameObject getObjectByNameEx(string value)
         {
+            switch (value)
+            {
+                case "tank":
+                    value = "panzer_vi_e_(1)";
+                    break;
+
+                case "car":
+                case "truck":
+                    value = "sedanvehicle";
+                    break;
+
+                case "car2":
+                case "truck2":
+                    value = "sedanvehicle_(1)";
+                    break;
+            };
+
             GameObject gameObject = getObjectByName(value);
 
             if (value == null)
