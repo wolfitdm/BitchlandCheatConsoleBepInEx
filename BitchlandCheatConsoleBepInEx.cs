@@ -46,6 +46,7 @@ using Component = UnityEngine.Component;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using Cursor = UnityEngine.Cursor;
+// using GLTFast.Export;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -930,6 +931,22 @@ namespace BitchlandCheatConsoleBepInEx
             //rb.velocity = v;
         }
 
+        private static bool printMessage = true;
+        private static void putMessageOnPressedKeyCode(KeyCode key)
+        {
+            if (!printMessage)
+            {
+                return;
+            }
+
+            if (key == 0)
+            {
+                return;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("key in position/rotate mode pressed : " + key.ToString());
+        }
+
         private void HandleRotateMode()
         {
             if (rotatemodevar == false || rotatedObjects == null || rotatedObjects.Length == 0)
@@ -952,46 +969,56 @@ namespace BitchlandCheatConsoleBepInEx
 
                     Quaternion rotation1x = rotatedObject.transform.rotation;
 
+                    KeyCode key = 0;
 
                     if (Input.GetKeyUp(keyCodeRotateXPlus))
                     {
                         rotation1x.x += strong;
+                        key = keyCodeRotateXPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateXMinus))
                     {
                         rotation1x.x -= strong;
+                        key = keyCodeRotateXMinus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateYPlus))
                     {
                         rotation1x.y += strong;
+                        key = keyCodeRotateYPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateYMinus))
                     {
                         rotation1x.y -= strong;
+                        key = keyCodeRotateYMinus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateZPlus)) {
                         rotation1x.z += strong;
+                        key = keyCodeRotateZPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateZMinus))
                     {
                         rotation1x.z -= strong;
+                        key = keyCodeRotateZMinus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateWPlus))
                     {
                         rotation1x.w += strong;
+                        key = keyCodeRotateWPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodeRotateWMinus))
                     {
                         rotation1x.w -= strong;
+                        key = keyCodeRotateWMinus;
                     }
 
+                    putMessageOnPressedKeyCode(key);
                     rotatedObject.transform.rotation = rotation1x;
                 }
             } catch { }
@@ -1019,37 +1046,45 @@ namespace BitchlandCheatConsoleBepInEx
 
                     Vector3 position1x = positionedObject.transform.position;
 
+                    KeyCode key = 0;
 
                     if (Input.GetKeyUp(keyCodePositionXPlus))
                     {
                         position1x.x += strong;
+                        key = keyCodePositionXPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodePositionXMinus))
                     {
                         position1x.x -= strong;
+                        key = keyCodePositionXMinus;
                     }
 
                     if (Input.GetKeyUp(keyCodePositionYPlus))
                     {
                         position1x.y += strong;
+                        key = keyCodePositionYPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodePositionYMinus))
                     {
                         position1x.y -= strong;
+                        key = keyCodePositionYMinus;
                     }
 
                     if (Input.GetKeyUp(keyCodePositionZPlus))
                     {
                         position1x.z += strong;
+                        key = keyCodePositionZPlus;
                     }
 
                     if (Input.GetKeyUp(keyCodePositionZMinus))
                     {
                         position1x.z -= strong;
+                        key = keyCodePositionZMinus;
                     }
 
+                    putMessageOnPressedKeyCode(key);
                     positionedObject.transform.position = position1x;
                 }
             }
@@ -1322,12 +1357,12 @@ namespace BitchlandCheatConsoleBepInEx
             TriggerUpdate();
             HandleMultiFollower();
             HandleMultiFollowerUpgrade();
+            HandlePositionMode();
+            HandleRotateMode();
         }
         private void LateUpdate()
         {
             HandleFlight();
-            HandlePositionMode();
-            HandleRotateMode();
             handleCommandKeys();
         }
 
@@ -1751,14 +1786,35 @@ namespace BitchlandCheatConsoleBepInEx
 
             string filename = $"{objectsFolder}/{name}.obj";
 
+            string filenameglb = $"{objectsFolder}/{name}.glb";
+
             if (File.Exists(filename))
             {
                 Main.Instance.GameplayMenu.ShowNotification(filename + " exists!");
                 return "";
             }
 
+            /*
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = rootObject;
+
             try
             {
+                var exporter = new GameObjectExport();
+
+                // Add the GameObject hierarchy to the exporter
+                exporter.AddScene(objects);
+
+                // Fire-and-forget async export
+                _ = exporter.SaveToFileAndDispose(filename);
+            } catch (Exception ex)
+            {
+            }*/
+             
+            try
+            { 
+
                 SaveableBehaviour s = MyGetComponentSave<SaveableBehaviour>(rootObject);
                 s.SaveToFile(filename);
                 return filename;
@@ -4944,6 +5000,14 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static List<string> copyex(string name)
         {
+            if (name == null || name == string.Empty)
+            {
+                name = "";
+            } else
+            {
+                name = " " + name;
+            }
+
             List<string> messages = new List<string>();
             try
             {
@@ -4969,7 +5033,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                                 try
                                 {
-                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste {value}' or the command 'toggleactive {value}' to toggle the active state, paste = to spawn the object!");
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste{name}' or the command 'toggleactive{name}' to toggle the active state, paste = to spawn the object!");
                                 }
                                 catch (Exception ex)
                                 {
@@ -4977,7 +5041,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                                 try
                                 {
-                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive {value} / togglecollision {value}', to toggle active/collision of this object!");
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive{name} / togglecollision{name}', to toggle active/collision of this object!");
                                 }
                                 catch (Exception ex)
                                 {
@@ -5001,7 +5065,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                                 try
                                 {
-                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste2 {value}' or the command 'toggleactive {value}' to toggle the active state, paste = to spawn the object!");
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste2{name}' or the command 'toggleactive {value}' to toggle the active state, paste = to spawn the object!");
                                 }
                                 catch (Exception ex)
                                 {
@@ -5009,7 +5073,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                                 try
                                 {
-                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive2 {value} / togglecollision2 {value}', to toggle active/collision of this object!");
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive2{name} / togglecollision2{name}', to toggle active/collision of this object!");
                                 }
                                 catch (Exception ex)
                                 {
@@ -5206,6 +5270,17 @@ namespace BitchlandCheatConsoleBepInEx
         public static void toggleactive(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
             GameObject[] objects = copyObj;
             bool activevar = active1;
 
@@ -5267,6 +5342,11 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                     }
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5278,6 +5358,17 @@ namespace BitchlandCheatConsoleBepInEx
         public static void toggleactive2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive2");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
             GameObject[] objects = copyObj2;
             bool activevar = active2;
 
@@ -5340,6 +5431,11 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                     }
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5351,6 +5447,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void togglecollision(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj;
             bool collisionvar = collision1;
@@ -5418,6 +5524,11 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                     }
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5429,6 +5540,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void togglecollision2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision2");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj2;
             bool collisionvar = collision2;
@@ -5496,6 +5617,11 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                     }
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5511,6 +5637,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void rotatemode(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: rotatemode");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj;
 
@@ -5561,6 +5697,11 @@ namespace BitchlandCheatConsoleBepInEx
                     rotatedObjects = null;
                     Main.Instance.GameplayMenu.ShowNotification("rotatemode: off");
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5571,6 +5712,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void rotatemode2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: rotatemode2");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj2;
 
@@ -5622,6 +5773,11 @@ namespace BitchlandCheatConsoleBepInEx
                     Main.Instance.GameplayMenu.ShowNotification("rotatemode: off");
                     rotatedObjects = null;
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5631,6 +5787,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void positionmode(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: positionmode");
+
+            List<string> messages = new List<string>();
+            
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj;
 
@@ -5682,6 +5848,11 @@ namespace BitchlandCheatConsoleBepInEx
                     positionedObjects = null;
                     Main.Instance.GameplayMenu.ShowNotification("positionmode: off");
                 }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
             }
             else
             {
@@ -5692,6 +5863,16 @@ namespace BitchlandCheatConsoleBepInEx
         public static void positionmode2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: positionmode2");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
 
             GameObject[] objects = copyObj2;
 
@@ -5742,6 +5923,144 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     Main.Instance.GameplayMenu.ShowNotification("positionmode: off");
                     positionedObjects = null;
+                }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static void warpobject(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: warpobject");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
+            GameObject[] objects = copyObj;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj;
+            }
+            else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies[value];
+            }
+
+            if (objects != null)
+            {
+                positionmodevar = !positionmodevar;
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    obj.transform.position = Main.Instance.Player.transform.position;
+                    obj.transform.rotation = Main.Instance.Player.transform.rotation;
+                    pasties.Add(obj);
+                }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static void warpobject2(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: warpobject2");
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
+            GameObject[] objects = copyObj2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies2[value];
+            }
+
+            if (objects != null)
+            {
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    obj.transform.position = Main.Instance.Player.transform.position;
+                    obj.transform.rotation = Main.Instance.Player.transform.rotation;
+                    pasties.Add(obj);
+                }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
                 }
             }
             else
@@ -11771,6 +12090,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "warpobject":
+                    {
+                        warpobject(null);
+                    }
+                    break;
+
+                case "warpobject2":
+                    {
+                        warpobject2(null);
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -13732,12 +14063,14 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawn":
                 case "spawnobjectex":
                     {
                         spawnobjectex(value);
                     }
                     break;
 
+                case "search":
                 case "searchobjectex":
                     {
                         searchobjectex(value);
@@ -13822,6 +14155,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "warpobject":
+                    {
+                        warpobject(value);
+                    }
+                    break;
+
+                case "warpobject2":
+                    {
+                        warpobject2(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -13837,6 +14182,33 @@ namespace BitchlandCheatConsoleBepInEx
             List<SaveableBehaviour> spawnedObjects = new List<SaveableBehaviour>();
 
             List<SaveableBehaviour> spawnedObjectsWorld = new List<SaveableBehaviour>();
+
+            GameObject[] allObjects = UnityEngine.Object.FindObjectsByType<GameObject>(
+                    FindObjectsSortMode.None // No sorting for better performance
+            );
+
+            try
+            {
+                if (allObjects != null)
+                {
+                    foreach (GameObject objected in allObjects)
+                    {
+                        if (objected == null)
+                        {
+                            continue;
+                        }
+
+                        if (list.Contains(objected))
+                        {
+                            continue;
+                        }
+
+                        list.Add(objected);
+                    }
+                }
+            } catch (Exception ex)
+            {
+            }
 
             try
             {
@@ -13886,6 +14258,34 @@ namespace BitchlandCheatConsoleBepInEx
             return list;
         } 
 
+        public static Dictionary<string,GameObject> getAllObjectsStrings()
+        {
+            Dictionary<string,GameObject> list = new Dictionary<string, GameObject>();
+
+            List<GameObject> objects = getAllObjects();
+
+            foreach (GameObject objected in objects)
+            {
+                if (objected.name == null)
+                {
+                    continue;
+                }
+
+                string name = objected.name;
+
+                name = name.ToLower().Replace(" ", "_");
+
+                if (list.ContainsKey(name))
+                {
+                    continue;
+                }
+
+                list.Add(name, objected);
+            }
+
+            return list;
+        }
+
         public static GameObject getObjectByName(string value)
         {
             if (value  == null)
@@ -13900,42 +14300,103 @@ namespace BitchlandCheatConsoleBepInEx
 
             string searchedName = value.ToLower();
 
-            List<GameObject> objects = getAllObjects();
+            Dictionary<string,GameObject> objects = getAllObjectsStrings();
 
-            foreach (GameObject objected in objects)
+            if (objects.ContainsKey(searchedName))
             {
-                string objectedName = objected.name;
+                return objects[searchedName];
+            }
 
-                if (objectedName == null || objectedName == string.Empty)
+            return null;
+        }
+
+        public static GameObject getObjectByNameStartsWith(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            Dictionary<string, GameObject> objects = getAllObjectsStrings();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.StartsWith(searchedName))
                 {
-                    continue;
-                }
-
-                objectedName = objectedName.ToLower();
-
-                if (searchedName == objectedName)
-                {
-                    return objected;
+                    return objects[name];
                 }
             }
 
             return null;
         }
 
+        public static GameObject getObjectByNameContains(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            Dictionary<string, GameObject> objects = getAllObjectsStrings();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.Contains(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
+        public static GameObject getObjectByNameEx(string value)
+        {
+            GameObject gameObject = getObjectByName(value);
+
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameStartsWith(value);
+            }
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameContains(value);
+            }
+
+            return gameObject;
+        }
+
         private static void listobjects()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listobjects");
 
-            List<GameObject> objects = getAllObjects();
-
-            foreach (GameObject objected in objects)
+            try
             {
-                if (objected == null)
-                {
-                    continue;
-                }
+                List<string> objectsNames = getAllObjectsStrings().Keys.ToList();
+                File.WriteAllText("listobjects.json", objectsNames.ToJson());
+            } catch (Exception ex)
+            {
 
-                Logger.LogInfo(objected.name);
             }
         }
 
@@ -13943,7 +14404,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectex");
 
-            GameObject gameObject = getObjectByName(value);
+            GameObject gameObject = getObjectByNameEx(value);
 
             if (value == null)
             {
@@ -13952,7 +14413,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (gameObject == null)
             {
-                Main.Instance.GameplayMenu.ShowNotification("object not founded : " + value);
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
                 return;
             }
 
@@ -13962,7 +14423,7 @@ namespace BitchlandCheatConsoleBepInEx
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectex");
 
-            GameObject gameObject = getObjectByName(value);
+            GameObject gameObject = getObjectByNameEx(value);
 
             if (value == null)
             {
@@ -13971,7 +14432,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             if (gameObject == null)
             {
-                Main.Instance.GameplayMenu.ShowNotification("object not founded : " + value);
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
                 return;
             }
 
@@ -17203,75 +17664,75 @@ namespace BitchlandCheatConsoleBepInEx
 
             configPositionValue = Config.Bind(pluginKeyControlsPositionMode,
                                         "PositionModeValue",
-                                        0.01f,
-                                        "value that is used in order to increase/decrease the x/y/z axis in position mode, default 0.01");
+                                        0.05f,
+                                        "value that is used in order to increase/decrease the x/y/z axis in position mode, default 0.05");
 
             configKeyCodePositionXPlus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeXPlus",
-                                        KeyCode.D,
-                                        "KeyCode in position mode in order to increase the x axis, default D");
+                                        KeyCode.PageDown,
+                                        "KeyCode in position mode in order to increase the x axis, default PageDown");
 
 
             configKeyCodePositionXMinus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeXMinus",
-                                        KeyCode.A,
-                                        "KeyCode in position mode in order to decreause the x axis, default A");
+                                        KeyCode.Delete,
+                                        "KeyCode in position mode in order to decrease the x axis, default Delete");
 
             configKeyCodePositionYPlus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeYPlus",
-                                        KeyCode.W,
-                                        "KeyCode in position mode in order to increase the y axis, default W");
+                                        KeyCode.Home,
+                                        "KeyCode in position mode in order to increase the y axis, default Home");
 
             configKeyCodePositionYMinus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeYMinus",
-                                        KeyCode.S,
-                                        "KeyCode in position mode in order to decreause the y axis, default S");
+                                        KeyCode.End,
+                                        "KeyCode in position mode in order to decrease the y axis, default End");
 
             configKeyCodePositionZPlus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeZPlus",
-                                        KeyCode.E,
-                                        "KeyCode in position mode in order to increase the z axis, default E");
+                                        KeyCode.Insert,
+                                        "KeyCode in position mode in order to increase the z axis, default Insert");
 
 
             configKeyCodePositionZMinus = Config.Bind(pluginKeyControlsPositionMode,
                                         "KeyCodePositionModeZMinus",
-                                        KeyCode.Q,
-                                        "KeyCode in position mode in order to decreause the z axis, default Q");
+                                        KeyCode.PageUp,
+                                        "KeyCode in position mode in order to decrease the z axis, default PageUp");
 
             configRotateValue = Config.Bind(pluginKeyControlsRotateMode,
                             "RotateModeValue",
-                            0.01f,
-                            "value that is used in order to increase/decrease the x/y/z/w axis in rotate mode, default 0.01");
+                            0.05f,
+                            "value that is used in order to increase/decrease the x/y/z/w axis in rotate mode, default 0.05");
 
             configKeyCodeRotateXPlus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeXPlus",
-                                        KeyCode.D,
-                                        "KeyCode in rotate mode in order to increase the x axis, default D");
+                                        KeyCode.PageDown,
+                                        "KeyCode in rotate mode in order to increase the x axis, default PageDown");
 
             configKeyCodeRotateXMinus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeXMinus",
-                                        KeyCode.A,
-                                        "KeyCode in rotate mode in order to decreause the x axis, default A");
+                                        KeyCode.Delete,
+                                        "KeyCode in rotate mode in order to decrease the x axis, default Delete");
 
             configKeyCodeRotateYPlus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeYPlus",
-                                        KeyCode.W,
-                                        "KeyCode in rotate mode in order to increase the y axis, default W");
+                                        KeyCode.Home,
+                                        "KeyCode in rotate mode in order to increase the y axis, default Home");
 
             configKeyCodeRotateYMinus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeYMinus",
-                                        KeyCode.S,
-                                        "KeyCode in rotate mode in order to decreause the y axis, default S");
+                                        KeyCode.End,
+                                        "KeyCode in rotate mode in order to decrease the y axis, default End");
 
             configKeyCodeRotateZPlus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeZPlus",
-                                        KeyCode.E,
-                                        "KeyCode in rotate mode in order to increase the z axis, default E");
+                                        KeyCode.Insert,
+                                        "KeyCode in rotate mode in order to increase the z axis, default Insert");
 
             configKeyCodeRotateZMinus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeZMinus",
-                                        KeyCode.Q,
-                                        "KeyCode in rotate mode in order to decreause the z axis, default Q");
+                                        KeyCode.PageUp,
+                                        "KeyCode in rotate mode in order to decrease the z axis, default PageUp");
 
             configKeyCodeRotateWPlus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeWPlus",
@@ -17281,7 +17742,7 @@ namespace BitchlandCheatConsoleBepInEx
             configKeyCodeRotateWMinus = Config.Bind(pluginKeyControlsRotateMode,
                                         "KeyCodeRotateModeWMinus",
                                         KeyCode.T,
-                                        "KeyCode in rotate mode in order to decreause the w axis, default T");
+                                        "KeyCode in rotate mode in order to decrease the w axis, default T");
 
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
@@ -17319,12 +17780,18 @@ namespace BitchlandCheatConsoleBepInEx
             rotateValue = configRotateValue.Value;
 
             keyCodePositionXPlus = configKeyCodePositionXPlus.Value;
+            keyCodePositionXMinus = configKeyCodePositionXMinus.Value;
             keyCodePositionYPlus = configKeyCodePositionYPlus.Value;
+            keyCodePositionYMinus = configKeyCodePositionYMinus.Value;
             keyCodePositionZPlus = configKeyCodePositionZPlus.Value;
+            keyCodePositionZMinus = configKeyCodePositionZMinus.Value;
 
             keyCodeRotateXPlus = configKeyCodeRotateXPlus.Value;
+            keyCodeRotateXMinus = configKeyCodeRotateXMinus.Value;
             keyCodeRotateYPlus = configKeyCodeRotateYPlus.Value;
+            keyCodeRotateYMinus = configKeyCodeRotateYMinus.Value;
             keyCodeRotateZPlus = configKeyCodeRotateZPlus.Value;
+            keyCodeRotateZMinus = configKeyCodeRotateZMinus.Value;
             keyCodeRotateWPlus = configKeyCodeRotateWPlus.Value;
             keyCodeRotateWMinus = configKeyCodeRotateWMinus.Value;
 
@@ -17843,7 +18310,7 @@ namespace BitchlandCheatConsoleBepInEx
                     catch { }
                     try
                     {
-                        PatchHarmonyMethodUnity(typeof(Person), "StopFollowing", "Person_StopInteracting", true, false);
+                        PatchHarmonyMethodUnity(typeof(Person), "StopFollowing", "Person_StopFollowing", true, false);
                     }
                     catch { }
                 }

@@ -35,6 +35,27 @@
     <Reference Include="Den.Tools">
       <HintPath>lib\Den.Tools.dll</HintPath>
     </Reference>
+    <Reference Include="glTFast">
+      <HintPath>lib\glTFast.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.Animation">
+      <HintPath>lib\glTFast.Animation.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.Documentation.Examples">
+      <HintPath>lib\glTFast.Documentation.Examples.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.dots">
+      <HintPath>lib\glTFast.dots.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.Editor">
+      <HintPath>lib\glTFast.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.Export">
+      <HintPath>lib\glTFast.Export.dll</HintPath>
+    </Reference>
+    <Reference Include="glTFast.Newtonsoft">
+      <HintPath>lib\glTFast.Newtonsoft.dll</HintPath>
+    </Reference>
     <Reference Include="MapMagic">
       <HintPath>lib\MapMagic.dll</HintPath>
     </Reference>
