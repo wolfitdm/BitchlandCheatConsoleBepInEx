@@ -10921,6 +10921,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "leashex":
+                    {
+                        leashex();
+                    }
+                    break;
+
                 case "npcleash":
                     {
                         npcleash();
@@ -10992,6 +10998,67 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+        public static void LeashEx(object personObj)
+        {
+            try
+            {
+                if (personObj == null)
+                {
+                    return;
+                }
+
+                int_Person _this = (int_Person)personObj;
+
+                if (!Main.Instance.PeopleFollowingPlayer.Contains(_this.ThisPerson))
+                    Main.Instance.PeopleFollowingPlayer.Add(_this.ThisPerson);
+                _this.StartTalkFunc = "RestrainedInteraction";
+                _this.ThisPerson.RandActionTimer = 5f;
+                _this.ThisPerson.DecideTimer = 5f;
+                _this.ThisPerson.FreeScheduleTasks.Clear();
+                _this.ThisPerson.CompleteScheduleTask(false);
+                _this.ThisPerson.FreeScheduleTasks.Clear();
+                _this.ThisPerson.Leashed = true;
+                Main.RunInNextFrame((Action)(() =>
+                {
+                    _this.ThisPerson.AddCullBlocker("Following_Leash");
+                    _this.ThisPerson.StartScheduleTask(new Person.ScheduleTask()
+                    {
+                        IDName = "FollowPlayer_restrained",
+                        ActionPlace = Main.Instance.Player.transform,
+                        OnArrive = (Action)(() => { }),
+                        WhileGoing = (Action)(() =>
+                        {
+                            _this.ThisPerson.RandActionTimer += Time.deltaTime;
+                            if ((double)_this.ThisPerson.RandActionTimer <= 0.25)
+                                return;
+                            _this.ThisPerson.RandActionTimer = 0.0f;
+                            float num = Vector3.Distance(Main.Instance.Player.transform.position, _this.transform.position);
+                            if ((double)num > 1.0)
+                                _this.ThisPerson.SetDestination(_this.ThisPerson.CurrentScheduleTask.ActionPlace);
+                            else if (_this.ThisPerson.navMesh.isOnNavMesh)
+                                _this.ThisPerson.navMesh.isStopped = true;
+                            _this.ThisPerson.navMesh.speed = (double)num > 4.0 ? 4f : 1f;
+                        }),
+                        OnInterrupt_WhileGoing = (Action)(() =>
+                        {
+                        })
+                    });
+                }));
+                _this.TheLeashRoot = UnityEngine.Object.Instantiate<GameObject>(Main.Instance.AllPrefabs[265]).transform;
+                _this.TheLeashRoot.SetParent(Main.Instance.Player.RightHandStuff);
+                _this.TheLeashRoot.localScale = Vector3.one;
+                _this.TheLeashRoot.localPosition = Vector3.zero;
+                _this.TheLeashRoot.localEulerAngles = Vector3.zero;
+                _this.TheLeashRoot = _this.TheLeashRoot.Find("Tip");
+                _this.TheLeashTiedSpot = _this.ThisPerson.Neck;
+                Main.Instance.MainThreads_Late.Add(new Action(_this.LeashThread));
+                _this.SetDefaultInteraction();
+                _this.StartTalkMono = (MonoBehaviour)_this;
+                _this.StartTalkFunc = "RestrainedInteraction";
+            } catch (Exception ex)
+            {
             }
         }
 
@@ -11112,7 +11179,24 @@ namespace BitchlandCheatConsoleBepInEx
             }
             catch { }
         }
+        private static void leashex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: leashex");
+            GameObject personGa = getPersonInteract();
 
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                LeashEx(person.ThisPersonInt);
+            }
+            catch { }
+        }
 
         private static void unleashplayer()
         {

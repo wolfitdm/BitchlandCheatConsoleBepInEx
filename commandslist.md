@@ -335,9 +335,10 @@ commands with no params:
 * leashplayer -> leash the player
 * unleashplayer -> unleash the player
 * leash -> leashes the npc the you looked at or  chatted with
+* leashex -> leashes the npc the you looked at or  chatted with, but without the interrupting thing, it is a better version from the original leash function
 * unleash -> unleashes the npc the you looked at or chatted with
-* npcleash -> alias for leash
-* npcunleash -> alias for unleash
+* npcleash -> leashes the npc the you looked at or  chatted with, and equip the npc also a portable pillory
+* npcunleash -> unleashes the npc the you looked at or chatted with, and drops the portable pillory
 * lockfollower -> lock followers so they can no longer break free from the leash
 * unlockfollower -> unlock followers so they can break free from the leash
 * npcforce -> toggle npc the you looked at or chatted with, can be forced to sex
