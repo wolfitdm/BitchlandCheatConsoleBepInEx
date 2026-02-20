@@ -4679,7 +4679,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void savecopy(string value)
         {
-            copy();
+            List<string> messages = copyex(value);
 
             if (copyObj == null || copyObj2 == null)
             {
@@ -4711,7 +4711,10 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Main.Instance.GameplayMenu.ShowNotification("savecopy: list saved to " + value);
-
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+            }
         }
         public static void spawncopy(string value)
         {
@@ -4806,6 +4809,91 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                 }
             }
+        }
+
+        public static List<string> copyex(string name)
+        {
+            List<string> messages = new List<string>();
+            try
+            {
+                RaycastHit hitInfo;
+                WeaponSystem _this = Main.Instance.Player.WeaponInv;
+                if (Physics.Raycast(_this.transform.position, _this.transform.TransformDirection(Vector3.forward), out hitInfo, _this.RayDistance, (int)_this.PromptLayers))
+                {
+                    Component[] obj_ = hitInfo.transform.GetComponents<Component>();
+                    Component[] obj2_ = hitInfo.transform.root.GetComponents<Component>();
+
+                    if (obj_ != null)
+                    {
+                        copyObj = new GameObject[obj_.Length];
+                        for (int i = 0; i < obj_.Length; i++)
+                        {
+                            copyObj[i] = null;
+
+                            Component obj = obj_[i];
+
+                            if (obj != null)
+                            {
+                                copyObj[i] = obj.gameObject;
+
+                                try
+                                {
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste {value}' or the command 'toggleactive {value}' to toggle the active state, paste = to spawn the object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive {value} / togglecollision {value}', to toggle active/collision of this object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
+                        }
+                    }
+
+                    if (obj2_ != null)
+                    {
+                        copyObj2 = new GameObject[obj2_.Length];
+                        for (int i = 0; i < obj2_.Length; i++)
+                        {
+                            copyObj2[i] = null;
+
+                            Component obj2 = obj2_[i];
+
+                            if (obj2 != null)
+                            {
+                                copyObj2[i] = obj2.gameObject;
+
+                                try
+                                {
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'paste2 {value}' or the command 'toggleactive {value}' to toggle the active state, paste = to spawn the object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+
+                                try
+                                {
+                                    messages.Add($"copy: object '{copyObj[i].name}' copied/selected, now you can use the command 'toggleactive2 {value} / togglecollision2 {value}', to toggle active/collision of this object!");
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+            }
+
+            return messages;
         }
 
         public static void copy()
@@ -4983,28 +5071,66 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static void toggleactive()
+        public static Dictionary<string, bool> active1Dict = new Dictionary<string, bool>();
+        public static void toggleactive(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive");
-            if (copyObj != null)
+            GameObject[] objects = copyObj;
+            bool activevar = active1;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
             {
-                active1 = !active1;
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj.Length; i++)
+                foundvalue = false;
+                objects = copyObj;
+                activevar = active1;
+            } else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
                 {
-                    if (copyObj[i] == null)
+                    foundvalue = true;
+                }
+            }
+            
+            if (foundvalue)
+            {
+                objects = copies[value];
+                if (!active1Dict.ContainsKey(value))
+                {
+                    active1Dict.Add(value, false);
+                }
+                activevar = active1Dict[value];
+            }
+
+            if (objects != null)
+            {
+                activevar = !activevar;
+                if (foundvalue)
+                {
+                    active1Dict[value] = activevar;
+                } else
+                {
+                    active1 = activevar;
+                }
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
                     {
                         continue;
                     }
 
-                    GameObject obj = copyObj[i];
+                    GameObject obj = objects[i];
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
-                    obj.SetActive(active1);
+                    obj.SetActive(activevar);
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive: object '{obj.name}' is set to " + (active1 ? "active" : "not active"));
+                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive: object '{obj.name}' is set to " + (activevar ? "active" : "not active"));
                     }
                     catch (Exception ex)
                     {
@@ -5016,28 +5142,68 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
             }
         }
-        public static void toggleactive2()
+
+        public static Dictionary<string, bool> active2Dict = new Dictionary<string, bool>();
+        public static void toggleactive2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: toggleactive2");
-            if (copyObj2 != null)
+            GameObject[] objects = copyObj2;
+            bool activevar = active2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
             {
-                active2 = !active2;
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj2.Length; i++)
+                foundvalue = false;
+                objects = copyObj2;
+                activevar = active2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
                 {
-                    if (copyObj2[i] == null)
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies2[value];
+                if (!active2Dict.ContainsKey(value))
+                {
+                    active2Dict.Add(value, false);
+                }
+                activevar = active2Dict[value];
+            }
+
+            if (objects != null)
+            {
+                activevar = !activevar;
+                if (foundvalue)
+                {
+                    active2Dict[value] = activevar;
+                } else
+                {
+                    active2 = activevar;
+                }
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
                     {
                         continue;
                     }
 
-                    GameObject obj = copyObj2[i];
+                    GameObject obj = objects[i];
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
-                    obj.SetActive(active2);
+                    obj.SetActive(activevar);
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive2: object '{obj.name}' is set to " + (active2 ? "active" : "not active"));
+                        Main.Instance.GameplayMenu.ShowNotification($"toggleactive2: object '{obj.name}' is set to " + (activevar ? "active" : "not active"));
                     }
                     catch (Exception ex)
                     {
@@ -5050,20 +5216,60 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        public static void togglecollision()
+        public static Dictionary<string, bool> collision1Dict = new Dictionary<string, bool>();
+        public static void togglecollision(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision");
-            if (copyObj != null)
+
+            GameObject[] objects = copyObj;
+            bool collisionvar = collision1;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
             {
-                collision1 = !collision1;
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj.Length; i++)
+                foundvalue = false;
+                objects = copyObj;
+                collisionvar = collision1;
+            }
+            else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
                 {
-                    if (copyObj[i] == null)
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies[value];
+                if (!collision1Dict.ContainsKey(value))
+                {
+                    collision1Dict.Add(value, false);
+                }
+                collisionvar = collision1Dict[value];
+            }
+
+            if (objects != null)
+            {
+                collisionvar = !collisionvar;
+                if (foundvalue)
+                {
+                    collision1Dict[value] = collisionvar;
+                } else
+                {
+                    collision1 = collisionvar;
+                }
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
                     {
                         continue;
                     }
-                    GameObject obj = copyObj[i];
+                    GameObject obj = objects[i];
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
@@ -5072,34 +5278,76 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         return;
                     }
-                    collider.enabled = collision1;
+                    collider.enabled = collisionvar;
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision: object collision '{obj.name}' is set to " + (collision1 ? "on" : "off"));
+                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision: object collision '{obj.name}' is set to " + (collisionvar ? "on" : "off"));
                     }
                     catch (Exception ex)
                     {
                     }
                 }
-            } else
+            }
+            else
             {
                 Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
             }
         }
-        public static void togglecollision2()
+
+        public static Dictionary<string, bool> collision2Dict = new Dictionary<string, bool>();
+        public static void togglecollision2(string value)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: togglecollision2");
-            if (copyObj2 != null)
+
+            GameObject[] objects = copyObj2;
+            bool collisionvar = collision2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
             {
-                collision2 = !collision2;
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj2.Length; i++)
+                foundvalue = false;
+                objects = copyObj2;
+                collisionvar = collision2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
                 {
-                    if (copyObj2[i] == null)
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                if (!collision2Dict.ContainsKey(value))
+                {
+                    collision2Dict.Add(value, false);
+                }
+                collisionvar = collision2Dict[value];
+                objects = copies2[value];
+            }
+
+            if (objects != null)
+            {
+                collisionvar = !collisionvar;
+                if (foundvalue)
+                {
+                    collision2Dict[value] = collisionvar;
+                } else
+                {
+                    collision2 = collisionvar;
+                }
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
                     {
                         continue;
                     }
-                    GameObject obj = copyObj2[i];
+                    GameObject obj = objects[i];
                     if (pasties.Contains(obj))
                         continue;
                     pasties.Add(obj);
@@ -5108,10 +5356,10 @@ namespace BitchlandCheatConsoleBepInEx
                     {
                         return;
                     }
-                    collider.enabled = collision2;
+                    collider.enabled = collisionvar;
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision2: object collision '{obj.name}' is set to " + (collision2 ? "on" : "off"));
+                        Main.Instance.GameplayMenu.ShowNotification($"togglecollision2: object collision '{obj.name}' is set to " + (collisionvar ? "on" : "off"));
                     }
                     catch (Exception ex)
                     {
@@ -9766,13 +10014,13 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "toggleactive":
                     {
-                        toggleactive();
+                        toggleactive(null);
                     }
                     break;
 
                 case "toggleactive2":
                     {
-                        toggleactive2();
+                        toggleactive2(null);
                     }
                     break;
 
@@ -9826,13 +10074,13 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "togglecollision":
                     {
-                        togglecollision();
+                        togglecollision(null);
                     }
                     break;
 
                 case "togglecollision2":
                     {
-                        togglecollision2();
+                        togglecollision2(null);
                     }
                     break;
 
@@ -13121,6 +13369,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "spawncopy2":
                     {
                         spawncopy2(value);
+                    }
+                    break;
+
+                case "toggleactive":
+                    {
+                        toggleactive(value);
+                    }
+                    break;
+
+                case "toggleactive2":
+                    {
+                        toggleactive2(value);
+                    }
+                    break;
+
+                case "togglecollision":
+                    {
+                        togglecollision(value);
+                    }
+                    break;
+
+                case "togglecollision2":
+                    {
+                        togglecollision2(value);
                     }
                     break;
 
