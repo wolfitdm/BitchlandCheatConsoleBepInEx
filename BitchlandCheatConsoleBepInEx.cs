@@ -4674,6 +4674,140 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool collision1 = true;
         public static bool collision2 = true;
 
+        public static Dictionary<string, GameObject[]> copies = new Dictionary<string, GameObject[]>();
+        public static Dictionary<string, GameObject[]> copies2 = new Dictionary<string, GameObject[]>();
+
+        public static void savecopy(string value)
+        {
+            copy();
+
+            if (copyObj == null || copyObj2 == null)
+            {
+                return;
+            }
+
+            if (value == null || value == string.Empty)
+            {
+                return;
+            }
+
+            bool containsList1 = copies.ContainsKey(value);
+            bool containsList2 = copies2.ContainsKey(value);
+
+            if (containsList1)
+            {
+                copies[value] = copyObj;
+            } else
+            {
+                copies.Add(value, copyObj);
+            }
+
+            if (containsList2)
+            {
+                copies2[value] = copyObj2;
+            } else
+            {
+                copies2.Add(value, copyObj2);
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("savecopy: list saved to " + value);
+
+        }
+        public static void spawncopy(string value)
+        {
+            if (value == null || value == string.Empty)
+            {
+                return;
+            }
+
+            if (!copies.ContainsKey(value))
+            {
+                savecopy(value);
+            }
+
+            if (!copies.ContainsKey(value))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("spawncopy: list " + value + " not found");
+                return;
+            }
+
+            GameObject[] objects = copies[value];
+
+            if (objects == null)
+            {
+                return;
+            }
+
+            List<GameObject> pasties = new List<GameObject>();
+            for (int i = 0; i < objects.Length; i++)
+            {
+                GameObject obj = objects[i];
+                if (pasties.Contains(obj))
+                    continue;
+                pasties.Add(obj);
+                GameObject newElement = Main.Spawn(obj);
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"spawncopy: object '{newElement.name}' pastied!");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+        public static void spawncopy2(string value)
+        {
+            if (value == null || value == string.Empty)
+            {
+                return;
+            }
+
+            if (!copies2.ContainsKey(value))
+            {
+                savecopy(value);
+            }
+
+            if (!copies2.ContainsKey(value))
+            {
+                Main.Instance.GameplayMenu.ShowNotification("spawncopy2: list " + value + " not found");
+                return;
+            }
+
+            GameObject[] objects = copies2[value];
+
+            if (objects == null)
+            {
+                return;
+            }
+
+            List<GameObject> pasties = new List<GameObject>();
+            for (int i = 0; i < objects.Length; i++)
+            {
+                GameObject obj = objects[i];
+                if (pasties.Contains(obj))
+                    continue;
+                pasties.Add(obj);
+                GameObject newElement = Main.Spawn(obj);
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"spawncopy2: object '{newElement.name}' pastied!");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
         public static void copy()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: copy");
@@ -10980,6 +11114,13 @@ namespace BitchlandCheatConsoleBepInEx
                         forceplayer();
                     }
                     break;
+
+                case "listobjects":
+                    {
+                        listobjects();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -12941,12 +13082,209 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnobjectex":
+                    {
+                        spawnobjectex(value);
+                    }
+                    break;
+
+                case "searchobjectex":
+                    {
+                        searchobjectex(value);
+                    }
+                    break;
+
+                case "raycastobjcopy":
+                case "copyobject":
+                case "c":
+                case "copy":
+                case "savecopy":
+                    {
+                        savecopy(value);
+                    }
+                    break;
+
+                case "spawnobject":
+                case "raycastobjpaste1":
+                case "p":
+                case "paste":
+                case "spawncopy":
+                    {
+                        spawncopy(value);
+                    }
+                    break;
+
+                case "spawnobject2":
+                case "raycastobjpaste2":
+                case "p2":
+                case "paste2":
+                case "spawncopy2":
+                    {
+                        spawncopy2(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
             }
+        }
+
+        private static List<GameObject> getAllObjects()
+        {
+            List<GameObject> list = new List<GameObject>();
+
+            List<SaveableBehaviour> spawnedObjects = new List<SaveableBehaviour>();
+
+            List<SaveableBehaviour> spawnedObjectsWorld = new List<SaveableBehaviour>();
+
+            try
+            {
+                spawnedObjects.AddRange(Main.Instance.SpawnedObjects);
+
+            } catch (Exception ex)
+            {
+
+            }
+
+            try
+            {
+                spawnedObjectsWorld.AddRange(Main.Instance.SpawnedObjects_World);
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            foreach (SaveableBehaviour save in spawnedObjects)
+            {
+                if (save == null)
+                {
+                    continue;
+                }
+
+                if (list.Contains(save.gameObject))
+                    continue;
+
+                list.Add(save.gameObject);
+            }
+
+            foreach (SaveableBehaviour save in spawnedObjectsWorld)
+            {
+                if (save == null)
+                {
+                    continue;
+                }
+
+                if (list.Contains(save.gameObject))
+                    continue;
+
+                list.Add(save.gameObject);
+            }
+
+            return list;
+        } 
+
+        public static GameObject getObjectByName(string value)
+        {
+            if (value  == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            List<GameObject> objects = getAllObjects();
+
+            foreach (GameObject objected in objects)
+            {
+                string objectedName = objected.name;
+
+                if (objectedName == null || objectedName == string.Empty)
+                {
+                    continue;
+                }
+
+                objectedName = objectedName.ToLower();
+
+                if (searchedName == objectedName)
+                {
+                    return objected;
+                }
+            }
+
+            return null;
+        }
+
+        private static void listobjects()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjects");
+
+            List<GameObject> objects = getAllObjects();
+
+            foreach (GameObject objected in objects)
+            {
+                if (objected == null)
+                {
+                    continue;
+                }
+
+                Logger.LogInfo(objected.name);
+            }
+        }
+
+        private static void searchobjectex(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectex");
+
+            GameObject gameObject = getObjectByName(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not founded : " + value);
+                return;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
+        }
+        private static void spawnobjectex(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectex");
+
+            GameObject gameObject = getObjectByName(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not founded : " + value);
+                return;
+            }
+
+            GameObject newElement = Main.Spawn(gameObject);
+            Person player = Main.Instance.Player;
+            newElement.transform.position = player.transform.position;
+            newElement.transform.rotation = player.transform.rotation;
+            newElement.transform.parent = player.transform.parent;
+            newElement.SetActive(true);
+
+            Main.Instance.GameplayMenu.ShowNotification("object spawned : " + gameObject.name);
         }
 
         private static void savenpctofile(string value)
