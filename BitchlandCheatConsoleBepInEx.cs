@@ -35,6 +35,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using UnityEngine.Video;
 using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
 using static MonoMod.RuntimeDetour.Platforms.DetourNativeMonoPosixPlatform;
@@ -44,6 +45,7 @@ using static UnityEngine.Rendering.VolumeComponent;
 using Component = UnityEngine.Component;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
+using Cursor = UnityEngine.Cursor;
 
 namespace BitchlandCheatConsoleBepInEx
 {
@@ -927,6 +929,133 @@ namespace BitchlandCheatConsoleBepInEx
             rb.velocity = fly_velocity;
             //rb.velocity = v;
         }
+
+        private void HandleRotateMode()
+        {
+            if (rotatemodevar == false || rotatedObjects == null || rotatedObjects.Length == 0)
+            {
+                return;
+            }
+
+            float strong = rotateValue;
+
+            try
+            {
+                for (int i = 0; i < rotatedObjects.Length; i++)
+                {
+                    GameObject rotatedObject = rotatedObjects[i];
+
+                    if (rotatedObject == null)
+                    {
+                        continue;
+                    }
+
+                    Quaternion rotation1x = rotatedObject.transform.rotation;
+
+
+                    if (Input.GetKeyUp(keyCodeRotateXPlus))
+                    {
+                        rotation1x.x += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateXMinus))
+                    {
+                        rotation1x.x -= strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateYPlus))
+                    {
+                        rotation1x.y += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateYMinus))
+                    {
+                        rotation1x.y -= strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateZPlus)) {
+                        rotation1x.z += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateZMinus))
+                    {
+                        rotation1x.z -= strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateWPlus))
+                    {
+                        rotation1x.w += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodeRotateWMinus))
+                    {
+                        rotation1x.w -= strong;
+                    }
+
+                    rotatedObject.transform.rotation = rotation1x;
+                }
+            } catch { }
+        }
+
+        private void HandlePositionMode()
+        {
+            if (positionmodevar == false || positionedObjects == null || positionedObjects.Length == 0)
+            {
+                return;
+            }
+
+            float strong = positionValue;
+
+            try
+            {
+                for (int i = 0; i < positionedObjects.Length; i++)
+                {
+                    GameObject positionedObject = positionedObjects[i];
+
+                    if (positionedObject == null)
+                    {
+                        continue;
+                    }
+
+                    Vector3 position1x = positionedObject.transform.position;
+
+
+                    if (Input.GetKeyUp(keyCodePositionXPlus))
+                    {
+                        position1x.x += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodePositionXMinus))
+                    {
+                        position1x.x -= strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodePositionYPlus))
+                    {
+                        position1x.y += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodePositionYMinus))
+                    {
+                        position1x.y -= strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodePositionZPlus))
+                    {
+                        position1x.z += strong;
+                    }
+
+                    if (Input.GetKeyUp(keyCodePositionZMinus))
+                    {
+                        position1x.z -= strong;
+                    }
+
+                    positionedObject.transform.position = position1x;
+                }
+            }
+            catch { }
+        }
+
         // Import GetKeyState from user32.dll
         [DllImport("user32.dll")]
         public static extern short GetKeyState(int nVirtKey);
@@ -1197,6 +1326,8 @@ namespace BitchlandCheatConsoleBepInEx
         private void LateUpdate()
         {
             HandleFlight();
+            HandlePositionMode();
+            HandleRotateMode();
             handleCommandKeys();
         }
 
@@ -5364,6 +5495,253 @@ namespace BitchlandCheatConsoleBepInEx
                     catch (Exception ex)
                     {
                     }
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static bool rotatemodevar = false;
+        public static bool positionmodevar = false;
+
+        public static GameObject[] rotatedObjects = null;
+        public static GameObject[] positionedObjects = null;
+        public static void rotatemode(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: rotatemode");
+
+            GameObject[] objects = copyObj;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj;
+            }
+            else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies[value];
+            }
+
+            if (objects != null)
+            {
+                rotatemodevar = !rotatemodevar;
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                }
+
+                if (rotatemodevar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("rotatemode: on");
+                    rotatedObjects = pasties.ToArray();
+                } else
+                {
+                    rotatedObjects = null;
+                    Main.Instance.GameplayMenu.ShowNotification("rotatemode: off");
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static void rotatemode2(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: rotatemode2");
+
+            GameObject[] objects = copyObj2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies2[value];
+            }
+
+            if (objects != null)
+            {
+                rotatemodevar = !rotatemodevar;
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                }
+
+                if (rotatemodevar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("rotatemode: on");
+                    rotatedObjects = pasties.ToArray();
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("rotatemode: off");
+                    rotatedObjects = null;
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+        public static void positionmode(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: positionmode");
+
+            GameObject[] objects = copyObj;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj;
+            }
+            else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies[value];
+            }
+
+            if (objects != null)
+            {
+                positionmodevar = !positionmodevar;
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                }
+
+                if (positionmodevar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("positionmode: on");
+                    positionedObjects = pasties.ToArray();
+                }
+                else
+                {
+                    positionedObjects = null;
+                    Main.Instance.GameplayMenu.ShowNotification("positionmode: off");
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        public static void positionmode2(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: positionmode2");
+
+            GameObject[] objects = copyObj2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies2[value];
+            }
+
+            if (objects != null)
+            {
+                positionmodevar = !positionmodevar;
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                }
+
+                if (positionmodevar)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("positionmode: on");
+                    positionedObjects = pasties.ToArray();
+                }
+                else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("positionmode: off");
+                    positionedObjects = null;
                 }
             }
             else
@@ -11369,6 +11747,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "positionmode":
+                    {
+                        positionmode(null);
+                    }
+                    break;
+
+                case "rotatemode":
+                    {
+                        rotatemode(null);
+                    }
+                    break;
+
+                case "positionmode2":
+                    {
+                        positionmode2(null);
+                    }
+                    break;
+
+                case "rotatemode2":
+                    {
+                        rotatemode2(null);
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -13393,6 +13795,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "togglecollision2":
                     {
                         togglecollision2(value);
+                    }
+                    break;
+
+                case "positionmode":
+                    {
+                        positionmode(value);
+                    }
+                    break;
+
+                case "rotatemode":
+                    {
+                        rotatemode(value);
+                    }
+                    break;
+
+                case "positionmode2":
+                    {
+                        positionmode2(value);
+                    }
+                    break;
+
+                case "rotatemode2":
+                    {
+                        rotatemode2(value);
                     }
                     break;
 
@@ -16381,6 +16807,23 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon9;
         private static ConfigEntry<KeyCode> configMoreWeaponSlotsSwitchWeapon10;
 
+        private static ConfigEntry<KeyCode> configKeyCodePositionXPlus;
+        private static ConfigEntry<KeyCode> configKeyCodePositionXMinus;
+        private static ConfigEntry<KeyCode> configKeyCodePositionYPlus;
+        private static ConfigEntry<KeyCode> configKeyCodePositionYMinus;
+        private static ConfigEntry<KeyCode> configKeyCodePositionZPlus;
+        private static ConfigEntry<KeyCode> configKeyCodePositionZMinus;
+        private static ConfigEntry<float> configPositionValue;
+
+        private static ConfigEntry<KeyCode> configKeyCodeRotateXPlus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateXMinus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateYPlus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateYMinus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateZPlus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateZMinus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateWPlus;
+        private static ConfigEntry<KeyCode> configKeyCodeRotateWMinus;
+        private static ConfigEntry<float> configRotateValue;
         public BitchlandCheatConsoleBepInEx()
         {
         }
@@ -16402,6 +16845,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static string pluginKeyControlsMultiFollower = "MultiFollower.KeyControls";
         private static string pluginKeyControlsStripMode = "StripMode.KeyControls";
         private static string pluginKeyControlsMoreWeaponSlots = "NoreWeaponSlots.KeyControls";
+        private static string pluginKeyControlsPositionMode = "PositionMode.KeyControls";
+        private static string pluginKeyControlsRotateMode = "RotateMode.KeyControls";
 
         public static bool useHarmonyPatches = false;
 
@@ -16469,6 +16914,24 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static bool everyNPCstripsNudeIfYouLookAtThem = false;
         public static bool maxRelationShipIfYouHaveSex = false;
+
+        private static KeyCode keyCodeRotateXPlus;
+        private static KeyCode keyCodeRotateXMinus;
+        private static KeyCode keyCodeRotateYPlus;
+        private static KeyCode keyCodeRotateYMinus;
+        private static KeyCode keyCodeRotateZPlus;
+        private static KeyCode keyCodeRotateZMinus;
+        private static KeyCode keyCodeRotateWPlus;
+        private static KeyCode keyCodeRotateWMinus;
+        private static float rotateValue;
+
+        private static KeyCode keyCodePositionXPlus;
+        private static KeyCode keyCodePositionXMinus;
+        private static KeyCode keyCodePositionYPlus;
+        private static KeyCode keyCodePositionYMinus;
+        private static KeyCode keyCodePositionZPlus;
+        private static KeyCode keyCodePositionZMinus;
+        private static float positionValue;
 
         private void Awake()
         {
@@ -16737,6 +17200,89 @@ namespace BitchlandCheatConsoleBepInEx
                     KeyCode.Alpha0,
                     "KeyCode to switch weapon 10, default Number 0");
 
+
+            configPositionValue = Config.Bind(pluginKeyControlsPositionMode,
+                                        "PositionModeValue",
+                                        0.01f,
+                                        "value that is used in order to increase/decrease the x/y/z axis in position mode, default 0.01");
+
+            configKeyCodePositionXPlus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeXPlus",
+                                        KeyCode.D,
+                                        "KeyCode in position mode in order to increase the x axis, default D");
+
+
+            configKeyCodePositionXMinus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeXMinus",
+                                        KeyCode.A,
+                                        "KeyCode in position mode in order to decreause the x axis, default A");
+
+            configKeyCodePositionYPlus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeYPlus",
+                                        KeyCode.W,
+                                        "KeyCode in position mode in order to increase the y axis, default W");
+
+            configKeyCodePositionYMinus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeYMinus",
+                                        KeyCode.S,
+                                        "KeyCode in position mode in order to decreause the y axis, default S");
+
+            configKeyCodePositionZPlus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeZPlus",
+                                        KeyCode.E,
+                                        "KeyCode in position mode in order to increase the z axis, default E");
+
+
+            configKeyCodePositionZMinus = Config.Bind(pluginKeyControlsPositionMode,
+                                        "KeyCodePositionModeZMinus",
+                                        KeyCode.Q,
+                                        "KeyCode in position mode in order to decreause the z axis, default Q");
+
+            configRotateValue = Config.Bind(pluginKeyControlsRotateMode,
+                            "RotateModeValue",
+                            0.01f,
+                            "value that is used in order to increase/decrease the x/y/z/w axis in rotate mode, default 0.01");
+
+            configKeyCodeRotateXPlus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeXPlus",
+                                        KeyCode.D,
+                                        "KeyCode in rotate mode in order to increase the x axis, default D");
+
+            configKeyCodeRotateXMinus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeXMinus",
+                                        KeyCode.A,
+                                        "KeyCode in rotate mode in order to decreause the x axis, default A");
+
+            configKeyCodeRotateYPlus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeYPlus",
+                                        KeyCode.W,
+                                        "KeyCode in rotate mode in order to increase the y axis, default W");
+
+            configKeyCodeRotateYMinus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeYMinus",
+                                        KeyCode.S,
+                                        "KeyCode in rotate mode in order to decreause the y axis, default S");
+
+            configKeyCodeRotateZPlus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeZPlus",
+                                        KeyCode.E,
+                                        "KeyCode in rotate mode in order to increase the z axis, default E");
+
+            configKeyCodeRotateZMinus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeZMinus",
+                                        KeyCode.Q,
+                                        "KeyCode in rotate mode in order to decreause the z axis, default Q");
+
+            configKeyCodeRotateWPlus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeWPlus",
+                                        KeyCode.R,
+                                        "KeyCode in rotate mode in order to increase the w axis, default R");
+
+            configKeyCodeRotateWMinus = Config.Bind(pluginKeyControlsRotateMode,
+                                        "KeyCodeRotateModeWMinus",
+                                        KeyCode.T,
+                                        "KeyCode in rotate mode in order to decreause the w axis, default T");
+
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
             KeyCodeFlySpeedMore = configKeyCodeFlySpeedMore.Value;
@@ -16768,6 +17314,19 @@ namespace BitchlandCheatConsoleBepInEx
             KeyCodeSwitchWeapon8 = configMoreWeaponSlotsSwitchWeapon8.Value;
             KeyCodeSwitchWeapon9 = configMoreWeaponSlotsSwitchWeapon9.Value;
             KeyCodeSwitchWeapon10 = configMoreWeaponSlotsSwitchWeapon10.Value;
+
+            positionValue = configPositionValue.Value;
+            rotateValue = configRotateValue.Value;
+
+            keyCodePositionXPlus = configKeyCodePositionXPlus.Value;
+            keyCodePositionYPlus = configKeyCodePositionYPlus.Value;
+            keyCodePositionZPlus = configKeyCodePositionZPlus.Value;
+
+            keyCodeRotateXPlus = configKeyCodeRotateXPlus.Value;
+            keyCodeRotateYPlus = configKeyCodeRotateYPlus.Value;
+            keyCodeRotateZPlus = configKeyCodeRotateZPlus.Value;
+            keyCodeRotateWPlus = configKeyCodeRotateWPlus.Value;
+            keyCodeRotateWMinus = configKeyCodeRotateWMinus.Value;
 
             stripModeSexKey = configKeyCodeStripModeStartSex.Value;
 
