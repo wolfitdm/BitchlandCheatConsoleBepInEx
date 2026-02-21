@@ -6863,6 +6863,7 @@ namespace BitchlandCheatConsoleBepInEx
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexposes.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/animslist.txt");
             OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/planslist.txt");
+            OpenUrl("https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt");
             OpenUrl("https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/tag/v1.0.0");
             Main.Instance.GameplayMenu.ShowNotification("executed command: type all commands and warps without the '* '. it is only for github, to use markdown and list items!");
         }
@@ -12066,6 +12067,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listvehicles":
+                    {
+                        listvehicles();
+                    }
+                    break;
+
+                case "listsexobjects":
+                    {
+                        listsexobjects();
+                    }
+                    break;
+
                 case "positionmode":
                     {
                         positionmode(null);
@@ -14415,6 +14428,88 @@ namespace BitchlandCheatConsoleBepInEx
             {
 
             }
+        }
+
+        private static void listvehicles()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listvehicles");
+            Int_Drive[] int_Drives = UnityEngine.Object.FindObjectsByType<Int_Drive>(FindObjectsSortMode.None);
+
+            if (int_Drives == null)
+                return;
+
+            List<string> drives = new List<string>();
+            for (int i = 0; i < int_Drives.Length; i++)
+            {
+                string name = int_Drives[i].name.ToLower().Replace(" ", "_");
+                drives.Add(name);
+            }
+
+            File.WriteAllText("listvehicles.json", drives.ToJson());
+        }
+
+        private static void listsexobjects()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listsexobjects");
+            Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsSortMode.None);
+            int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsSortMode.None);
+            int_SexTubeBike[] int_SexTubeBikes = UnityEngine.Object.FindObjectsByType<int_SexTubeBike>(FindObjectsSortMode.None);
+            int_wallpussy[] wallpussies = UnityEngine.Object.FindObjectsByType<int_wallpussy>(FindObjectsSortMode.None);
+            int_Piss[] pisses = UnityEngine.Object.FindObjectsByType<int_Piss>(FindObjectsSortMode.None);
+            bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsSortMode.None);
+
+            if (int_SexMachines == null || int_SexLocker == null || int_SexTubeBikes == null || wallpussies == null || pisses == null || sexspots == null)
+                return;
+
+            List<string> sexmachines = new List<string>();
+            List<string> sexlockers = new List<string>();
+            List<string> sextubebikes = new List<string>();
+            List<string> wallpussies_ = new List<string>();
+            List<string> pisses_ = new List<string>();
+            List<string> sexspots_ = new List<string>();
+           
+            for (int i = 0; i < int_SexMachines.Length; i++)
+            {
+                string name = int_SexMachines[i].name.ToLower().Replace(" ", "_");
+                sexmachines.Add(name);
+            }
+
+            for (int i = 0; i < int_SexLocker.Length; i++)
+            {
+                string name = int_SexLocker[i].name.ToLower().Replace(" ", "_");
+                sexlockers.Add(name);
+            }
+
+            for (int i = 0; i < int_SexTubeBikes.Length; i++)
+            {
+                string name = int_SexTubeBikes[i].name.ToLower().Replace(" ", "_");
+                sextubebikes.Add(name);
+            }
+
+            for (int i = 0; i < wallpussies.Length; i++)
+            {
+                string name = wallpussies[i].name.ToLower().Replace(" ", "_");
+                wallpussies_.Add(name);
+            }
+
+            for (int i = 0; i < pisses.Length; i++)
+            {
+                string name = pisses[i].name.ToLower().Replace(" ", "_");
+                pisses_.Add(name);
+            }
+
+            for (int i = 0; i < sexspots.Length; i++)
+            {
+                string name = sexspots[i].name.ToLower().Replace(" ", "_");
+                sexspots_.Add(name);
+            }
+
+            File.WriteAllText("sexmachines.json", sexmachines.ToJson());
+            File.WriteAllText("sexlockers.json", sexlockers.ToJson());
+            File.WriteAllText("sextubebikes.json", sextubebikes.ToJson());
+            File.WriteAllText("wallpussies.json", wallpussies_.ToJson());
+            File.WriteAllText("pisses.json", pisses_.ToJson());
+            File.WriteAllText("sexspots.json", sexspots_.ToJson());
         }
 
         private static void searchobjectex(string value)
