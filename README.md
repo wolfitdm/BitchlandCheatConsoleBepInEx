@@ -6,6 +6,8 @@ for a current full list of commands see
 
 https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/commandslist.txt
 
+for other lists please see the assets here or type help command in the Cheat Console
+
 Bitchland Cheat console
 
 F1 and F2 Key configurable in
