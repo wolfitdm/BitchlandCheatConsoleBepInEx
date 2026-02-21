@@ -9,3 +9,5 @@ Vehicles:
 for all objects see listobjects.json file
 
 https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/listobjects.json
+
+for vehicles see 

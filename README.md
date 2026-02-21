@@ -1,5 +1,13 @@
 Bitchland Cheat console
 
+--> PRESS F1 or F2 to open/close the Cheat console <--
+
+for a current full list of commands see 
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/commandslist.txt
+
+Bitchland Cheat console
+
 F1 and F2 Key configurable in
 
 * BepInEx\config\com.wolfitdm.BitchlandCheatConsoleBepInEx.cfg
@@ -898,13 +906,5 @@ PLAN_woodpole2
 PLAN_woodpoleWide
 
 Objects:
-Vehicles:
 
-* spawn car
-* spawn car2
-* spawn tank
-* spawn tank2
-
-for more objects see listobjects.json file
-
-https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/listobjects.json
+see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
