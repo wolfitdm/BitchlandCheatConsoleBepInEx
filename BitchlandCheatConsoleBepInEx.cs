@@ -12115,6 +12115,60 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "car":
+                    {
+                        spawnobjectex("sedanvehicle");
+                    }
+                    break;
+
+                case "car2":
+                    {
+                        spawnobjectex("sedanvehicle_(1)");
+                    }
+                    break;
+
+                case "tank":
+                    {
+                        spawnobjectex("panzer_vi_e_(1)");
+                    }
+                    break;
+
+                case "sexlocker":
+                    {
+                        spawnobjectex("glasslocker");
+                    }
+                    break;
+
+                case "offersex":
+                    {
+                        spawnobjectex("sexspotfloor");
+                    }
+                    break;
+
+                case "gloryholewall":
+                    {
+                        spawnobjectex("sexspot_gloryholewall");
+                    }
+                    break;
+
+                case "woodpole":
+                    {
+                        spawnobjectex("woodpolewide");
+                    }
+                    break;
+
+                case "woodpole2":
+                    {
+                        spawnobjectex("woodpole2");
+                    }
+                    break;
+
+                case "woodpillar":
+                    {
+                        spawnobjectex("woodpillar");
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -14379,23 +14433,6 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static GameObject getObjectByNameEx(string value)
         {
-            switch (value)
-            {
-                case "tank":
-                    value = "panzer_vi_e_(1)";
-                    break;
-
-                case "car":
-                case "truck":
-                    value = "sedanvehicle";
-                    break;
-
-                case "car2":
-                case "truck2":
-                    value = "sedanvehicle_(1)";
-                    break;
-            };
-
             GameObject gameObject = getObjectByName(value);
 
             if (value == null)
@@ -14533,7 +14570,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
         private static void spawnobjectex(string value)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectex");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectex " + value);
 
             GameObject gameObject = getObjectByNameEx(value);
 
