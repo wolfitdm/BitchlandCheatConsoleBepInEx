@@ -6,8 +6,30 @@ Vehicles:
 * spawn sedanvehicle",
 * spawn panzer_vi_e_(1)
 
-for all objects see listobjects.json file
+for all objects see 
 
-https://github.com/wolfitdm/BitchlandCheatConsoleBepInEx/releases/download/v1.0.0/listobjects.json
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listobjects.json
 
 for vehicles see 
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listvehicles.json
+
+for pisses see
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/pisses.json
+
+for sexlockers see
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexlockers.json
+
+for sex machines see
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexmachines.json
+
+for sex spots see
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sexspots.json
+
+for sex tube bikes see
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/sextubebikes.json
