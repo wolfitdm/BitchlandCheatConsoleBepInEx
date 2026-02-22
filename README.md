@@ -355,6 +355,41 @@ commands with no params:
 * npcrestrain -> toggle npc the you looked at or chatted with, can be restrained
 * forceplayer -> toggle player can be forced to sex
 * restrainplayer -> toggle player can be restrained
+* listobjects -> list all objects, for more infos see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt 
+* listvehicles -> list all vehicles
+* listsexobjects -> list all sex objects
+* positionmode -> activate/deactive (toggle) the positionmode , you must execute the command copy first, then you can change the position of the object with PageUp,PageDown,Insert,End Key, you can change the keys in the config BepInEx/config/BitchlandCheat*.cfg
+* rotatemode -> activate/deactive (toggle) the rotatemode , you must execute the command copy first, then you can change the rotation of the object with PageUp,PageDown,Insert,End Key, you can change the keys in the config BepInEx/config/BitchlandCheat*.cfg
+* positionmode2 -> activate/deactive (toggle) the positionmode , you must execute the command copy first, then you can change the position of the object 2 with PageUp,PageDown,Insert,End Key, you can change the keys in the config BepInEx/config/BitchlandCheat*.cfg
+* rotatemode2 -> activate/deactive (toggle) the rotatemode , you must execute the command copy first, then you can change the rotation of the object 2 with PageUp,PageDown,Insert,End Key, you can change the keys in the config BepInEx/config/BitchlandCheat*.cfg
+* warpobject -> teleports the selected object to you, (execute the copy command on the object the you looked at)
+* warpobject2 -> teleports the selected object 2 to you, (execute the copy command on the object the you looked at)
+* breakall -> toggle you can also break mineable objects in the main city
+* playerownedall -> toggle every sex machines owned you (so that you can lock / unlock followers, on every sex machine the you are do not build)
+* lockall -> lock everything in bitchland
+* unlockall -> unlock everything in bitchland
+* car -> spawnss a car , this command executes -> spawn sedanvehicle, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* car2 -> spawns a car with a turret , this command executes -> spawn sedanvehicle_(1), for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* tank -> spawns a tank, this command executes -> spawn panzer_vi_e_(1), for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* tank2 -> spawns a other tank, this command executes -> spawn panzer_vi_e, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* locker -> spawns a locker, this command executes -> spawn locker, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexlocker -> spawns a sexlocker, this command executes -> spawn glasslocker, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexmachine -> spawn a sexmachine, this command executes -> spawn machine3, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexmachine2 -> spawn a other sexmachine, this command executes -> spawn preparatorstand, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexmachine3 -> spawn a other sexmachine, this command executes -> spawn preparatorstand_(1), for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexmachine4 -> spawn a other sexmachine, this command executes -> spawn preparatorstand_(2), for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sexmachine5 -> spawn a other sexmachine, this command executes -> spawn preparatorstand_(5), for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* sextubebike -> spawn a sextube bike, this command executes -> spawn tubebike, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* offersex -> spawn a offer sex spot, this command executes -> spawn sexspotfloor, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* gloryholewall -> spawn a gloryholewall, this command executes -> spawn sexspot_gloryholewall, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* woodpole -> spawn a woodpole, this command executes -> spawn woodpolewide, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* woodpole2 -> spawn a other woodpole, this command executes -> spawn woodpole2, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* woodpillar -> spawn a woodpillar, this command executes -> spawn woodpillar, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* woodpillar2 -> spawn a other woodpillar, this command executes -> spawn woodpillarbj, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* dildopole -> spawn a dildopole, this command executes -> spawn dildopole_1, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* dildopole2 -> spawn a other dildopole, this command executes -> spawn dildopole_2, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* dildopole3 -> spawn a other dildo pole, this command executes, spawn dildopole_3, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* listobjectsslow -> a other version from the listobjects command, it lists really all gameobjects (also persons) but on the overworld is takes too long time, to create the objects list, therefore please dont use this command, in the overworld
 
 commands with 1 param:
 
@@ -498,6 +533,49 @@ commands with 1 param:
 * trainingvalue number -> set the training value from the player to number (population menu)
 * npctrainingvalue number -> set the training value from the npc the you looked at or chatted with (population menu)
 * stripmodepersonality personality ->  toggle every npc the you looked at strips nude for you, and set the npc to the personality personality e.g stripmodepersonality broken
+* spawn name -> spawn the object name, and make sure you can see the object, see for more objects  https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* spawnobjectex -> alias for the spawn command
+* spawnex -> spawn the object name, (use that command, only if spawn name, not works really good, i dont think, that is happened in the future, spawn name, is the better version)
+* spawnobjectexex name -> alias for spawnex command
+* search name -> searches for the object name
+* searchobjectex name -> alias for the search command (yes i like it to have long versions of a command)
+* copy name -> select (copies the target, so that you can use the positionmode name/rotatemode name command, or the toggleactive name/togglecollision name command
+* raycastobjcopy name -> alias for copy name command
+* copyobject name -> alias for copy name command
+* c name -> alias for the copy command
+* savecopy name -> alias for the copy command 
+* paste name -> spawns the target that you saved under name, with the copy name command
+* spawnobject name -> alias for paste name, it is a really old command 
+* raycastobjpaste1 name -> alias for paste name, it is really old command with much aliases
+* p name -> alias for paste name, hey it is a really old command
+* spawncopy name -> alias for paste name, 10 commands the do the same thing haha :)
+* paste2 name -> spawns the target 2 that you saved under name, with the copy name command
+* spawnobject2 name -> alias for paste2 name, it is a really old command 
+* raycastobjpaste2 name -> alias for paste2 name, it is really old command with much aliases
+* p2 name -> alias for paste2 name, hey it is a really old command
+* spawncopy2 name -> alias for paste2 name, 10 commands the do the same thing haha :)
+* toggleactive name -> toggle the active state from the gameobject, the have you select with the copy name command
+* toggleactive2 name -> toggle the active state from the gameobject 2, the have you select with the copy name command
+* togglecollision name -> toggle the collision from the gameobject , the have you select with the copy name command
+* togglecollision2 name -> toggle the collision from the gameobject 2 , the have you select with the copy name command
+* positionmode name -> activate/deactivte the positionmode from the gameobject the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
+* rotatemode name ->  -> activate/deactivte the rotatemode from the gameobject the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
+* positionmode2 name -> activate/deactivte the positionmode from the gameobject 2 the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
+* rotatemode2 name -> activate/deactivte the rotatemode from the gameobject 2 the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
+* warpobject name -> teleports the object the have saved under name, with the copy name command to you
+* warpobject2 name -> teleports the object 2 the have saved under name, with the copy name command to you
+
+
+This commands are maybe removed in the future (please do not use this commands):
+
+
+* spawnslow name -> spawns the object name, and make all renders visbile, i warn you, this command is very slow, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* spawnobjectexslow name  -> alias for spawnslow command
+* spawnexslow name -> spawns the object name,  i warn you, this command is very slow, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* spawnobjectexexslow name -> alias for spawnexslow
+* searchslow name -> search all objects for this name, i warn you, this command is very slow, and should be removed in the future
+* searchobjectexslow name -> alias for searchslow command
+
 
 commands with 2 params:
 

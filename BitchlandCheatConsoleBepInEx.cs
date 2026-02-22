@@ -43,6 +43,7 @@ using UnityEngine.Video;
 using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
 using static Den.Tools.Serializer;
 using static MonoMod.RuntimeDetour.Platforms.DetourNativeMonoPosixPlatform;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.InputSystem.InputRemoting;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.VolumeComponent;
@@ -4885,50 +4886,69 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool collision1 = true;
         public static bool collision2 = true;
 
-        private static void SetMaterialOpaque(GameObject obj)
+        private static void makeRendererVisible(Renderer r)
         {
-            if (obj == null)
+            if (r == null)
             {
                 return;
             }
 
-            obj.layer = LayerMask.NameToLayer("Default");
+            r.enabled = true;
 
-            Renderer[] r_ = obj.GetComponents<Renderer>();
-            Renderer[] r2_ = obj.GetComponents<SkinnedMeshRenderer>();
-            CanvasRenderer[] r3_ = obj.GetComponents<CanvasRenderer>();
-
-
-            if (r_ == null)
+            if (r.material != null)
             {
-                r_ = new Renderer[0];
-            }
+                Material mat = r.material;
 
-            if (r2_ == null)
-            {
-                r2_ = new Renderer[0];
-            }
+                if (mat == null) goto end_here;
 
-            if (r3_ == null)
-            {
-                r3_ = new CanvasRenderer[0];
-            }
+                mat.shader = Shader.Find("Standard");
 
-            for (int i = 0; i < r_.Length; i++) {
-                Renderer r = r_[i];
-
-                if (r == null)
+                // Ensure alpha is 1 (fully opaque)
+                if (mat.HasProperty("_Color"))
                 {
-                    continue;
+                    Color col = mat.color;
+                    col.a = 1f;
+                    mat.color = col;
                 }
 
-                r.enabled = true;
-
-                if (r.material != null)
+                // Ensure shader is visible
+                if (mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("Fade"))
                 {
-                    Material mat = r.material;
+                    // Switch to Standard Opaque shader
+                    mat.shader = Shader.Find("Standard");
+                    mat.SetFloat("_Mode", 0); // Opaque mode
+                }
 
-                    if (mat == null) goto end_here;
+                // Get current color and set alpha to 1
+                Color color = mat.color;
+                color.a = 1f;
+                mat.color = color;
+
+                // If using Standard Shader, switch to Opaque mode
+                if (mat.shader.name == "Standard")
+                {
+                    mat.SetFloat("_Mode", 0); // 0 = Opaque
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    mat.SetInt("_ZWrite", 1);
+                    mat.DisableKeyword("_ALPHATEST_ON");
+                    mat.DisableKeyword("_ALPHABLEND_ON");
+                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    mat.renderQueue = -1;
+                }
+
+                r.material = mat;
+            }
+
+        end_here:
+            if (r.materials != null)
+            {
+                for (int j = 0; j < r.materials.Length; j++)
+                {
+
+                    Material mat = r.materials[j];
+
+                    if (mat == null) continue;
 
                     mat.shader = Shader.Find("Standard");
 
@@ -4966,58 +4986,54 @@ namespace BitchlandCheatConsoleBepInEx
                         mat.renderQueue = -1;
                     }
 
-                    r.material = mat;
+                    r.materials[j] = mat;
                 }
+            }
+        }
 
-            end_here:
-                if (r.materials != null)
+        private static void SetMaterialOpaque(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return;
+            }
+
+            if (!obj.activeSelf)
+            {
+                obj.SetActive(true);
+            }
+
+            obj.layer = LayerMask.NameToLayer("Default");
+
+            Renderer[] r_ = obj.GetComponents<Renderer>();
+            Renderer[] r2_ = obj.GetComponents<SkinnedMeshRenderer>();
+            CanvasRenderer[] r3_ = obj.GetComponents<CanvasRenderer>();
+
+
+            if (r_ == null)
+            {
+                r_ = new Renderer[0];
+            }
+
+            if (r2_ == null)
+            {
+                r2_ = new Renderer[0];
+            }
+
+            if (r3_ == null)
+            {
+                r3_ = new CanvasRenderer[0];
+            }
+
+            for (int i = 0; i < r_.Length; i++) {
+                Renderer r = r_[i];
+
+                if (r == null)
                 {
-                    for (int j = 0; j < r.materials.Length; j++)
-                    {
-
-                        Material mat = r.materials[j];
-
-                        if (mat == null) continue;
-
-                        mat.shader = Shader.Find("Standard");
-
-                        // Ensure alpha is 1 (fully opaque)
-                        if (mat.HasProperty("_Color"))
-                        {
-                            Color col = mat.color;
-                            col.a = 1f;
-                            mat.color = col;
-                        }
-
-                        // Ensure shader is visible
-                        if (mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("Fade"))
-                        {
-                            // Switch to Standard Opaque shader
-                            mat.shader = Shader.Find("Standard");
-                            mat.SetFloat("_Mode", 0); // Opaque mode
-                        }
-
-                        // Get current color and set alpha to 1
-                        Color color = mat.color;
-                        color.a = 1f;
-                        mat.color = color;
-
-                        // If using Standard Shader, switch to Opaque mode
-                        if (mat.shader.name == "Standard")
-                        {
-                            mat.SetFloat("_Mode", 0); // 0 = Opaque
-                            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                            mat.SetInt("_ZWrite", 1);
-                            mat.DisableKeyword("_ALPHATEST_ON");
-                            mat.DisableKeyword("_ALPHABLEND_ON");
-                            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                            mat.renderQueue = -1;
-                        }
-
-                        r.materials[j] = mat;
-                    }
+                    continue;
                 }
+
+                makeRendererVisible(r);
             }
 
             for (int i = 0; i < r2_.Length; i++)
@@ -5029,66 +5045,7 @@ namespace BitchlandCheatConsoleBepInEx
                     continue;
                 }
 
-                r.enabled = true;
-
-                if (r.material != null)
-                {
-                    Material mat = r.material;
-
-                    if (mat == null) goto end_here2;
-
-                    mat.shader = Shader.Find("Standard");
-
-                    // Get current color and set alpha to 1
-                    Color color = mat.color;
-                    color.a = 1f;
-                    mat.color = color;
-
-                    // If using Standard Shader, switch to Opaque mode
-                    if (mat.shader.name == "Standard")
-                    {
-                        mat.SetFloat("_Mode", 0); // 0 = Opaque
-                        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                        mat.SetInt("_ZWrite", 1);
-                        mat.DisableKeyword("_ALPHATEST_ON");
-                        mat.DisableKeyword("_ALPHABLEND_ON");
-                        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                        mat.renderQueue = -1;
-                    }
-                }
-
-            end_here2:
-                if (r.materials != null)
-                {
-                    for (int j = 0; j < r.materials.Length; j++)
-                    {
-
-                        Material mat = r.materials[j];
-
-                        if (mat == null) continue;
-
-                        mat.shader = Shader.Find("Standard");
-
-                        // Get current color and set alpha to 1
-                        Color color = mat.color;
-                        color.a = 1f;
-                        mat.color = color;
-
-                        // If using Standard Shader, switch to Opaque mode
-                        if (mat.shader.name == "Standard")
-                        {
-                            mat.SetFloat("_Mode", 0); // 0 = Opaque
-                            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                            mat.SetInt("_ZWrite", 1);
-                            mat.DisableKeyword("_ALPHATEST_ON");
-                            mat.DisableKeyword("_ALPHABLEND_ON");
-                            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                            mat.renderQueue = -1;
-                        }
-                    }
-                }
+                makeRendererVisible(r);
             }
 
             for (int i = 0; i < r3_.Length; i++)
@@ -5102,6 +5059,36 @@ namespace BitchlandCheatConsoleBepInEx
 
                 r.SetAlpha(1f);
             }
+
+            Renderer[] renderers = obj.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer r in renderers)
+            {
+                makeRendererVisible(r);
+            }
+
+            // Enable all Lights
+            Light[] lights = obj.GetComponentsInChildren<Light>(true);
+            foreach (Light l in lights)
+            {
+                l.enabled = true;
+            }
+
+            // Enable all ParticleSystems
+            ParticleSystem[] particles = obj.GetComponentsInChildren<ParticleSystem>(true);
+            foreach (ParticleSystem ps in particles)
+            {
+                var emission = ps.emission;
+                emission.enabled = true;
+                ps.Play();
+            }
+
+            // Enable all UI CanvasRenderers
+            CanvasRenderer[] canvases = obj.GetComponentsInChildren<CanvasRenderer>(true);
+            foreach (CanvasRenderer cr in canvases)
+            {
+                cr.SetAlpha(1f);
+            }
+
         }
 
         public static Dictionary<string, GameObject[]> copies = new Dictionary<string, GameObject[]>();
@@ -12396,6 +12383,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "breakall":
+                    {
+                        breakall();
+                    }
+                    break;
+
+                case "playerownedall":
+                    {
+                        playerownedall();
+                    }
+                    break;
+
+                case "lockall":
+                    {
+                        lockall();
+                    }
+                    break;
+
+                case "unlockall":
+                    {
+                        unlockall();
+                    }
+                    break;
+
                 case "car":
                     {
                         spawnobjectexfast("sedanvehicle", true);
@@ -12435,6 +12446,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "sexmachine":
                     {
                         spawnobjectexfast("machine3", true);
+                    }
+                    break;
+
+                case "sexmachine2":
+                    {
+                        spawnobjectexfast("preparatorstand", true);
+                    }
+                    break;
+
+                case "sexmachine3":
+                    {
+                        spawnobjectexfast("preparatorstand_(1)", true);
+                    }
+                    break;
+
+                case "sexmachine4":
+                    {
+                        spawnobjectexfast("preparatorstand_(2)", true);
+                    }
+                    break;
+
+                case "sexmachine5":
+                    {
+                        spawnobjectexfast("preparatorstand_(5)", true);
                     }
                     break;
 
@@ -19457,6 +19492,199 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: unlockfollower");
             lockFollowing = false;
         }
+
+        public static bool breakallvar = false;
+        public static void breakall()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: breakall");
+            lockFollowing = false;
+
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            } catch(Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                return;
+            }
+
+            GameObject[] all = null;
+
+            try
+            {
+                all = getAllObjectsByInteractibleType<bl_MinableObject>();
+            } catch (Exception ex)
+            {
+                all = null;
+            }
+
+            if (all == null)
+            {
+                return;
+            }
+
+            breakallvar = !breakallvar;
+
+            for (int i = 0; i < all.Length; i++)
+            {
+                try
+                {
+                    Interactible s = MyGetComponent<bl_MinableObject>(all[i]);
+                    if (s == null)
+                    {
+                        continue;
+                    }
+                    s.OnlyInteractibleInOW = breakallvar;
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (breakallvar)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You can interact with everything and breakall everything in the maincity");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You can not interact with everything and breakall everything in the maincity");
+            }
+        }
+
+        public static bool playerownedallvar = false;
+        public static void playerownedall()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playerownedall");
+            lockFollowing = false;
+
+            GameObject[] all = null;
+
+            try
+            {
+                all = getAllObjectsByInteractibleType<int_Lockable>();
+            }
+            catch (Exception ex)
+            {
+                all = null;
+            }
+
+            if (all == null)
+            {
+                return;
+            }
+
+            playerownedallvar = !playerownedallvar;
+
+            for (int i = 0; i < all.Length; i++)
+            {
+                try
+                {
+                    int_Lockable s = MyGetComponent<int_Lockable>(all[i]);
+                    if (s == null)
+                    {
+                        continue;
+                    }
+                    s.PlayerOwned = playerownedallvar;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (playerownedallvar)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You owned everything");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("Nothing you owned!");
+            }
+        }
+        public static void lockall()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: lockall");
+            lockFollowing = false;
+
+            GameObject[] all = null;
+
+            try
+            {
+                all = getAllObjectsByInteractibleType<int_Lockable>();
+            }
+            catch (Exception ex)
+            {
+                all = null;
+            }
+
+            if (all == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < all.Length; i++)
+            {
+                try
+                {
+                    int_Lockable s = MyGetComponent<int_Lockable>(all[i]);
+                    if (s == null)
+                    {
+                        continue;
+                    }
+                    s.Locked = true;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("Everything is locked");
+        }
+
+        public static void unlockall()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: unlockall");
+            lockFollowing = false;
+
+            GameObject[] all = null;
+
+            try
+            {
+                all = getAllObjectsByInteractibleType<int_Lockable>();
+            }
+            catch (Exception ex)
+            {
+                all = null;
+            }
+
+            if (all == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < all.Length; i++)
+            {
+                try
+                {
+                    int_Lockable s = MyGetComponent<int_Lockable>(all[i]);
+                    if (s == null)
+                    {
+                        continue;
+                    }
+                    s.Locked = false;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("Everything is unlocked");
+        }
+
+
 
         public static bool isPersonLeashed(GameObject personGa)
         {
