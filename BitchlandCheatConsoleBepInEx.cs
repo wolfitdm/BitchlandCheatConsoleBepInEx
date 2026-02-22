@@ -9,10 +9,12 @@ using HarmonyLib;
 using MapMagic.Expose;
 using MapMagic.Nodes;
 using Microsoft.Win32.SafeHandles;
+using MonoMod.Utils;
 using SemanticVersioning;
 using System;
 using System.CodeDom;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
@@ -28,6 +30,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Transactions;
 using TinyJson;
 using UnityEngine;
@@ -38,14 +41,15 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
 using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
+using static Den.Tools.Serializer;
 using static MonoMod.RuntimeDetour.Platforms.DetourNativeMonoPosixPlatform;
 using static UnityEngine.InputSystem.InputRemoting;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.VolumeComponent;
 using Component = UnityEngine.Component;
+using Cursor = UnityEngine.Cursor;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
-using Cursor = UnityEngine.Cursor;
 // using GLTFast.Export;
 
 namespace BitchlandCheatConsoleBepInEx
@@ -151,6 +155,26 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
             return default;
+        }
+        private static GameObject[] getAllObjectsByInteractibleType<T>() where T : Interactible
+        {
+            T[] allObjects = UnityEngine.Object.FindObjectsByType<T>(
+                FindObjectsSortMode.None // No sorting for better performance
+            );
+
+            if (allObjects != null)
+            {
+                int length = allObjects.Length;
+                GameObject[] newAllObjects = new GameObject[allObjects.Length];
+                for (int i = 0; i < length; i++)
+                {
+                    newAllObjects[i] = allObjects[i].gameObject;
+                }
+
+                return newAllObjects;
+            }
+
+            return null;
         }
 
         private static bool showGUI = false;       // Toggle GUI visibility
@@ -4861,6 +4885,225 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool collision1 = true;
         public static bool collision2 = true;
 
+        private static void SetMaterialOpaque(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return;
+            }
+
+            obj.layer = LayerMask.NameToLayer("Default");
+
+            Renderer[] r_ = obj.GetComponents<Renderer>();
+            Renderer[] r2_ = obj.GetComponents<SkinnedMeshRenderer>();
+            CanvasRenderer[] r3_ = obj.GetComponents<CanvasRenderer>();
+
+
+            if (r_ == null)
+            {
+                r_ = new Renderer[0];
+            }
+
+            if (r2_ == null)
+            {
+                r2_ = new Renderer[0];
+            }
+
+            if (r3_ == null)
+            {
+                r3_ = new CanvasRenderer[0];
+            }
+
+            for (int i = 0; i < r_.Length; i++) {
+                Renderer r = r_[i];
+
+                if (r == null)
+                {
+                    continue;
+                }
+
+                r.enabled = true;
+
+                if (r.material != null)
+                {
+                    Material mat = r.material;
+
+                    if (mat == null) goto end_here;
+
+                    mat.shader = Shader.Find("Standard");
+
+                    // Ensure alpha is 1 (fully opaque)
+                    if (mat.HasProperty("_Color"))
+                    {
+                        Color col = mat.color;
+                        col.a = 1f;
+                        mat.color = col;
+                    }
+
+                    // Ensure shader is visible
+                    if (mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("Fade"))
+                    {
+                        // Switch to Standard Opaque shader
+                        mat.shader = Shader.Find("Standard");
+                        mat.SetFloat("_Mode", 0); // Opaque mode
+                    }
+
+                    // Get current color and set alpha to 1
+                    Color color = mat.color;
+                    color.a = 1f;
+                    mat.color = color;
+
+                    // If using Standard Shader, switch to Opaque mode
+                    if (mat.shader.name == "Standard")
+                    {
+                        mat.SetFloat("_Mode", 0); // 0 = Opaque
+                        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                        mat.SetInt("_ZWrite", 1);
+                        mat.DisableKeyword("_ALPHATEST_ON");
+                        mat.DisableKeyword("_ALPHABLEND_ON");
+                        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        mat.renderQueue = -1;
+                    }
+
+                    r.material = mat;
+                }
+
+            end_here:
+                if (r.materials != null)
+                {
+                    for (int j = 0; j < r.materials.Length; j++)
+                    {
+
+                        Material mat = r.materials[j];
+
+                        if (mat == null) continue;
+
+                        mat.shader = Shader.Find("Standard");
+
+                        // Ensure alpha is 1 (fully opaque)
+                        if (mat.HasProperty("_Color"))
+                        {
+                            Color col = mat.color;
+                            col.a = 1f;
+                            mat.color = col;
+                        }
+
+                        // Ensure shader is visible
+                        if (mat.shader.name.Contains("Transparent") || mat.shader.name.Contains("Fade"))
+                        {
+                            // Switch to Standard Opaque shader
+                            mat.shader = Shader.Find("Standard");
+                            mat.SetFloat("_Mode", 0); // Opaque mode
+                        }
+
+                        // Get current color and set alpha to 1
+                        Color color = mat.color;
+                        color.a = 1f;
+                        mat.color = color;
+
+                        // If using Standard Shader, switch to Opaque mode
+                        if (mat.shader.name == "Standard")
+                        {
+                            mat.SetFloat("_Mode", 0); // 0 = Opaque
+                            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                            mat.SetInt("_ZWrite", 1);
+                            mat.DisableKeyword("_ALPHATEST_ON");
+                            mat.DisableKeyword("_ALPHABLEND_ON");
+                            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                            mat.renderQueue = -1;
+                        }
+
+                        r.materials[j] = mat;
+                    }
+                }
+            }
+
+            for (int i = 0; i < r2_.Length; i++)
+            {
+                Renderer r = r2_[i];
+
+                if (r == null)
+                {
+                    continue;
+                }
+
+                r.enabled = true;
+
+                if (r.material != null)
+                {
+                    Material mat = r.material;
+
+                    if (mat == null) goto end_here2;
+
+                    mat.shader = Shader.Find("Standard");
+
+                    // Get current color and set alpha to 1
+                    Color color = mat.color;
+                    color.a = 1f;
+                    mat.color = color;
+
+                    // If using Standard Shader, switch to Opaque mode
+                    if (mat.shader.name == "Standard")
+                    {
+                        mat.SetFloat("_Mode", 0); // 0 = Opaque
+                        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                        mat.SetInt("_ZWrite", 1);
+                        mat.DisableKeyword("_ALPHATEST_ON");
+                        mat.DisableKeyword("_ALPHABLEND_ON");
+                        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        mat.renderQueue = -1;
+                    }
+                }
+
+            end_here2:
+                if (r.materials != null)
+                {
+                    for (int j = 0; j < r.materials.Length; j++)
+                    {
+
+                        Material mat = r.materials[j];
+
+                        if (mat == null) continue;
+
+                        mat.shader = Shader.Find("Standard");
+
+                        // Get current color and set alpha to 1
+                        Color color = mat.color;
+                        color.a = 1f;
+                        mat.color = color;
+
+                        // If using Standard Shader, switch to Opaque mode
+                        if (mat.shader.name == "Standard")
+                        {
+                            mat.SetFloat("_Mode", 0); // 0 = Opaque
+                            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                            mat.SetInt("_ZWrite", 1);
+                            mat.DisableKeyword("_ALPHATEST_ON");
+                            mat.DisableKeyword("_ALPHABLEND_ON");
+                            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                            mat.renderQueue = -1;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < r3_.Length; i++)
+            {
+                CanvasRenderer r = r3_[i];
+
+                if (r == null)
+                {
+                    continue;
+                }
+
+                r.SetAlpha(1f);
+            }
+        }
+
         public static Dictionary<string, GameObject[]> copies = new Dictionary<string, GameObject[]>();
         public static Dictionary<string, GameObject[]> copies2 = new Dictionary<string, GameObject[]>();
 
@@ -4941,6 +5184,7 @@ namespace BitchlandCheatConsoleBepInEx
                 newElement.transform.rotation = player.transform.rotation;
                 newElement.transform.parent = player.transform.parent;
                 newElement.SetActive(true);
+                SetMaterialOpaque(newElement);
                 try
                 {
                     Main.Instance.GameplayMenu.ShowNotification($"spawncopy: object '{newElement.name}' pastied!");
@@ -4988,6 +5232,7 @@ namespace BitchlandCheatConsoleBepInEx
                 newElement.transform.rotation = player.transform.rotation;
                 newElement.transform.parent = player.transform.parent;
                 newElement.SetActive(true);
+                SetMaterialOpaque(newElement);
                 try
                 {
                     Main.Instance.GameplayMenu.ShowNotification($"spawncopy2: object '{newElement.name}' pastied!");
@@ -5190,37 +5435,62 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        public static void ObjectsSpawn(GameObject[] objects, string messagePrefix, string messagePostfix, bool useOpaqueMode)
+        {
+            if (objects == null)
+                return;
+
+            if (messagePrefix == null)
+                return;
+
+            if (messagePostfix == null)
+                return;
+
+            List<GameObject> pasties = new List<GameObject>();
+            for (int i = 0; i < objects.Length; i++)
+            {
+                GameObject obj = objects[i];
+                if (obj == null)
+                    continue;
+                if (pasties.Contains(obj))
+                    continue;
+                pasties.Add(obj);
+                GameObject newElement = Main.Spawn(obj);
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                if (useOpaqueMode)
+                    SetMaterialOpaque(newElement);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"{messagePrefix} {newElement.name} {messagePostfix}");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
         public static void paste()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste");
             if (copyObj != null)
             {
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj.Length; i++)
-                {
-                    if (copyObj[i] == null)
-                    {
-                        continue;
-                    }
-
-                    GameObject obj = copyObj[i];
-                    if (pasties.Contains(obj))
-                        continue;
-                    pasties.Add(obj);
-                    GameObject newElement = Main.Spawn(obj);
-                    Person player = Main.Instance.Player;
-                    newElement.transform.position = player.transform.position;
-                    newElement.transform.rotation = player.transform.rotation;
-                    newElement.transform.parent = player.transform.parent;
-                    newElement.SetActive(true);
-                    try
-                    {
-                        Main.Instance.GameplayMenu.ShowNotification($"paste: object '{newElement.name}' pastied!");
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                }
+                ObjectsSpawn(copyObj, "paste: object", "pastied!", false);
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+        public static void pasteex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: paste");
+            if (copyObj != null)
+            {
+                ObjectsSpawn(copyObj, "pasteex: object", "pastied!", true);
             }
             else
             {
@@ -5233,32 +5503,19 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("executed command: paste2");
             if (copyObj2 != null)
             {
-                List<GameObject> pasties = new List<GameObject>();
-                for (int i = 0; i < copyObj2.Length; i++)
-                {
-                    if (copyObj2[i] == null)
-                    {
-                        continue;
-                    }
-
-                    GameObject obj = copyObj2[i];
-                    if (pasties.Contains(obj))
-                        continue;
-                    pasties.Add(obj);
-                    GameObject newElement = Main.Spawn(obj);
-                    Person player = Main.Instance.Player;
-                    newElement.transform.position = player.transform.position;
-                    newElement.transform.rotation = player.transform.rotation;
-                    newElement.transform.parent = player.transform.parent;
-                    newElement.SetActive(true);
-                    try
-                    {
-                        Main.Instance.GameplayMenu.ShowNotification($"paste2: object '{newElement.name}' pastied!");
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                }
+                ObjectsSpawn(copyObj2, "paste2ex: object", "pastied!", true);
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+        public static void paste2ex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: paste2ex");
+            if (copyObj2 != null)
+            {
+                ObjectsSpawn(copyObj2, "paste2ex: object", "pastied!", true);
             }
             else
             {
@@ -10674,6 +10931,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnobjectex":
+                case "raycastobjpaste1ex":
+                case "pex":
+                case "pasteex":
+                    {
+                        pasteex();
+                    }
+                    break;
+
+                case "spawnobject2ex":
+                case "raycastobjpaste2ex":
+                case "p2ex":
+                case "paste2ex":
+                    {
+                        paste2ex();
+                    }
+                    break;
+
                 case "npcsexy":
                     {
                         npcsexy();
@@ -12061,9 +12336,9 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
-                case "listobjects":
+                case "listobjectsslow":
                     {
-                        listobjects();
+                        listobjectsslow();
                     }
                     break;
 
@@ -12117,55 +12392,103 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "car":
                     {
-                        spawnobjectex("sedanvehicle");
+                        spawnobjectexfast("sedanvehicle", true);
                     }
                     break;
 
                 case "car2":
                     {
-                        spawnobjectex("sedanvehicle_(1)");
+                        spawnobjectexfast("sedanvehicle_(1)", true);
                     }
                     break;
 
                 case "tank":
                     {
-                        spawnobjectex("panzer_vi_e_(1)");
+                        spawnobjectexfast("panzer_vi_e_(1)", true);
+                    }
+                    break;
+
+                case "tank2":
+                    {
+                        spawnobjectexfast("panzer_vi_e", true);
+                    }
+                    break;
+
+                case "locker":
+                    {
+                        spawnobjectexfast("locker", true);
                     }
                     break;
 
                 case "sexlocker":
                     {
-                        spawnobjectex("glasslocker");
+                        spawnobjectexfast("glasslocker", true);
+                    }
+                    break;
+
+                case "sexmachine":
+                    {
+                        spawnobjectexfast("machine3", true);
+                    }
+                    break;
+
+                case "sextubebike":
+                    {
+                        spawnobjectexfast("tubebike", true);
                     }
                     break;
 
                 case "offersex":
                     {
-                        spawnobjectex("sexspotfloor");
+                        spawnobjectexfast("sexspotfloor", true);
                     }
                     break;
 
                 case "gloryholewall":
                     {
-                        spawnobjectex("sexspot_gloryholewall");
+                        spawnobjectexfast("sexspot_gloryholewall", true);
                     }
                     break;
 
                 case "woodpole":
                     {
-                        spawnobjectex("woodpolewide");
+                        spawnobjectexfast("woodpolewide", true);
                     }
                     break;
 
                 case "woodpole2":
                     {
-                        spawnobjectex("woodpole2");
+                        spawnobjectexfast("woodpole2", true);
                     }
                     break;
 
                 case "woodpillar":
                     {
-                        spawnobjectex("woodpillar");
+                        spawnobjectexfast("woodpillar", true);
+                    }
+                    break;
+
+                case "woodpillar2":
+                    {
+                        spawnobjectexfast("woodpillarbj", true);
+                    }
+                    break;
+
+                case "dildopole":
+                    {
+                        spawnobjectexfast("dildopole_1", true);
+                    }
+                    break;
+
+                case "dildopole2":
+                    {
+                        spawnobjectexfast("dildopole_2", true);
+                    }
+                    break;
+
+                case "dildopole3":
+                    {
+                        spawnobjectexfast("dildopole_3", true);
                     }
                     break;
 
@@ -14130,17 +14453,45 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnslow":
+                case "spawnobjectexslow":
+                    {
+                        spawnobjectexslow(value, true);
+                    }
+                    break;
+
+                case "spawnexslow":
+                case "spawnobjectexexslow":
+                    {
+                        spawnobjectexslow(value, false);
+                    }
+                    break;
+
+                case "searchslow":
+                case "searchobjectexslow":
+                    {
+                        searchobjectexslow(value);
+                    }
+                    break;
+
                 case "spawn":
                 case "spawnobjectex":
                     {
-                        spawnobjectex(value);
+                        spawnobjectexfast(value, true);
+                    }
+                    break;
+
+                case "spawnex":
+                case "spawnobjectexex":
+                    {
+                        spawnobjectexfast(value, false);
                     }
                     break;
 
                 case "search":
                 case "searchobjectex":
                     {
-                        searchobjectex(value);
+                        searchobjectexfast(value);
                     }
                     break;
 
@@ -14242,118 +14593,468 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        private static List<GameObject> getAllObjects()
+        private static List<GameObject> allObjectsFastOW = new List<GameObject>();
+        private static List<GameObject> allObjectsFastNotOw = new List<GameObject>();
+        private static List<GameObject> getAllObjectsFast()
         {
+            bool isOW = false;
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            } catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                if (allObjectsFastOW.Count > 0)
+                {
+                    return allObjectsFastOW;
+                }
+            } else
+            {
+                if (allObjectsFastNotOw.Count > 0)
+                {
+                    return allObjectsFastNotOw;
+                }
+            }
+
             List<GameObject> list = new List<GameObject>();
 
-            List<SaveableBehaviour> spawnedObjects = new List<SaveableBehaviour>();
-
-            List<SaveableBehaviour> spawnedObjectsWorld = new List<SaveableBehaviour>();
-
-            GameObject[] allObjects = UnityEngine.Object.FindObjectsByType<GameObject>(
-                    FindObjectsSortMode.None // No sorting for better performance
-            );
-
             try
             {
-                if (allObjects != null)
-                {
-                    foreach (GameObject objected in allObjects)
-                    {
-                        if (objected == null)
-                        {
-                            continue;
-                        }
-
-                        if (list.Contains(objected))
-                        {
-                            continue;
-                        }
-
-                        list.Add(objected);
-                    }
-                }
-            } catch (Exception ex)
-            {
-            }
-
+                list.AddRange(getAllObjectsByInteractibleType<int_ArmyManagementTable>());
+            } catch { }
             try
             {
-                spawnedObjects.AddRange(Main.Instance.SpawnedObjects);
-
-            } catch (Exception ex)
-            {
-
+                list.AddRange(getAllObjectsByInteractibleType<int_basicSit>());
             }
-
+            catch { }
             try
             {
-                spawnedObjectsWorld.AddRange(Main.Instance.SpawnedObjects_World);
-
+                list.AddRange(getAllObjectsByInteractibleType<bl_HangFurniture>());
             }
-            catch (Exception ex)
+            catch { }
+            try
             {
-
+                list.AddRange(getAllObjectsByInteractibleType<Int_Car>());
             }
-
-            foreach (SaveableBehaviour save in spawnedObjects)
+            catch { }
+            try
             {
-                if (save == null)
-                {
-                    continue;
-                }
-
-                if (list.Contains(save.gameObject))
-                    continue;
-
-                list.Add(save.gameObject);
+                list.AddRange(getAllObjectsByInteractibleType<int_CondomBox>());
             }
-
-            foreach (SaveableBehaviour save in spawnedObjectsWorld)
+            catch { }
+            try
             {
-                if (save == null)
-                {
-                    continue;
-                }
-
-                if (list.Contains(save.gameObject))
-                    continue;
-
-                list.Add(save.gameObject);
+                list.AddRange(getAllObjectsByInteractibleType<MultiInteractible>());
             }
-
-            return list;
-        } 
-
-        public static Dictionary<string,GameObject> getAllObjectsStrings()
-        {
-            Dictionary<string,GameObject> list = new Dictionary<string, GameObject>();
-
-            List<GameObject> objects = getAllObjects();
-
-            foreach (GameObject objected in objects)
+            catch { }
+            try
             {
-                if (objected.name == null)
-                {
-                    continue;
-                }
+                list.AddRange(getAllObjectsByInteractibleType<int_ResourceItem>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_DildoPole>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_Lockable>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_Dragable>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_EscapePrison>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_FloorSit>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_LoadCustomCharacter>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_misc_StopUsing>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_money>());
+            }
+            catch { }
+            /*try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_Person>());
+            }
+            catch { }*/
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_Pickupable>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_PickupToBag>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_PickupToHand>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_Piss>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_posterCollectible>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_readable>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_ResourceMining>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_SearchTrash>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_SitAndShit>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_startsex>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_Turret>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_useWeapon>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_VendingMachine>());
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_Vent>());
+            }
+            catch { }
 
-                string name = objected.name;
 
-                name = name.ToLower().Replace(" ", "_");
-
-                if (list.ContainsKey(name))
-                {
-                    continue;
-                }
-
-                list.Add(name, objected);
+            if (isOW)
+            {
+                allObjectsFastOW.Clear();
+                allObjectsFastOW.AddRange(list);
+            }
+            else
+            {
+                allObjectsFastNotOw.Clear();
+                allObjectsFastNotOw.AddRange(list);
             }
 
             return list;
         }
 
-        public static GameObject getObjectByName(string value)
+        private static List<GameObject> allObjectsSlowOW = new List<GameObject>();
+        private static List<GameObject> allObjectsSlowNotOw = new List<GameObject>();
+        private static List<GameObject> getAllObjectsSlow()
+        {
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                if (allObjectsSlowOW.Count > 0)
+                {
+                    return allObjectsSlowOW;
+                }
+            }
+            else
+            {
+                if (allObjectsSlowNotOw.Count > 0)
+                {
+                    return allObjectsSlowNotOw;
+                }
+            }
+            GameObject[] allObjectsNotOW = UnityEngine.Object.FindObjectsByType<GameObject>(
+               FindObjectsSortMode.None // No sorting for better performance
+          );
+
+           if (allObjectsNotOW != null)
+           {
+               List<GameObject> list = allObjectsNotOW.ToList();
+
+                if (isOW)
+                {
+                    allObjectsSlowOW.Clear();
+                    allObjectsSlowOW.AddRange(list);
+                }
+                else
+                {
+                    allObjectsSlowNotOw.Clear();
+                    allObjectsSlowNotOw.AddRange(list);
+                }
+
+                return list;
+            }
+
+           return null;
+        }
+
+        private static ConcurrentDictionary<string, GameObject> allObjectsSlowStringsOW = new ConcurrentDictionary<string, GameObject>();
+        private static ConcurrentDictionary<string, GameObject> allObjectsSlowStringsNotOw = new ConcurrentDictionary<string, GameObject>();
+        public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsSlow()
+        {
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                if (allObjectsSlowStringsOW.Count > 0)
+                {
+                    return allObjectsSlowStringsOW;
+                }
+            }
+            else
+            {
+                if (allObjectsSlowStringsNotOw.Count > 0)
+                {
+                    return allObjectsSlowStringsNotOw;
+                }
+            }
+            Dictionary<string,GameObject> list = new Dictionary<string, GameObject>();
+
+            ConcurrentDictionary<string, GameObject> listex = new ConcurrentDictionary<string, GameObject>();
+
+            List<GameObject> objects = getAllObjectsSlow();
+
+            if (objects == null)
+            {
+                return listex;
+            }
+
+            ParallelOptions options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount // Use all CPU cores
+            };
+
+            int j = 0;
+            //Task.Run(() => {
+                try
+                {
+                    Parallel.ForEach(objects, options, objected =>
+                    {
+                        if (objected == null)
+                            goto end_here;
+                        if (objected.name == null)
+                        {
+                            goto end_here;
+                        }
+
+                        string name = objected.name;
+
+                        name = name.ToLower().Replace(" ", "_");
+
+                        int k = 0;
+
+                        string nametest = name;
+
+                        while (listex.ContainsKey(nametest))
+                        {
+                            nametest = name + k.ToString();
+                            k++;
+                        }
+
+                        listex.TryAdd(nametest, objected);
+                        j++;
+                        Logger.LogInfo(j.ToString());
+
+                    end_here:
+                        int i = 0;
+                    });
+
+                   // File.WriteAllText("biglist", listex.Keys.ToJson());
+                }
+                catch (AggregateException ex)
+                {
+                    Logger.LogError(ex.ToString());
+                    return listex;
+                }
+           // });
+
+            if (listex.Count > 0)
+            {
+               if (isOW)
+               {
+                    allObjectsSlowStringsOW.Clear();
+                    allObjectsSlowStringsOW.AddRange<string, GameObject>(listex);
+               }
+               else
+               {
+                    allObjectsSlowStringsNotOw.Clear();
+                    allObjectsSlowStringsNotOw.AddRange<string, GameObject>(listex);
+               }
+            }
+
+            return listex;
+        }
+
+        private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsOW = new ConcurrentDictionary<string, GameObject>();
+        private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsNotOw = new ConcurrentDictionary<string, GameObject>();
+        public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsFast()
+        {
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                if (allObjectsFastStringsOW.Count > 0)
+                {
+                    return allObjectsFastStringsOW;
+                }
+            }
+            else
+            {
+                if (allObjectsFastStringsNotOw.Count > 0)
+                {
+                    return allObjectsFastStringsNotOw;
+                }
+            }
+
+            Dictionary<string, GameObject> list = new Dictionary<string, GameObject>();
+
+            ConcurrentDictionary<string, GameObject> listex = new ConcurrentDictionary<string, GameObject>();
+
+            List<GameObject> objects = getAllObjectsFast();
+
+            if (objects == null)
+            {
+                return listex;
+            }
+
+            ParallelOptions options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount // Use all CPU cores
+            };
+
+            int j = 0;
+            //Task.Run(() => {
+            try
+            {
+                Parallel.ForEach(objects, options, objected =>
+                {
+                    if (objected == null)
+                        goto end_here;
+                    if (objected.name == null)
+                    {
+                        goto end_here;
+                    }
+
+                    string name = objected.name;
+
+                    name = name.ToLower().Replace(" ", "_");
+
+                    int k = 0;
+
+                    string nametest = name;
+
+                    while (listex.ContainsKey(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    listex.TryAdd(nametest, objected);
+                    j++;
+                    Logger.LogInfo(j.ToString());
+
+                end_here:
+                    int i = 0;
+                });
+
+                // File.WriteAllText("biglist", listex.Keys.ToJson());
+            }
+            catch (AggregateException ex)
+            {
+                Logger.LogError(ex.ToString());
+                return listex;
+            }
+            // });
+
+            if (listex.Count > 0)
+            {
+                if (isOW)
+                {
+                    allObjectsFastStringsOW.Clear();
+                    allObjectsFastStringsOW.AddRange<string, GameObject>(listex);
+                }
+                else
+                {
+                    allObjectsFastStringsNotOw.Clear();
+                    allObjectsFastStringsNotOw.AddRange<string, GameObject>(listex);
+                }
+            }
+
+            return listex;
+        }
+
+        public static GameObject getObjectByNameSlow(string value)
         {
             if (value  == null)
             {
@@ -14367,7 +15068,7 @@ namespace BitchlandCheatConsoleBepInEx
 
             string searchedName = value.ToLower();
 
-            Dictionary<string,GameObject> objects = getAllObjectsStrings();
+            ConcurrentDictionary<string,GameObject> objects = getAllObjectsStringsSlow();
 
             if (objects.ContainsKey(searchedName))
             {
@@ -14377,7 +15078,7 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
-        public static GameObject getObjectByNameStartsWith(string value)
+        public static GameObject getObjectByNameFast(string value)
         {
             if (value == null)
             {
@@ -14391,7 +15092,31 @@ namespace BitchlandCheatConsoleBepInEx
 
             string searchedName = value.ToLower();
 
-            Dictionary<string, GameObject> objects = getAllObjectsStrings();
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFast();
+
+            if (objects.ContainsKey(searchedName))
+            {
+                return objects[searchedName];
+            }
+
+            return null;
+        }
+
+        public static GameObject getObjectByNameStartsWithSlow(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsSlow();
 
             foreach (string name in objects.Keys)
             {
@@ -14404,7 +15129,7 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
-        public static GameObject getObjectByNameContains(string value)
+        public static GameObject getObjectByNameStartsWithFast(string value)
         {
             if (value == null)
             {
@@ -14418,7 +15143,34 @@ namespace BitchlandCheatConsoleBepInEx
 
             string searchedName = value.ToLower();
 
-            Dictionary<string, GameObject> objects = getAllObjectsStrings();
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFast();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.StartsWith(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
+        public static GameObject getObjectByNameContainsSlow(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsSlow();
 
             foreach (string name in objects.Keys)
             {
@@ -14431,37 +15183,119 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
-        public static GameObject getObjectByNameEx(string value)
+        public static GameObject getObjectByNameContainsFast(string value)
         {
-            GameObject gameObject = getObjectByName(value);
-
             if (value == null)
             {
                 return null;
             }
 
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFast();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.Contains(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
+        private static Dictionary<string, GameObject> objectsByNameSlowCache = new Dictionary<string, GameObject>();
+
+        public static GameObject getObjectByNameSlowEx(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (objectsByNameSlowCache.ContainsKey(value))
+            {
+                return objectsByNameSlowCache[value];
+            }
+
+            GameObject gameObject = getObjectByNameSlow(value);
+
             if (gameObject == null)
             {
-                gameObject = getObjectByNameStartsWith(value);
+                gameObject = getObjectByNameStartsWithSlow(value);
             }
 
             if (gameObject == null)
             {
-                gameObject = getObjectByNameContains(value);
+                gameObject = getObjectByNameContainsSlow(value);
             }
 
             return gameObject;
         }
 
-        private static void listobjects()
+        private static Dictionary<string, GameObject> objectsByNameFastCache = new Dictionary<string, GameObject>();
+        public static GameObject getObjectByNameFastEx(string value)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjects");
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (objectsByNameFastCache.ContainsKey(value))
+            {
+                return objectsByNameFastCache[value];
+            }
+
+            GameObject gameObject = getObjectByNameFast(value);
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameStartsWithFast(value);
+            }
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameContainsFast(value);
+            }
+
+            if (gameObject != null)
+            {
+                objectsByNameFastCache.Add(value, gameObject);
+            }
+
+            return gameObject;
+        }
+
+        private static void listobjectsslow()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjectsslow");
 
             try
             {
-                List<string> objectsNames = getAllObjectsStrings().Keys.ToList();
-                File.WriteAllText("listobjects.json", objectsNames.ToJson());
-            } catch (Exception ex)
+                List<string> objectsNames = getAllObjectsStringsSlow().Keys.ToList();
+                File.WriteAllText("listobjectsslow.json", objectsNames.ToJson());
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        private static void listobjectsfast()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjectsfast");
+
+            try
+            {
+                List<string> objectsNames = getAllObjectsStringsFast().Keys.ToList();
+                File.WriteAllText("listobjectsfast.json", objectsNames.ToJson());
+            }
+            catch (Exception ex)
             {
 
             }
@@ -14549,11 +15383,11 @@ namespace BitchlandCheatConsoleBepInEx
             File.WriteAllText("sexspots.json", sexspots_.ToJson());
         }
 
-        private static void searchobjectex(string value)
+        private static void searchobjectexslow(string value)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectex");
+            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectexslow");
 
-            GameObject gameObject = getObjectByNameEx(value);
+            GameObject gameObject = getObjectByNameSlowEx(value);
 
             if (value == null)
             {
@@ -14568,11 +15402,12 @@ namespace BitchlandCheatConsoleBepInEx
 
             Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
         }
-        private static void spawnobjectex(string value)
-        {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectex " + value);
 
-            GameObject gameObject = getObjectByNameEx(value);
+        private static void searchobjectexfast(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectexfast");
+
+            GameObject gameObject = getObjectByNameFastEx(value);
 
             if (value == null)
             {
@@ -14585,14 +15420,55 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
 
-            GameObject newElement = Main.Spawn(gameObject);
-            Person player = Main.Instance.Player;
-            newElement.transform.position = player.transform.position;
-            newElement.transform.rotation = player.transform.rotation;
-            newElement.transform.parent = player.transform.parent;
-            newElement.SetActive(true);
+            Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
+        }
 
-            Main.Instance.GameplayMenu.ShowNotification("object spawned : " + gameObject.name);
+        private static void spawnobjectexslow(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexslow " + value);
+
+            GameObject gameObject = getObjectByNameSlowEx(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);        
+        }
+
+        private static void spawnobjectexfast(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexslow " + value);
+
+            GameObject gameObject = getObjectByNameFastEx(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);
         }
 
         private static void savenpctofile(string value)
