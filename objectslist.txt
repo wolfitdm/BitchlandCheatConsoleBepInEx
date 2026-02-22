@@ -10,6 +10,10 @@ for all objects see
 
 https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listobjects.json
 
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listobjects_maincity.json
+
+https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listobjects_ow.json
+
 for vehicles see 
 
 https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/listvehicles.json
