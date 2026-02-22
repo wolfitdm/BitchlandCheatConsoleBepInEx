@@ -12342,6 +12342,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listobjects":
+                    {
+                        listobjectsfast();
+                    }
+                    break;
+
                 case "listvehicles":
                     {
                         listvehicles();
@@ -15449,7 +15455,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static void spawnobjectexfast(string value, bool opaqueMode)
         {
-            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexslow " + value);
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexfast " + value);
 
             GameObject gameObject = getObjectByNameFastEx(value);
 

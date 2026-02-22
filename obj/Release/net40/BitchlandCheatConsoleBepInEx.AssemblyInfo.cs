@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BitchlandCheatConsoleBepInEx")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9053eb19e06f61a2ae9effcd58eb445044dd86f6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f14c45782d20509f989c19a05a8b9aec70077807")]
 [assembly: System.Reflection.AssemblyProductAttribute("You have unlimited all!")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BitchlandCheatConsoleBepInEx")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
