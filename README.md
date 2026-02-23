@@ -564,7 +564,8 @@ commands with 1 param:
 * rotatemode2 name -> activate/deactivte the rotatemode from the gameobject 2 the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
 * warpobject name -> teleports the object the have saved under name, with the copy name command to you
 * warpobject2 name -> teleports the object 2 the have saved under name, with the copy name command to you
-
+* listalltypes name -> list all components of a gameobject, the have you select with the copy name command, and show his scripts (only for developer important)
+* listalltypes2 name -> list all components of a gameobject 2 , the have you selected with the copy name command, and show his scripts (only for developer important)
 
 This commands are maybe removed in the future (please do not use this commands):
 

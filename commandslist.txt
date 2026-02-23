@@ -373,6 +373,27 @@ dildopole -> spawn a dildopole, this command executes -> spawn dildopole_1, for 
 dildopole2 -> spawn a other dildopole, this command executes -> spawn dildopole_2, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
 dildopole3 -> spawn a other dildo pole, this command executes, spawn dildopole_3, for more objects see https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
 listobjectsslow -> a other version from the listobjects command, it lists really all gameobjects (also persons) but on the overworld is takes too long time, to create the objects list, therefore please dont use this command, in the overworld
+ow -> alias for the command openworld (works perfectly)
+openworld -> teleports you to the open world (works perfectly)
+ow2 -> alias for the command openworld2
+openworld2 -> use this command if openworld command no longer works
+ow3 -> alias for the openworld3 command
+openworld3 -> use this command if the other openworld commands no longer works
+ow4 -> alias for the openworld4 command
+openworld4 -> use this command if the other openworld commands no longer works
+ow5 -> alias for the openworld5 command
+openworld5 -> use this command if the other openworld commands no longer works
+mc -> alias for the maincity command
+maincity -> teleports you to the main city
+mc2 -> alias for the maincity2 command
+maincity2 -> use this command if the other maincity commands no longer works
+mc3 -> alias for the maincity3 command
+maincity3 -> use this command if the other maincity commands no longer works
+listalltypes -> list all components of a gameobject, the have you select with the copy command, and show his scripts (only for developer important)
+listalltypes2 -> list all components of a gameobject 2 , the have you selected with the copy command, and show his scripts (only for developer important)
+cursor -> you see the mouse cursor
+nocursor -> hides the mouse cursor
+nominingtools -> toggle you don't longer need mining tools and you can very fast mining
 
 commands with 1 param:
 
@@ -546,6 +567,8 @@ positionmode2 name -> activate/deactivte the positionmode from the gameobject 2 
 rotatemode2 name -> activate/deactivte the rotatemode from the gameobject 2 the have you selected with the copy name command, Press Insert/End/PageUp/PageDown/R/T/Q/E key to change position/rotation from the object, you can change the keys in BepInEx\config\BitchlandCheatConsole*.cfg
 warpobject name -> teleports the object the have saved under name, with the copy name command to you
 warpobject2 name -> teleports the object 2 the have saved under name, with the copy name command to you
+listalltypes name -> list all components of a gameobject, the have you select with the copy name command, and show his scripts (only for developer important)
+listalltypes2 name -> list all components of a gameobject 2 , the have you selected with the copy name command, and show his scripts (only for developer important)
 
 This commands are maybe removed in the future (please do not use this commands):
 
