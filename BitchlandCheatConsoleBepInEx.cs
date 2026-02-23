@@ -1393,7 +1393,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static string lastCommand = "";
 
-        private GUIStyle levelLabelStyle = null;
+        private static GUIStyle levelLabelStyle = null;
 
         private static bool showLevelLabel = false;
 
@@ -14636,6 +14636,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static List<GameObject> allObjectsFastOW = new List<GameObject>();
         private static List<GameObject> allObjectsFastNotOw = new List<GameObject>();
+
         private static List<GameObject> getAllObjectsFast()
         {
             bool isOW = false;
@@ -14665,7 +14666,13 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_ArmyManagementTable>());
+                try
+                {
+                    list.AddRange(getAllObjectsByInteractibleType<int_ArmyManagementTable>());
+                }
+                catch (Exception ex)
+                {
+                }
             } catch { }
             try
             {
@@ -15063,7 +15070,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                     listex.TryAdd(nametest, objected);
                     j++;
-                    Logger.LogInfo(j.ToString());
+                   // Logger.LogInfo(j.ToString());
 
                 end_here:
                     int i = 0;
