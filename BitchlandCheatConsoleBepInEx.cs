@@ -19618,6 +19618,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static bool onOpenCheat = false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix, Type[] parameters = null)
         {
             string uniqueId = "com.wolfitdm.BitchlandCheatConsoleBepInEx";
@@ -20049,7 +20050,10 @@ namespace BitchlandCheatConsoleBepInEx
                         PatchHarmonyMethodUnity(typeof(Person), "StopFollowing", "Person_StopFollowing", true, false);
                     }
                     catch { }
-                    miningPatch();
+                    try
+                    {
+                        miningPatch();
+                    } catch { }
                 }
 
             } catch (Exception ex)
