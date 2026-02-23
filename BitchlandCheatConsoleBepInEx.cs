@@ -6,47 +6,26 @@ using BepInEx.Unity.Mono;
 using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
-using MapMagic.Expose;
-using MapMagic.Nodes;
-using Microsoft.Win32.SafeHandles;
 using MonoMod.Utils;
-using SemanticVersioning;
 using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using TinyJson;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.InputSystem;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using UnityEngine.Video;
-using static BitchlandCheatConsoleBepInEx.BitchlandCheatConsoleBepInEx;
-using static Den.Tools.Serializer;
-using static MonoMod.RuntimeDetour.Platforms.DetourNativeMonoPosixPlatform;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.InputSystem.InputRemoting;
 using static UnityEngine.Random;
-using static UnityEngine.Rendering.VolumeComponent;
 using Component = UnityEngine.Component;
 using Cursor = UnityEngine.Cursor;
 using Quaternion = UnityEngine.Quaternion;
@@ -157,9 +136,15 @@ namespace BitchlandCheatConsoleBepInEx
             }
             return default;
         }
-        private static GameObject[] getAllObjectsByInteractibleType<T>() where T : Interactible
+        private static GameObject[] getAllObjectsByInteractibleType<T>(bool includeInactive = false) where T : Interactible
         {
-            T[] allObjects = UnityEngine.Object.FindObjectsByType<T>(
+            FindObjectsInactive include = FindObjectsInactive.Exclude;
+            if (includeInactive)
+            {
+                include = FindObjectsInactive.Include;
+            }
+
+            T[] allObjects = UnityEngine.Object.FindObjectsByType<T>(include,
                 FindObjectsSortMode.None // No sorting for better performance
             );
 
@@ -10914,7 +10899,7 @@ namespace BitchlandCheatConsoleBepInEx
                 case "p2":
                 case "paste2":
                     {
-                       paste2();
+                        paste2();
                     }
                     break;
 
@@ -11401,7 +11386,7 @@ namespace BitchlandCheatConsoleBepInEx
                         help();
                     }
                     break;
-                    
+
                 case "playvideovl":
                     {
                         playvideo("slave.mp4", false, true, false, false, false);
@@ -11592,7 +11577,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "togglefuta":
                     {
-                       togglefuta();
+                        togglefuta();
                     }
                     break;
 
@@ -11619,7 +11604,7 @@ namespace BitchlandCheatConsoleBepInEx
                         npcmasturbate();
                     }
                     break;
-                
+
                 case "onlyfemales":
                     {
                         onlyfemales();
@@ -12041,7 +12026,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "howlongwantssex":
                     {
-                        howlongwantssex("");    
+                        howlongwantssex("");
                     }
                     break;
 
@@ -12115,7 +12100,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "infiniteammoall":
                     {
-                        infiniteammoall();    
+                        infiniteammoall();
                     }
                     break;
 
@@ -12533,6 +12518,92 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "ow":
+                case "openworld":
+                    {
+                        goto_openworld();
+                    }
+                    break;
+
+                case "ow2":
+                case "openworld2":
+                    {
+                        goto_openworld2();
+                    }
+                    break;
+
+                case "ow3":
+                case "openworld3":
+                    {
+                        goto_openworld3();
+                    }
+                    break;
+
+                case "ow4":
+                case "openworld4":
+                    {
+                        goto_openworld4();
+                    }
+                    break;
+
+                case "ow5":
+                case "openworld5":
+                    {
+                        goto_openworld5();
+                    }
+                    break;
+
+                case "mc":
+                case "maincity":
+                    {
+                        goto_maincity();
+                    }
+                    break;
+
+                case "mc2":
+                case "maincity2":
+                    {
+                        goto_maincity2();
+                    }
+                    break;
+
+                case "mc3":
+                case "maincity3":
+                    {
+                        goto_maincity3();
+                    }
+                    break;
+
+                case "listalltypes":
+                    {
+                        listalltypes(null);
+                    }
+                    break;
+
+                case "listalltypes2":
+                    {
+                        listalltypes2(null);
+                    }
+                    break;
+
+                case "cursor":
+                    {
+                        allowcursor();
+                    }
+                    break;
+
+                case "nocursor":
+                    {
+                        disallowcursor();
+                    }
+                    break;
+
+                case "nominingtools":
+                    {
+                        nominingtools();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -12553,6 +12624,483 @@ namespace BitchlandCheatConsoleBepInEx
                     break;
             }
         }
+
+        private static void disallowcursor()
+        {
+            try
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: disallowcursor");
+                Main.Instance.GameplayMenu.DisallowCursor();
+            } catch (Exception ex)
+            {
+
+            }
+        }
+
+        private static void allowcursor()
+        {
+            try
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: allowcursor");
+                Main.Instance.GameplayMenu.AllowCursor();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_maincity()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maincity");
+            try
+            {
+                Main.Instance.GameplayMenu.GoToCity();
+            } catch (Exception ex)
+            {
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_maincity2()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maincity2");
+            try
+            {
+                Main.Instance.GameplayMenu.Click_YesGotoBLCity();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_maincity3()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maincity3");
+            try
+            {
+                LoadingScene.LoadScene(1);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_openworld()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworld");
+
+            try
+            {
+                Main.Instance.GameplayMenu.GoToOpenWorld_Section(0);
+            } catch (Exception ex)
+            {
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_openworld2()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworld2");
+
+            try
+            {
+                Main.Instance.GameplayMenu.GoToOpenWorld_11();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_openworld3()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworld3");
+
+            MonoBehaviour gameplay = GetScriptByName("Gameplay");
+
+            if (gameplay != null)
+            {
+                gameplay.Invoke("GoToOpenWorld_11", 1f);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_openworld4()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworld4");
+            try
+            {
+                Main.Instance.GameplayMenu.Click_YesGotoOpenWorld();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_openworld5()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworld5");
+            try
+            {
+                LoadingScene.LoadScene(2);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private static Dictionary<string, MonoBehaviour> scripts = new Dictionary<string, MonoBehaviour>();
+        private static MonoBehaviour GetScriptByName(string name)
+        {
+            if (name == null || name == string.Empty)
+            {
+                return null;
+            }
+
+            if (scripts.ContainsKey(name))
+            {
+                return scripts[name];
+            }
+
+
+            Interactible[] allMonoBehaviours = FindObjectsOfType<Interactible>(true);
+
+            MonoBehaviour all = null;
+
+            if (allMonoBehaviours == null)
+            {
+                return all;
+            }
+
+            if (allMonoBehaviours.Length == 0)
+            {
+                return all;
+            }
+
+            for (int i = 0; i < allMonoBehaviours.Length; i++)
+            {
+                Interactible mb = allMonoBehaviours[i];
+
+                if (mb == null)
+                {
+                    continue;
+                }
+
+                if (mb.ScriptToRun_OnInteract == null)
+                {
+                    continue;
+                }
+
+                for (int j = 0; j < mb.ScriptToRun_OnInteract.Length; j++)
+                {
+                    if (mb.ScriptToRun_OnInteract[j] == null  || mb.ScriptToRun_OnInteract[j].name != name)
+                    {
+                        continue;
+                    }
+
+                    all = mb.ScriptToRun_OnInteract[j];
+
+                    scripts.Add(name, all);
+
+                    return all;
+                }
+            }
+
+            return all;
+        }
+
+        private static MonoBehaviour GetScriptByNameEx(string name)
+        {
+            if (name == null || name == string.Empty)
+            {
+                return null;
+            }
+
+            if (scripts.ContainsKey(name))
+            {
+                return scripts[name];
+            }
+
+            MonoBehaviour[] allMonoBehaviours = FindObjectsOfType<MonoBehaviour>(true);
+
+            MonoBehaviour all = null;
+
+            if (allMonoBehaviours == null)
+            {
+                return all;
+            }
+
+            if (allMonoBehaviours.Length == 0)
+            {
+                return all;
+            }
+
+            for (int i = 0; i < allMonoBehaviours.Length; i++)
+            {
+                MonoBehaviour mb = allMonoBehaviours[i];
+
+                if (mb == null)
+                {
+                    continue;
+                }
+
+                if (mb.name != name)
+                {
+                    continue;
+                }
+
+                all = mb;
+
+                scripts.Add(name, all);
+
+                return all;
+            }
+
+            return all;
+        }
+
+        public static MethodInfo[] GetAllScriptFunctions(string scriptName)
+        {
+            MonoBehaviour script = GetScriptByName(scriptName);
+
+            if (script == null)
+            {
+                return null;
+            }
+
+            Type type = script.GetType();
+
+            // Get all public and non-public instance methods declared in this class
+            MethodInfo[] methods = type.GetMethods(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly
+            );
+
+            if (methods == null || methods.Length == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < methods.Length; i++)
+            {
+                Logger.LogInfo(methods[i].Name);
+            }
+
+            return methods;
+        }
+        private static void ListAllTypesFromGameObject(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return;
+            }
+            // Get all components attached to this GameObject
+            Component[] components = obj.GetComponents<Component>();
+
+            string message = "";
+            if (components.Length == 0)
+            {
+                message = $"{obj.name} has no components.";
+                Logger.LogInfo(message);
+                Main.Instance.GameplayMenu.ShowNotification(message);
+                return;
+            }
+
+            message = $"Components attached to '{obj.name}':";
+
+            foreach (Component comp in components)
+            {
+                if (comp != null)
+                {
+                    message = $"- {comp.GetType().Name}";
+                }
+                else
+                {
+                    message = "⚠ Found a missing or null component slot.";
+                }
+                Logger.LogInfo(message);
+                Main.Instance.GameplayMenu.ShowNotification(message);
+
+                Interactible f = comp.GetComponent<Interactible>();
+                InteractRedirect g = comp.GetComponent<InteractRedirect>();
+                Interactible h = null;
+
+                if (f != null)
+                {
+                    h = f;
+                } else if (g != null)
+                {
+                    h = g.Redirect;
+                }
+
+                if (h != null)
+                {
+                    Interactible x = h;
+                    string[] y = x.ScriptFunctionToRun_OnInteract;
+                    MonoBehaviour[] z = x.ScriptToRun_OnInteract;
+
+                    if (y != null)
+                    {
+                        for (int i = 0; i < y.Length; i++)
+                        {
+                            Logger.LogInfo(y[i]);
+                        }
+                    }
+
+                    if (z != null)
+                    {
+                        for (int i = 0; i < z.Length; i++)
+                        {
+                            Logger.LogInfo(z[i].name);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void listalltypes(string value)
+        {
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
+            GameObject[] objects = copyObj;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj;
+            }
+            else if (!copies.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies[value];
+            }
+
+            if (objects != null)
+            {
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                    ListAllTypesFromGameObject(obj);
+                }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
+        private static void listalltypes2(string value)
+        {
+
+            List<string> messages = new List<string>();
+
+            if (value == null || value == string.Empty)
+            {
+                if (copyObj == null || copyObj2 == null)
+                {
+                    messages = copyex(null);
+                }
+            }
+
+            GameObject[] objects = copyObj2;
+
+            bool foundvalue = true;
+
+            if (value == null || value == string.Empty)
+            {
+                foundvalue = false;
+                objects = copyObj2;
+            }
+            else if (!copies2.ContainsKey(value))
+            {
+                foundvalue = false;
+                savecopy(value);
+                if (copies2.ContainsKey(value))
+                {
+                    foundvalue = true;
+                }
+            }
+
+            if (foundvalue)
+            {
+                objects = copies2[value];
+            }
+
+            if (objects != null)
+            {
+                List<GameObject> pasties = new List<GameObject>();
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if (objects[i] == null)
+                    {
+                        continue;
+                    }
+
+                    GameObject obj = objects[i];
+                    if (pasties.Contains(obj))
+                        continue;
+                    pasties.Add(obj);
+                    ListAllTypesFromGameObject(obj);
+                }
+
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification(messages[i]);
+                }
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("No target selected, please use the command 'copy' to select/copy a target");
+            }
+        }
+
         public static void LeashEx(object personObj)
         {
             try
@@ -14626,6 +15174,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "loadscene":
+                    {
+                        loadscene(value);
+                    }
+                    break;
+
+                case "listalltypes":
+                    {
+                        listalltypes(value);
+                    }
+                    break;
+
+                case "listalltypes2":
+                    {
+                        listalltypes2(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -14634,8 +15200,68 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        private static void loadscene(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: loadscene");
+
+            try
+            {
+                LoadingScene.LoadScene(stringValueToInt(value));
+            } catch (Exception ex)
+            {
+            }
+        }
+
         private static List<GameObject> allObjectsFastOW = new List<GameObject>();
         private static List<GameObject> allObjectsFastNotOw = new List<GameObject>();
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+        private static void addArmyTableToList(List<GameObject> list)
+        {
+
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_ArmyManagementTable>(true));
+            }
+            catch { }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void addHangFurnitureToList(List<GameObject> list)
+        {
+
+            try
+            {
+               list.AddRange(getAllObjectsByInteractibleType<bl_HangFurniture>(true));
+            }
+            catch { }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void addMistStopUsingToList(List<GameObject> list)
+        {
+
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<int_misc_StopUsing>(true));
+            }
+            catch { }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void addResourceMiningToList(List<GameObject> list)
+        {
+
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_ResourceMining>(true));
+            }
+            catch { }
+        }
+
+
 
         private static List<GameObject> getAllObjectsFast()
         {
@@ -14666,67 +15292,61 @@ namespace BitchlandCheatConsoleBepInEx
 
             try
             {
-                try
-                {
-                    list.AddRange(getAllObjectsByInteractibleType<int_ArmyManagementTable>());
-                }
-                catch (Exception ex)
-                {
-                }
+                addArmyTableToList(list);
             } catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_basicSit>());
+                list.AddRange(getAllObjectsByInteractibleType<int_basicSit>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<bl_HangFurniture>());
+                addHangFurnitureToList(list);
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<Int_Car>());
+                list.AddRange(getAllObjectsByInteractibleType<Int_Car>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_CondomBox>());
+                list.AddRange(getAllObjectsByInteractibleType<int_CondomBox>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<MultiInteractible>());
+                list.AddRange(getAllObjectsByInteractibleType<MultiInteractible>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_ResourceItem>());
+                list.AddRange(getAllObjectsByInteractibleType<int_ResourceItem>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_DildoPole>());
+                list.AddRange(getAllObjectsByInteractibleType<int_DildoPole>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_Lockable>());
+                list.AddRange(getAllObjectsByInteractibleType<int_Lockable>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_Dragable>());
+                list.AddRange(getAllObjectsByInteractibleType<int_Dragable>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_EscapePrison>());
+                list.AddRange(getAllObjectsByInteractibleType<int_EscapePrison>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_FloorSit>());
+                list.AddRange(getAllObjectsByInteractibleType<int_FloorSit>(true));
             }
             catch { }
             try
@@ -14736,7 +15356,7 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_misc_StopUsing>());
+                addMistStopUsingToList(list);
             }
             catch { }
             try
@@ -14781,7 +15401,7 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<Int_ResourceMining>());
+                addResourceMiningToList(list);
             }
             catch { }
             try
@@ -18924,13 +19544,35 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
             onOpenCheat = true;
-            BL_CloseEscMenu();
-            BL_CloseJournal();
-            Main.Instance.GameplayMenu.CloseJournal();
-            Main.Instance.GameplayMenu.AllowCursor();
-            Main.Instance.GameplayMenu.UpdateAmmo();
-            Main.Instance.GameplayMenu.UpdateNeeds();
-            Main.Instance.GameplayMenu.UpdateArousal();
+            try
+            {
+                BL_CloseEscMenu();
+            }
+            catch { }
+            try
+            {
+                BL_CloseJournal();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.CloseJournal();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.AllowCursor();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateAmmo();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateNeeds();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateArousal();
+            } catch {}
         }
 
         public void onCloseCheatConsole()
@@ -18940,15 +19582,36 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
             onOpenCheat = false;
-            BL_CloseEscMenu();
-            BL_CloseJournal();
-            Main.Instance.GameplayMenu.DisallowCursor();
-            Main.Instance.GameplayMenu.UpdateAmmo();
-            Main.Instance.GameplayMenu.UpdateNeeds();
-            Main.Instance.GameplayMenu.UpdateArousal();
+            try
+            {
+                BL_CloseEscMenu();
+            } catch { }
+            try
+            {
+                BL_CloseJournal();
+            } catch { }
+            try
+            {
+               Main.Instance.GameplayMenu.DisallowCursor();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateAmmo();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateNeeds();
+            } catch { }
+            try
+            {
+                Main.Instance.GameplayMenu.UpdateArousal();
+            } catch { }
             if (allowCursorOnClose)
             {
-                Main.Instance.GameplayMenu.AllowCursor();
+                try
+                {
+                    Main.Instance.GameplayMenu.AllowCursor();
+                } catch { }
                 allowCursorOnClose = false;
             }
         }
@@ -19386,11 +20049,87 @@ namespace BitchlandCheatConsoleBepInEx
                         PatchHarmonyMethodUnity(typeof(Person), "StopFollowing", "Person_StopFollowing", true, false);
                     }
                     catch { }
+                    miningPatch();
                 }
 
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
+            }
+        }
+
+        private static bool minewithouttools = false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void miningPatch()
+        {
+            try
+            {
+                PatchHarmonyMethodUnity(typeof(bl_MinableObject), "Interact", "bl_MinableObject_Interact", true, false);
+            }
+            catch { }
+
+            try
+            {
+                PatchHarmonyMethodUnity(typeof(bl_MinableObject), "CheckCanInteract", "bl_MinableObject_CheckCanInteract", true, false);
+            }
+            catch { }
+        }
+
+        public static bool bl_MinableObject_CheckCanInteract(object __instance, ref bool __result, Person person)
+        {
+            if (__instance == null)
+            {
+                return true;
+            }
+
+            if (!minewithouttools)
+            {
+                return true;
+            }
+
+            __result = true;
+
+            return false;
+        }
+        public static bool bl_MinableObject_Interact(object __instance, Person person)
+        {
+            if (__instance == null)
+            {
+                return true;
+            }
+            if (!minewithouttools)
+            {
+                return true;
+            }
+            bl_MinableObject _this = (bl_MinableObject)__instance;
+            _this.InteractingPerson = person;
+            _this.InteractingPerson.Interacting = true;
+            person.AddMoveBlocker("Mining");
+            person.transform.LookAt(_this.transform);
+            person.transform.eulerAngles = new Vector3(0.0f, person.transform.eulerAngles.y, 0.0f);
+            person.Anim.Play(_this.MiningAnim);
+            if (person.IsPlayer)
+                Main.Instance.GameplayMenu.WeaponReloadUI.SetActive(true);
+            else
+                person.enabled = false;
+            _this._TimeMining = 0;
+            Main.Instance.MainThreads.Add(new Action(_this.MiningThread));
+            return false;
+        }
+
+        public static void nominingtools()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: nominingtools");
+
+            minewithouttools = !minewithouttools;
+
+            if (minewithouttools)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You don't no longer a pickaxe or axe for mining, and you can very fast mining");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You need a pickaxe or axe for mining");
             }
         }
 
