@@ -8,6 +8,9 @@ https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/hea
 
 for other lists please see the assets here or type help command in the Cheat Console
 
+It is important to spawn all objects in the overworld once using commands like tank/car/car2/move/spawn in the main city. You only need to execute one of these commands once in the main city to ensure they also work in the overworld.
+
+
 Bitchland Cheat console
 
 F1 and F2 Key configurable in
@@ -567,6 +570,7 @@ commands with 1 param:
 * listalltypes name -> list all components of a gameobject, the have you select with the copy name command, and show his scripts (only for developer important)
 * listalltypes2 name -> list all components of a gameobject 2 , the have you selected with the copy name command, and show his scripts (only for developer important)
 * loadscene scene -> load a scene, 1 -> maincity, 2 -> openworld in the future, not now
+* move name -> same effect like spawn name, except that the original object is moved to you, not spawn the object name, and make sure you can see the object, see for more objects  https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
 
 This commands are maybe removed in the future (please do not use this commands):
 
