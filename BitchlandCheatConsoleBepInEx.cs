@@ -23,9 +23,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using TinyJson;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Networking;
 using UnityEngine.Video;
+using static Den.Tools.Serializer;
 using static UnityEngine.Random;
+using static UnityEngine.Rendering.DebugUI;
 using Component = UnityEngine.Component;
 using Cursor = UnityEngine.Cursor;
 using Quaternion = UnityEngine.Quaternion;
@@ -1362,8 +1365,76 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        private static bool GameObjectsUpdateInit = false;
+        private void GameObjectsUpdate()
+        {
+            if (GameObjectsUpdateInit)
+            {
+                return;
+            }
+
+            if (isOpenWorld())
+            {
+                GameObjectsUpdateInit = true;
+                return;
+            }
+
+            if (!preloadedGameObjects.ContainsKey("sedanvehicle"))
+            {
+                GameObject sedanVehicle = GameObject.Find("SedanVehicle");
+                if (sedanVehicle != null)
+                {
+                    preloadedGameObjects.Add("sedanvehicle", sedanVehicle);
+                }
+            }
+
+            if (!preloadedGameObjects.ContainsKey("sedanvehicle_(1)"))
+            {
+                GameObject sedanVehicle = GameObject.Find("SedanVehicle (1)");
+                if (sedanVehicle != null)
+                {
+                    preloadedGameObjects.Add("sedanvehicle_(1)", sedanVehicle);
+                }
+            }
+
+            if (!preloadedGameObjects.ContainsKey("panzer_vi_e_(1)")) {
+                GameObject panzer = GameObject.Find("Panzer_VI_E (1)");
+                if (panzer != null)
+                {
+                    preloadedGameObjects.Add("panzer_vi_e_(1)", panzer);
+                }
+            }
+
+            if (!preloadedGameObjects.ContainsKey("locker"))
+            {
+                GameObject panzer = GameObject.Find("locker");
+                if (panzer != null)
+                {
+                    preloadedGameObjects.Add("locker", panzer);
+                }
+            }
+
+            if (!preloadedGameObjects.ContainsKey("panzer_vi_e"))
+            {
+                GameObject panzer = GameObject.Find("Panzer_VI_E");
+                if (panzer != null)
+                {
+                    preloadedGameObjects.Add("panzer_vi_e", panzer);
+                }
+            }
+
+            if (preloadedGameObjects.Count != 5)
+            {
+                return;
+            }
+
+            getAllObjectsFast();
+
+            GameObjectsUpdateInit = true;
+        }
         private void Update()
         {
+            GameObjectsUpdate();
             TriggerUpdate();
             HandleMultiFollower();
             HandleMultiFollowerUpgrade();
@@ -5407,6 +5478,316 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void handleInteractComponent(GameObject original, GameObject obj)
+        {
+            if (original == null)
+            {
+                return;
+            }
+
+            if (obj == null)
+            {
+                return;
+            }
+
+            Interactible original_ = MyGetComponent<Interactible>(original);
+            Interactible copy_ = MyGetComponent<Interactible>(obj);
+
+            if (original_ == null || copy_ == null)
+            {
+                return;
+            }
+
+            if (original_.CanInteract != null)
+            {
+                copy_._CanInteract = original_._CanInteract;
+            }
+            if (original_.ScatInteractible != null)
+            {
+                copy_.ScatInteractible = original_.ScatInteractible;
+            }
+            if (original_.NPCCanUseInFollow != null)
+            {
+                copy_.NPCCanUseInFollow = original_.NPCCanUseInFollow;
+            }
+            if (original_.OnlyInteractibleInOW != null)
+            {
+                copy_.OnlyInteractibleInOW = original_.OnlyInteractibleInOW;
+            }
+            if (original_.SetInteracting != null)
+            {
+                copy_.SetInteracting = original_.SetInteracting;
+            }
+            if (original_.OffersFetishes != null)
+            {
+                copy_.OffersFetishes = original_.OffersFetishes;
+            }
+            if (original_.OffersPersonalities != null)
+            {
+                copy_.OffersPersonalities = original_.OffersPersonalities;
+            }
+            if (original_.RunTo != null)
+            {
+                copy_.RunTo = original_.RunTo;
+            }
+            if (original_.DefaultGenderOnly != null)
+            {
+                copy_.DefaultGenderOnly = original_.DefaultGenderOnly;
+            }
+            if (original_.GenderOnly != null)
+            {
+                copy_.GenderOnly = original_.GenderOnly;
+            }
+            if (original_.UnparentOnStart != null)
+            {
+                copy_.UnparentOnStart = original_.UnparentOnStart;
+            }
+            copy_.CarryWeight = original_.CarryWeight;
+            copy_.NPCCanBeInteractedWhileUsing = original_.NPCCanBeInteractedWhileUsing;
+            copy_.PrefabName = original_.PrefabName;
+            copy_.CanLeave = original_.CanLeave;
+            copy_.PersonGoingToUse = original_.PersonGoingToUse;
+            copy_.RequiredPerks = original_.RequiredPerks;
+            copy_.DestroyAfterUse = original_.DestroyAfterUse;
+            copy_.Owner = original_.Owner;
+            copy_.PivotSpot = original_.PivotSpot;
+            copy_.intDoIK = original_.intDoIK;
+            copy_.intUsingIKs = original_.intUsingIKs;
+            copy_.ReferenceSpots = original_.ReferenceSpots;
+            copy_.InteractBlockers = original_.InteractBlockers;
+            copy_.PlayerCanInteract = original_.PlayerCanInteract;
+            copy_.DefaultInteractIcon = original_.DefaultInteractIcon;
+            copy_.InteractIcon = original_.InteractIcon;
+            copy_.InteractText = original_.InteractText;
+            copy_._InteractTexts = original_._InteractTexts;
+            copy_.InteractingPerson = original_.InteractingPerson;
+            copy_.DisableOnStart = original_.DisableOnStart;
+            copy_.ActivateOnInteract = original_.ActivateOnInteract;
+            copy_.DeactivateOnInteract = original_.DeactivateOnInteract;
+            copy_.EnableOnInteract = original_.EnableOnInteract;
+            copy_.DisableOnInteract = original_.DisableOnInteract;
+            copy_.ScriptToRun_OnInteract = original_.ScriptToRun_OnInteract;
+            copy_.ScriptFunctionToRun_OnInteract = original_.ScriptFunctionToRun_OnStopInteract;
+            copy_.ScriptToRun_OnStopInteract = original_.ScriptToRun_OnStopInteract;
+            copy_.ScriptFunctionToRun_OnStopInteract = original_.ScriptFunctionToRun_OnStopInteract;
+            copy_.NPCOnFinishInteract = original_.NPCOnFinishInteract;
+            copy_.AutomatedStopInteraction = original_.AutomatedStopInteraction;
+            copy_.DoForSeconds = original_.DoForSeconds;
+            copy_.PlaceNPCOnInteract = original_.PlaceNPCOnInteract;
+            copy_.PlacePlayerOnLeave = original_.PlacePlayerOnLeave;
+            copy_.NavMeshInteractSpot = original_.NavMeshInteractSpot;
+            copy_.DisableHeadRotate = original_.DisableHeadRotate;
+            copy_.HeadRotateTo = original_.HeadRotateTo;
+            copy_._AvailableUses = original_._AvailableUses;
+            copy_._SelectedUseIndex = original_._SelectedUseIndex;
+            copy_._RunningForSecs = original_._RunningForSecs;
+            copy_.Despawnable = original_.Despawnable;
+            copy_.DespawnTimerMaxHere = original_.DespawnTimerMaxHere;
+            copy_.DespawnTimer = original_.DespawnTimer;
+            copy_.DespawnTimerChecker = original_.DespawnTimerChecker;
+            copy_.DoDistanceCheck = original_.DoDistanceCheck;
+            copy_._InsideSafeHouse = original_._InsideSafeHouse;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+        public static void handleCarComponent(GameObject original, GameObject obj)
+        {
+            if (original == null)
+            {
+                return;
+            }
+
+            if (obj == null)
+            {
+                return;
+            }
+
+            Int_Drive carOriginal = MyGetComponent<Int_Drive>(original);
+            Int_Drive carCopy = MyGetComponent<Int_Drive>(obj);
+
+            if (carOriginal == null || carCopy == null)
+            {
+                return;
+            }
+
+
+
+            if (carOriginal.MyRigidbody != null)
+            {
+                carCopy.MyRigidbody = carOriginal.MyRigidbody;
+            }
+            if (carOriginal.DropPlace != null)
+            {
+                carCopy.DropPlace = carOriginal.DropPlace;
+            }
+            if (carOriginal.CarScripts != null)
+            {
+                carCopy.CarScripts = carOriginal.CarScripts;
+            }
+            if (carOriginal.CarObjs != null)
+            {
+                carCopy.CarObjs = carOriginal.CarObjs;
+            }
+            if (carOriginal.Lights != null)
+            {
+                carCopy.Lights = carOriginal.Lights;
+            }
+            if (carOriginal.ExitFix != null)
+            {
+                carCopy.ExitFix = carOriginal.ExitFix;
+            }
+            if (carOriginal.Engine != null)
+            {
+                carCopy.Engine = carOriginal.Engine;
+            }
+            if (carOriginal.CarTurnedOnScripts != null)
+            {
+                carCopy.CarTurnedOnScripts = carOriginal.CarTurnedOnScripts;
+            }
+            if (carOriginal.CurrentNationMarking != null)
+            {
+                carCopy.CurrentNationMarking = carOriginal.CurrentNationMarking;
+            }
+            if (carOriginal.TurnOnSound != null)
+            {
+                carCopy.TurnOnSound = carOriginal.TurnOnSound;
+            }
+            if (carOriginal.PeopleSeated != null)
+            {
+                carCopy.PeopleSeated = carOriginal.PeopleSeated;
+            }
+            if (carOriginal.Seats != null)
+            {
+                carCopy.Seats = carOriginal.Seats;
+            }
+            if (carOriginal.SittingAnim != null)
+            {
+                carCopy.SittingAnim = carOriginal.SittingAnim;
+            }
+            if (carOriginal.VisibleNPCs != null)
+            {
+                carCopy.VisibleNPCs = carOriginal.VisibleNPCs;
+            }
+            if (carOriginal.GlobalAudio != null)
+            {
+                carCopy.GlobalAudio = carOriginal.GlobalAudio;
+            }
+            if (carOriginal.BreakingSounds != null)
+            {
+                carCopy.BreakingSounds = carOriginal.BreakingSounds;
+            }
+            if (carOriginal.Wings != null)
+            {
+                carCopy.Wings = carOriginal.Wings;
+            }
+            if (carOriginal.UnFlipTimer != null)
+            {
+                carCopy.UnFlipTimer = carOriginal.UnFlipTimer;
+            }
+            if (carOriginal.PlayerCantLeave != null)
+            {
+                carCopy.PlayerCantLeave = carOriginal.PlayerCantLeave;
+            }
+            if (carOriginal.frameunflipper != null)
+            {
+                carCopy.frameunflipper = carOriginal.frameunflipper;
+            }
+            if (carOriginal.UndoFlipped != null)
+            {
+                carCopy.UndoFlipped = carOriginal.UndoFlipped;
+            }
+            if (carOriginal.Flipped != null)
+            {
+                carCopy.Flipped = carOriginal.Flipped;
+            }
+            if (carOriginal.UnflipTorque != null)
+            {
+                carCopy.UnflipTorque = carOriginal.UnflipTorque;
+            }
+            if (carOriginal.RunOverTrigger != null)
+            {
+                carCopy.RunOverTrigger = carOriginal.RunOverTrigger;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void handleLockableComponent(GameObject original, GameObject copy)
+        {
+            if (original == null)
+            {
+                return;
+            }
+
+            if (copy == null)
+            {
+                return;
+            }
+
+            int_Lockable original_ = MyGetComponent<int_Lockable>(original);
+            int_Lockable copy_ = MyGetComponent<int_Lockable>(copy);
+
+            if (original_ == null || copy_ == null)
+            {
+                return;
+            }
+
+            copy_.Obstacle = original_.Obstacle;
+            copy_.StartLocked = original_.StartLocked;
+            copy_.PlayerOwned = original_.PlayerOwned;
+            copy_.Audio = original_.Audio;
+            copy_.DEBUG_LOCKLOG = original_.Audio;
+            copy_.KeyID = original_.KeyID;
+            copy_.m_Locked = original_.m_Locked;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GameObject handleComponentOld(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            GameObject spawned = Main.Spawn(obj);
+            try
+            {
+                handleCarComponent(obj, spawned);
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            try
+            {
+                handleLockableComponent(obj, spawned);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            try
+            {
+                handleInteractComponent(obj, spawned);
+            } catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            return spawned;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GameObject handleComponentDefault(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            GameObject spawned = Main.Spawn(obj);
+            return spawned;
+        }
+
         public static void ObjectsSpawn(GameObject[] objects, string messagePrefix, string messagePostfix, bool useOpaqueMode)
         {
             if (objects == null)
@@ -5427,7 +5808,55 @@ namespace BitchlandCheatConsoleBepInEx
                 if (pasties.Contains(obj))
                     continue;
                 pasties.Add(obj);
-                GameObject newElement = Main.Spawn(obj);
+
+                GameObject newElement = handleComponentDefault(obj);
+                if (obj == null)
+                {
+                    continue;
+                }
+                Person player = Main.Instance.Player;
+                newElement.transform.position = player.transform.position;
+                newElement.transform.rotation = player.transform.rotation;
+                newElement.transform.parent = player.transform.parent;
+                newElement.SetActive(true);
+                if (useOpaqueMode)
+                    SetMaterialOpaque(newElement);
+                try
+                {
+                    Main.Instance.GameplayMenu.ShowNotification($"{messagePrefix} {newElement.name} {messagePostfix}");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+        }
+
+        public static void MoveObjects(GameObject[] objects, string messagePrefix, string messagePostfix, bool useOpaqueMode)
+        {
+            if (objects == null)
+                return;
+
+            if (messagePrefix == null)
+                return;
+
+            if (messagePostfix == null)
+                return;
+
+            List<GameObject> pasties = new List<GameObject>();
+            for (int i = 0; i < objects.Length; i++)
+            {
+                GameObject obj = objects[i];
+                if (obj == null)
+                    continue;
+                if (pasties.Contains(obj))
+                    continue;
+                pasties.Add(obj);
+
+                GameObject newElement = obj;
+                if (obj == null)
+                {
+                    continue;
+                }
                 Person player = Main.Instance.Player;
                 newElement.transform.position = player.transform.position;
                 newElement.transform.rotation = player.transform.rotation;
@@ -12394,25 +12823,31 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "car":
                     {
-                        spawnobjectexfast("sedanvehicle", true);
+                        moveobjectexfast("sedanvehicle", true);
                     }
                     break;
 
                 case "car2":
                     {
-                        spawnobjectexfast("sedanvehicle_(1)", true);
+                        moveobjectexfast("sedanvehicle_(1)", true);
+                    }
+                    break;
+
+                case "car3":
+                    {
+                        moveobjectexfast("sedanvehicle_(backup)", true);
                     }
                     break;
 
                 case "tank":
                     {
-                        spawnobjectexfast("panzer_vi_e_(1)", true);
+                        moveobjectexfast("panzer_vi_e_(1)", true);
                     }
                     break;
 
                 case "tank2":
                     {
-                        spawnobjectexfast("panzer_vi_e", true);
+                        moveobjectexfast("panzer_vi_e", true);
                     }
                     break;
 
@@ -12574,6 +13009,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "mc4":
+                case "maincity4":
+                    {
+                        goto_maincity4();
+                    }
+                    break;
+
                 case "listalltypes":
                     {
                         listalltypes(null);
@@ -12689,6 +13131,19 @@ namespace BitchlandCheatConsoleBepInEx
             catch (Exception ex)
             {
 
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void goto_maincity4()
+        {
+
+            Main.Instance.GameplayMenu.ShowNotification("executed command: maincity4");
+            try
+            {
+                Main.Instance.Default_Area.OnEnter();
+            } catch (Exception ex)
+            {
             }
         }
 
@@ -15070,6 +15525,13 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "move":
+                case "moveobjectex":
+                    {
+                        moveobjectexfast(value, true);
+                    }
+                    break;
+
                 case "spawnex":
                 case "spawnobjectexex":
                     {
@@ -15192,11 +15654,30 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        private static void gameobjectfind(string value)
+        {
+            GameObject gameObject = GameObject.Find(value);
+
+            if (gameObject != null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"gameobject {value} found");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification($"gameobject {value} not found");
             }
         }
 
@@ -15290,6 +15771,17 @@ namespace BitchlandCheatConsoleBepInEx
 
             List<GameObject> list = new List<GameObject>();
 
+            /*   try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_Drive>(true));
+            }
+            catch { }
+            try
+            {
+                list.AddRange(getAllObjectsByInteractibleType<Int_Car>(true));
+            }
+            catch { }*/
+
             try
             {
                 addArmyTableToList(list);
@@ -15302,11 +15794,6 @@ namespace BitchlandCheatConsoleBepInEx
             try
             {
                 addHangFurnitureToList(list);
-            }
-            catch { }
-            try
-            {
-                list.AddRange(getAllObjectsByInteractibleType<Int_Car>(true));
             }
             catch { }
             try
@@ -15351,7 +15838,7 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_LoadCustomCharacter>());
+                list.AddRange(getAllObjectsByInteractibleType<int_LoadCustomCharacter>(true));
             }
             catch { }
             try
@@ -15361,7 +15848,7 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_money>());
+                list.AddRange(getAllObjectsByInteractibleType<int_money>(true));
             }
             catch { }
             /*try
@@ -15371,32 +15858,32 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }*/
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<Int_Pickupable>());
+                list.AddRange(getAllObjectsByInteractibleType<Int_Pickupable>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_PickupToBag>());
+                list.AddRange(getAllObjectsByInteractibleType<int_PickupToBag>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_PickupToHand>());
+                list.AddRange(getAllObjectsByInteractibleType<int_PickupToHand>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_Piss>());
+                list.AddRange(getAllObjectsByInteractibleType<int_Piss>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_posterCollectible>());
+                list.AddRange(getAllObjectsByInteractibleType<int_posterCollectible>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_readable>());
+                list.AddRange(getAllObjectsByInteractibleType<int_readable>(true));
             }
             catch { }
             try
@@ -15406,50 +15893,57 @@ namespace BitchlandCheatConsoleBepInEx
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_SearchTrash>());
+                list.AddRange(getAllObjectsByInteractibleType<int_SearchTrash>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_SitAndShit>());
+                list.AddRange(getAllObjectsByInteractibleType<int_SitAndShit>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_startsex>());
+                list.AddRange(getAllObjectsByInteractibleType<int_startsex>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<Int_Turret>());
+                list.AddRange(getAllObjectsByInteractibleType<Int_Turret>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_useWeapon>());
+                list.AddRange(getAllObjectsByInteractibleType<int_useWeapon>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_VendingMachine>());
+                list.AddRange(getAllObjectsByInteractibleType<int_VendingMachine>(true));
             }
             catch { }
             try
             {
-                list.AddRange(getAllObjectsByInteractibleType<int_Vent>());
+                list.AddRange(getAllObjectsByInteractibleType<int_Vent>(true));
             }
             catch { }
 
+            Main.Instance.GameplayMenu.ShowNotification(list.Count.ToString());
 
             if (isOW)
             {
-                allObjectsFastOW.Clear();
-                allObjectsFastOW.AddRange(list);
+                if (list.Count > 0)
+                {
+                    allObjectsFastOW.Clear();
+                    allObjectsFastOW.AddRange(list);
+                }
             }
             else
             {
-                allObjectsFastNotOw.Clear();
-                allObjectsFastNotOw.AddRange(list);
+                if (list.Count > 0)
+                {
+                    allObjectsFastNotOw.Clear();
+                    allObjectsFastNotOw.AddRange(list);
+                }
             }
 
             return list;
@@ -15484,7 +15978,7 @@ namespace BitchlandCheatConsoleBepInEx
                     return allObjectsSlowNotOw;
                 }
             }
-            GameObject[] allObjectsNotOW = UnityEngine.Object.FindObjectsByType<GameObject>(
+            GameObject[] allObjectsNotOW = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include,
                FindObjectsSortMode.None // No sorting for better performance
           );
 
@@ -15511,6 +16005,7 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static ConcurrentDictionary<string, GameObject> allObjectsSlowStringsOW = new ConcurrentDictionary<string, GameObject>();
         private static ConcurrentDictionary<string, GameObject> allObjectsSlowStringsNotOw = new ConcurrentDictionary<string, GameObject>();
+
         public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsSlow()
         {
             bool isOW = false;
@@ -15722,6 +16217,7 @@ namespace BitchlandCheatConsoleBepInEx
             return listex;
         }
 
+        private static Dictionary<string, GameObject> preloadedGameObjects = new Dictionary<string, GameObject>();
         public static GameObject getObjectByNameSlow(string value)
         {
             if (value  == null)
@@ -15735,6 +16231,11 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             string searchedName = value.ToLower();
+
+            if (preloadedGameObjects.ContainsKey(searchedName))
+            {
+                return preloadedGameObjects[searchedName];
+            }
 
             ConcurrentDictionary<string,GameObject> objects = getAllObjectsStringsSlow();
 
@@ -15759,6 +16260,11 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             string searchedName = value.ToLower();
+
+            if (preloadedGameObjects.ContainsKey(searchedName))
+            {
+                return preloadedGameObjects[searchedName];
+            }
 
             ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFast();
 
@@ -15972,7 +16478,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static void listvehicles()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listvehicles");
-            Int_Drive[] int_Drives = UnityEngine.Object.FindObjectsByType<Int_Drive>(FindObjectsSortMode.None);
+            Int_Drive[] int_Drives = UnityEngine.Object.FindObjectsByType<Int_Drive>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
             if (int_Drives == null)
                 return;
@@ -15981,7 +16487,18 @@ namespace BitchlandCheatConsoleBepInEx
             for (int i = 0; i < int_Drives.Length; i++)
             {
                 string name = int_Drives[i].name.ToLower().Replace(" ", "_");
-                drives.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (drives.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                drives.Add(nametest);
             }
 
             File.WriteAllText("listvehicles.json", drives.ToJson());
@@ -15990,12 +16507,12 @@ namespace BitchlandCheatConsoleBepInEx
         private static void listsexobjects()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listsexobjects");
-            Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsSortMode.None);
-            int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsSortMode.None);
-            int_SexTubeBike[] int_SexTubeBikes = UnityEngine.Object.FindObjectsByType<int_SexTubeBike>(FindObjectsSortMode.None);
-            int_wallpussy[] wallpussies = UnityEngine.Object.FindObjectsByType<int_wallpussy>(FindObjectsSortMode.None);
-            int_Piss[] pisses = UnityEngine.Object.FindObjectsByType<int_Piss>(FindObjectsSortMode.None);
-            bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsSortMode.None);
+            Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int_SexTubeBike[] int_SexTubeBikes = UnityEngine.Object.FindObjectsByType<int_SexTubeBike>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int_wallpussy[] wallpussies = UnityEngine.Object.FindObjectsByType<int_wallpussy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int_Piss[] pisses = UnityEngine.Object.FindObjectsByType<int_Piss>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
             if (int_SexMachines == null || int_SexLocker == null || int_SexTubeBikes == null || wallpussies == null || pisses == null || sexspots == null)
                 return;
@@ -16010,37 +16527,103 @@ namespace BitchlandCheatConsoleBepInEx
             for (int i = 0; i < int_SexMachines.Length; i++)
             {
                 string name = int_SexMachines[i].name.ToLower().Replace(" ", "_");
-                sexmachines.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (sexmachines.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                sexmachines.Add(nametest);
             }
 
             for (int i = 0; i < int_SexLocker.Length; i++)
             {
                 string name = int_SexLocker[i].name.ToLower().Replace(" ", "_");
-                sexlockers.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (sexlockers.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                sexlockers.Add(nametest);
             }
 
             for (int i = 0; i < int_SexTubeBikes.Length; i++)
             {
                 string name = int_SexTubeBikes[i].name.ToLower().Replace(" ", "_");
-                sextubebikes.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (sextubebikes.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                sextubebikes.Add(nametest);
             }
 
             for (int i = 0; i < wallpussies.Length; i++)
             {
                 string name = wallpussies[i].name.ToLower().Replace(" ", "_");
-                wallpussies_.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (wallpussies_.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                wallpussies_.Add(nametest);
             }
 
             for (int i = 0; i < pisses.Length; i++)
             {
                 string name = pisses[i].name.ToLower().Replace(" ", "_");
-                pisses_.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (pisses_.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                pisses_.Add(nametest);
             }
 
             for (int i = 0; i < sexspots.Length; i++)
             {
                 string name = sexspots[i].name.ToLower().Replace(" ", "_");
-                sexspots_.Add(name);
+
+                string nametest = name;
+
+                int k = 0;
+
+                while (sexspots_.Contains(nametest))
+                {
+                    nametest = name + k.ToString();
+                    k++;
+                }
+
+                sexspots_.Add(nametest);
             }
 
             File.WriteAllText("sexmachines.json", sexmachines.ToJson());
@@ -16137,6 +16720,30 @@ namespace BitchlandCheatConsoleBepInEx
             objects[0] = gameObject;
 
             ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);
+        }
+
+        private static void moveobjectexfast(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: moveobjectexfast " + value);
+
+            GameObject gameObject = getObjectByNameFastEx(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            MoveObjects(objects, "object moved : ", "!", opaqueMode);
         }
 
         private static void savenpctofile(string value)
@@ -16379,6 +16986,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(keyOriginal + " " + valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -16461,6 +17074,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2);
                     }
                     break;
 
@@ -16550,6 +17169,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -16626,6 +17251,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4);
+                    }
+                    break;
+
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3 + " " + value4);
                     }
                     break;
 
@@ -16708,6 +17339,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -16784,6 +17421,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
+                    }
+                    break;
+
+                case "gaemeobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6);
                     }
                     break;
 
@@ -16866,6 +17509,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -16942,6 +17591,12 @@ namespace BitchlandCheatConsoleBepInEx
                 case "npcanimplay":
                     {
                         npcanimplay(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
+                    }
+                    break;
+
+                case "gameobjectfind":
+                    {
+                        gameobjectfind(key + " " + value + " " + value2 + " " + value3 + " " + value4 + " " + value5 + " " + value6 + " " + value7 + " " + value8);
                     }
                     break;
 
@@ -20002,9 +20657,11 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (useHarmonyExtendedLockPatch)
                 {
-                    try {
+                    try
+                    {
                         PatchHarmonyMethodUnity(typeof(int_SexTubeBike), "StopInteracting", "int_SexTubeBike_StopInteracting", true, false);
-                    } catch { }
+                    }
+                    catch { }
                     try
                     {
                         PatchHarmonyMethodUnity(typeof(Int_SexMachine), "StopInteracting", "Int_SexMachine_StopInteracting", true, false);
@@ -20053,12 +20710,44 @@ namespace BitchlandCheatConsoleBepInEx
                     try
                     {
                         miningPatch();
-                    } catch { }
+                    }
+                    catch { }
                 }
 
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isOpenWorld()
+        {
+            bool isOW = false;
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            } catch (Exception ex)
+            {
+                isOW = false;
+            }
+            return isOW;
+        }
+        public static void UI_Menu_Start()
+        {
+            Logger.LogInfo("getAllObjectsFastPatch");
+            if (isOpenWorld())
+            {
+                if (allObjectsFastOW.Count < 3000)
+                {
+                    getAllObjectsFast();
+                }
+            } else
+            {
+                if (allObjectsFastNotOw.Count < 3000)
+                {
+                    getAllObjectsFast();
+                }
             }
         }
 
