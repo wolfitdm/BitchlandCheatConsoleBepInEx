@@ -27,6 +27,7 @@ using UnityEngine.AI;
 using UnityEngine.Networking;
 using UnityEngine.Video;
 using static Den.Tools.Serializer;
+using static Mono.Security.X509.X509Stores;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.DebugUI;
 using Component = UnityEngine.Component;
@@ -166,10 +167,12 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        private static bool showMenu = false; // show Menu
         private static bool showGUI = false;       // Toggle GUI visibility
         private bool pressEnter = false;
         private string inputText = "";      // Stores user input
         private Rect windowRect = new Rect(20, 20, 600, 150); // GUI window position
+        private Rect windowRect2 = new Rect(20, 20, 350, 400);
         private static Dictionary<string, Vector3> spawnpoints = new Dictionary<string, Vector3>();
         private static List<string> itemsP = new List<string>();
         private static List<string> spawnpointsNames = new List<string>();
@@ -851,21 +854,26 @@ namespace BitchlandCheatConsoleBepInEx
             itemsP.Add("ProstSuit2");
             itemPCount = itemsP.Count;
         }
-
         private void TriggerUpdate()
         {
             Init();
+
             // Toggle GUI with F1 key
-            if (Input.GetKeyUp(KeyCodeF1) || Input.GetKeyUp(KeyCodeF2))
+            if (Input.GetKeyUp(KeyCodeF1))
             {
                 showGUI = !showGUI;
             }
+            
+            if (Input.GetKeyUp(KeyCodeF2))
+            {
+                showMenu = !showMenu;
+                Logger.LogInfo($"showMenu = {showMenu}");
+            }
 
-            if (showGUI)
+            if (showGUI || showMenu)
             {
                 onOpenCheatConsole();
-            }
-            else
+            } else
             {
                 onCloseCheatConsole();
             }
@@ -1435,6 +1443,7 @@ namespace BitchlandCheatConsoleBepInEx
         private void Update()
         {
             GameObjectsUpdate();
+            initToggleHealthBar();
             TriggerUpdate();
             HandleMultiFollower();
             HandleMultiFollowerUpgrade();
@@ -1443,6 +1452,17 @@ namespace BitchlandCheatConsoleBepInEx
         }
         private void LateUpdate()
         {
+            if (Input.GetKeyUp(KeyCodeF1) || Input.GetKeyUp(KeyCodeF2))
+            {            
+                try
+                {
+                    Canvas objectOfType = UnityEngine.Object.FindObjectOfType<Canvas>();
+                    objectOfType.enabled = enableHealthBar;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
             HandleFlight();
             handleCommandKeys();
         }
@@ -1454,6 +1474,29 @@ namespace BitchlandCheatConsoleBepInEx
         private static bool showLevelLabel = false;
 
         private static string currentLevelText = "Level 1";
+
+        private static bool enableHealthBar = false;
+
+        private static bool initToggleHealthBar_ = false;
+
+        private static void initToggleHealthBar()
+        {
+            if (initToggleHealthBar_)
+            {
+                return;
+            }
+
+            try
+            {
+                Canvas objectOfType = UnityEngine.Object.FindObjectOfType<Canvas>();
+                enableHealthBar = objectOfType.enabled;
+                initToggleHealthBar_ = true;
+            } catch(Exception ex)
+            {
+            }
+             
+        }
+
 
         private void Start()
         {
@@ -1484,14 +1527,62 @@ namespace BitchlandCheatConsoleBepInEx
         }
         private void OnGUI()
         {
+            if (invisibleStyle == null)
+            {
+                int width = Texture2D.whiteTexture.width;
+                int height = Texture2D.whiteTexture.height;
+
+                transparentTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+
+                // Create an array of fully transparent pixels
+                Color[] pixels = new Color[width * height];
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    // RGBA: (R=0, G=0, B=0, A=0) → fully transparent
+                    pixels[i] = new Color(0f, 0f, 0f, 0f);
+                }
+
+                // Apply pixels to the texture
+                transparentTexture.SetPixels(pixels);
+                transparentTexture.Apply();
+
+                invisibleStyle = new GUIStyle(GUI.skin.textField)
+                {
+                    normal = { background = transparentTexture, textColor = new Color(0, 0, 0, 0) },
+                    focused = { background = transparentTexture, textColor = new Color(0, 0, 0, 0) },
+                    active = { background = transparentTexture, textColor = new Color(0, 0, 0, 0) },
+                    hover = { background = transparentTexture, textColor = new Color(0, 0, 0, 0) },
+                    border = new RectOffset(0, 0, 0, 0),
+                    padding = new RectOffset(0, 0, 0, 0),
+                };
+                originalColor = GUI.skin.settings.cursorColor;
+            }
             handleLevelSystem();
             //messageBoxOnGui();
             renderVideoTexture();
 
-            if (!showGUI) return;
+            if (!showGUI && !showMenu) return;
 
-            // Draw a draggable window
-            windowRect = GUI.Window(0, windowRect, DrawWindow, "BitchlandCheatConsole");
+            if (showGUI)
+            {
+                try
+                {
+                    // Draw a draggable window
+                    windowRect = GUI.Window(0, windowRect, DrawWindow, "BitchlandCheatConsole");
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            if (showMenu)
+            {
+                try
+                {
+                    windowRect2 = GUI.Window(0, windowRect2, DrawCheatWindow, "BitchlandCheatMenu");
+                } catch (Exception ex)
+                {
+                }
+            }
         }
         private void DrawWindow(int windowID)
         {
@@ -1504,10 +1595,11 @@ namespace BitchlandCheatConsoleBepInEx
             inputText = GUILayout.TextField(inputText, int.MaxValue); // Max 50 chars
 
             bool nothingHasFocus = GUI.GetNameOfFocusedControl() == string.Empty;
+            bool cheatMenuHasFocus = GUI.GetNameOfFocusedControl() == "Test";
             bool hasFocus = GUI.GetNameOfFocusedControl() == "TextField";
 
             // in case nothing else if focused, focus our input
-            if (!hasFocus && nothingHasFocus)
+            if (!hasFocus && nothingHasFocus || cheatMenuHasFocus)
             {
                 GUI.FocusControl("TextField");
             }
@@ -1515,9 +1607,8 @@ namespace BitchlandCheatConsoleBepInEx
             bool pressSubmitButton = GUILayout.Button("Submit");
             bool pressEnter = Event.current.isKey && Event.current.keyCode == KeyCode.Return && hasFocus;
             bool pressF1 = Event.current.isKey && Event.current.keyCode == KeyCodeF1 && hasFocus;
-            bool pressF2 = Event.current.isKey && Event.current.keyCode == KeyCodeF2 && hasFocus;
 
-            if (pressF1 || pressF2)
+            if (pressF1)
             {
                 showGUI = !showGUI;
             }
@@ -1549,6 +1640,503 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             // Allow window dragging
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        private bool EditorLikeFoldout(bool foldout, string title)
+        {
+            GUILayout.BeginHorizontal();
+            string arrow = foldout ? "▼" : "▶";
+            if (GUILayout.Button(arrow + " " + title, GUI.skin.label))
+            {
+                foldout = !foldout;
+            }
+            GUILayout.EndHorizontal();
+            return foldout;
+        }
+
+        private Vector2 scrollPos;     // Scroll-Position
+        private bool foldoutPlayer = false;
+        private bool foldoutTeleports = false;
+        private bool foldoutWeapons = false;
+        private bool foldoutItems = false;
+        private bool foldoutVehicles = false;
+        private bool foldoutSexMachines = false;
+        private bool foldoutGameObjectsMove = false;
+        private bool foldoutGameObjectsSpawn = false;
+        private Texture2D transparentTexture = null;
+        private GUIStyle invisibleStyle = null;
+        private Color originalColor;
+
+        private void DrawCheatWindow(int windowID)
+        {
+            if (GUILayout.Button("Toggle Health Bar (F2)"))
+            {
+                handleCommand("togglehealthbar");
+            }
+            if (GUILayout.Button("TP SafeArea (F8)"))
+            {
+                handleCommand("warp f8");
+            }
+            GUI.skin.settings.cursorColor = new Color(0, 0, 0, 0); // Invisible
+            GUI.SetNextControlName("Test");
+            GUILayout.TextField("", invisibleStyle);
+            bool nothingHasFocus = GUI.GetNameOfFocusedControl() == string.Empty;
+            bool cheatConsoleHasFocus = GUI.GetNameOfFocusedControl() == "TextField";
+            bool hasFocus = GUI.GetNameOfFocusedControl() == "Test";
+
+            // in case nothing else if focused, focus our input
+            if (!hasFocus && nothingHasFocus || cheatConsoleHasFocus)
+            {
+                GUI.FocusControl("Test");
+            }
+
+            bool pressF2 = Event.current.isKey && Event.current.keyCode == KeyCodeF2 && hasFocus;
+
+            if (pressF2)
+            {
+                showMenu = !showMenu;
+                Logger.LogInfo($"pressF2: showMenu = {showMenu}");
+                if (!showMenu)
+                {
+                    GUI.skin.settings.cursorColor = originalColor;
+                }
+            }
+
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+            // Player-Cheats
+            foldoutPlayer = EditorLikeFoldout(foldoutPlayer, "Player Cheats");
+            if (foldoutPlayer)
+            {
+                if (GUILayout.Button("+9999 Bitch Notes"))
+                {
+                    handleCommand("addmoney 9999");
+                }
+                if (GUILayout.Button("Give Me All Items"))
+                {
+                    handleCommand("addallitems");
+                }
+                if (GUILayout.Button("Spawn Mining Kit"))
+                {
+                    handleCommand("miningkit");
+                }
+                if (GUILayout.Button("Spawn Tank"))
+                {
+                    handleCommand("tank");
+                }
+                if (GUILayout.Button("Spawn Car"))
+                {
+                    handleCommand("car");
+                }
+                if (GUILayout.Button("Spawn Tank 2"))
+                {
+                    handleCommand("tank2");
+                }
+                if (GUILayout.Button("Spawn Car 2"))
+                {
+                    handleCommand("car2");
+                }
+                if (GUILayout.Button("Max Relationships"))
+                {
+                    handleCommand("maxrs");
+                }
+                if (GUILayout.Button("Toggle Infinite Health"))
+                {
+                    handleCommand("infinitehealth");
+                }
+                if (GUILayout.Button("Toggle Infinite Ammo"))
+                {
+                    handleCommand("infiniteammoall");
+                }
+                if (GUILayout.Button("Toggle GodMode"))
+                {
+                    handleCommand("godmode");
+                }
+                if (GUILayout.Button("Unlock Gallery"))
+                {
+                    handleCommand("fullgallery");
+                }
+            }
+
+            GUILayout.Space(10);
+
+            // Teleports
+            foldoutTeleports = EditorLikeFoldout(foldoutTeleports, "Teleports");
+
+            if (foldoutTeleports)
+            {
+                for (int i = 0; i < spawnpointsNames.Count; i++)
+                {
+                    if (GUILayout.Button(spawnpointsNames[i]))
+                    {
+                        handleCommand($"warp {spawnpointsNames[i]}");
+                    }
+                }
+            }
+
+            GUILayout.Space(10);
+
+            foldoutWeapons = EditorLikeFoldout(foldoutWeapons, "Weapons");
+
+            if (foldoutWeapons)
+            {
+                try
+                {
+                    List<string> allWeapons = getAllWeaponsByPrefab(null);
+
+                    if (allWeapons != null)
+                    {
+                        allWeapons = allWeapons.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+                        for (int i = 0; i < allWeapons.Count; i++)
+                        {
+                            if (allWeapons[i] == null)
+                            {
+                                continue;
+                            }
+
+                            if (GUILayout.Button($"{allWeapons[i]}"))
+                            {
+                                handleCommand($"addweapon {allWeapons[i]}");
+                            }
+                        }
+                    }
+                } catch (Exception ex)
+                {
+                }
+            }
+
+            GUILayout.Space(10);
+
+            foldoutItems = EditorLikeFoldout(foldoutItems, "Items");
+
+            if (foldoutItems)
+            {
+                try
+                {
+                    List<GameObject> allWeapons = getAllItems();
+
+                    List<string> allItems = new List<string>();
+
+                    if (allWeapons != null)
+                    {
+                        for (int i = 0; i < allWeapons.Count; i++)
+                        {
+                            if (allWeapons[i] == null)
+                            {
+                                continue;
+                            }
+
+                            string name = allWeapons[i].name;
+
+                            name = name.ToLower().Replace(" ", "_");
+
+                            if (allItems.Contains(name))
+                            {
+                                continue;
+                            }
+
+                            allItems.Add(name);
+                        }
+
+                        allItems = allItems.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+
+                        for (int i = 0; i < allItems.Count; i++)
+                        {
+                            string name = allItems[i];
+                            if (GUILayout.Button($"{name}"))
+                            {
+                                handleCommand($"additem {name}");
+                                handleCommand($"spawnitem {name}");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            GUILayout.Space(10);
+
+            foldoutVehicles = EditorLikeFoldout(foldoutVehicles, "Vehicles");
+
+            if (foldoutVehicles)
+            {
+                Int_Drive[] int_Drives = UnityEngine.Object.FindObjectsByType<Int_Drive>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (int_Drives == null)
+                    return;
+
+                List<string> drives = new List<string>();
+                for (int i = 0; i < int_Drives.Length; i++)
+                {
+                    string name = int_Drives[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (drives.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    drives.Add(nametest);
+                }
+
+                for (int i = 0; i < drives.Count; i++)
+                {
+                    string name = drives[i];
+                    if (GUILayout.Button(name))
+                    {
+                        handleCommand($"move {name}");
+                    }
+                }
+            }
+
+            foldoutSexMachines = EditorLikeFoldout(foldoutSexMachines, "Sex Machines");
+
+            if (foldoutSexMachines)
+            {
+                Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                int_SexTubeBike[] int_SexTubeBikes = UnityEngine.Object.FindObjectsByType<int_SexTubeBike>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                int_wallpussy[] wallpussies = UnityEngine.Object.FindObjectsByType<int_wallpussy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                int_Piss[] pisses = UnityEngine.Object.FindObjectsByType<int_Piss>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (int_SexMachines == null || int_SexLocker == null || int_SexTubeBikes == null || wallpussies == null || pisses == null || sexspots == null)
+                    goto end_here;
+
+                List<string> sexmachines = new List<string>();
+                List<string> sexlockers = new List<string>();
+                List<string> sextubebikes = new List<string>();
+                List<string> wallpussies_ = new List<string>();
+                List<string> pisses_ = new List<string>();
+                List<string> sexspots_ = new List<string>();
+
+                for (int i = 0; i < int_SexMachines.Length; i++)
+                {
+                    string name = int_SexMachines[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexmachines.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexmachines.Add(nametest);
+                }
+
+                for (int i = 0; i < sexmachines.Count; i++)
+                {
+                    string name = sexmachines[i];
+                    
+                    if (GUILayout.Button($"SexMachine ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+                for (int i = 0; i < int_SexLocker.Length; i++)
+                {
+                    string name = int_SexLocker[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexlockers.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexlockers.Add(nametest);
+                }
+
+
+                for (int i = 0; i < sexlockers.Count; i++)
+                {
+                    string name = sexlockers[i];
+
+                    if (GUILayout.Button($"SexLocker ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+
+                for (int i = 0; i < int_SexTubeBikes.Length; i++)
+                {
+                    string name = int_SexTubeBikes[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sextubebikes.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sextubebikes.Add(nametest);
+                }
+
+                for (int i = 0; i < sextubebikes.Count; i++)
+                {
+                    string name = sextubebikes[i];
+
+                    if (GUILayout.Button($"SexTubeBike ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+                for (int i = 0; i < wallpussies.Length; i++)
+                {
+                    string name = wallpussies[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (wallpussies_.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    wallpussies_.Add(nametest);
+                }
+
+                for (int i = 0; i < wallpussies_.Count; i++)
+                {
+                    string name = wallpussies_[i];
+
+                    if (GUILayout.Button($"WallPussy ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+                for (int i = 0; i < pisses.Length; i++)
+                {
+                    string name = pisses[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (pisses_.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    pisses_.Add(nametest);
+                }
+
+                for (int i = 0; i < pisses_.Count; i++)
+                {
+                    string name = pisses_[i];
+
+                    if (GUILayout.Button($"Pisses ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+                for (int i = 0; i < sexspots.Length; i++)
+                {
+                    string name = sexspots[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexspots_.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexspots_.Add(nametest);
+                }
+
+                for (int i = 0; i < sexspots_.Count; i++)
+                {
+                    string name = sexspots_[i];
+
+                    if (GUILayout.Button($"SexSpots ({name})"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+
+            }
+        end_here:
+            foldoutGameObjectsMove = EditorLikeFoldout(foldoutGameObjectsMove, "Move GameObjects");
+
+            if (foldoutGameObjectsMove)
+            {
+                try
+                {
+                    ConcurrentBag<string> allGameObjectsMove = getAllObjectsStringsFastList();
+
+                    List<string> allGameObjects = new List<string>();
+
+                    allGameObjects = allGameObjectsMove.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+
+                    for (int i = 0; i < allGameObjects.Count; i++)
+                    {
+                        string name = allGameObjects[i];
+                        if (GUILayout.Button($"{name}"))
+                        {
+                           handleCommand($"move {name}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            foldoutGameObjectsSpawn = EditorLikeFoldout(foldoutGameObjectsSpawn, "Spawn GameObjects");
+
+            if (foldoutGameObjectsSpawn)
+            {
+                try
+                {
+                    ConcurrentBag<string> allGameObjectsSpawn = getAllObjectsStringsFastList();
+
+                    List<string> allGameObjects = new List<string>();
+
+                    allGameObjects = allGameObjectsSpawn.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+
+                    for (int i = 0; i < allGameObjects.Count; i++)
+                    {
+                        string name = allGameObjects[i];
+                        if (GUILayout.Button($"{name}"))
+                        {
+                            handleCommand($"move {name}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            GUILayout.EndScrollView();
+
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
@@ -13046,6 +13634,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "togglehealthbar":
+                    {
+                        togglehealthbar();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -13065,6 +13659,34 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
             }
+        }
+
+        private static void togglehealthbar()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: togglehealthbar");
+            try
+            {
+                Canvas objectOfType = UnityEngine.Object.FindObjectOfType<Canvas>();
+                objectOfType.enabled = true;
+
+                bool enabled = !enableHealthBar;
+
+                if (enabled)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("healthbar: on");
+                } else
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("healthbar: off");
+                }
+
+                enableHealthBar = enabled;
+
+                objectOfType.enabled = enableHealthBar;
+            }
+            catch (Exception ex)
+            {
+            }
+
         }
 
         private static void disallowcursor()
@@ -16112,6 +16734,43 @@ namespace BitchlandCheatConsoleBepInEx
 
         private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsOW = new ConcurrentDictionary<string, GameObject>();
         private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsNotOw = new ConcurrentDictionary<string, GameObject>();
+
+        private static ConcurrentBag<string> allObjectsFastStringsOWBag = new ConcurrentBag<string>();
+        private static ConcurrentBag<string> allObjectsFastStringsNotOWBag = new ConcurrentBag<string>();
+
+        public static ConcurrentBag<string> getAllObjectsStringsFastList()
+        {
+            getAllObjectsStringsFast();
+
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (isOW)
+            {
+                if (allObjectsFastStringsOW.Count > 0)
+                {
+                    return allObjectsFastStringsOWBag;
+                }
+            }
+            else
+            {
+                if (allObjectsFastStringsNotOw.Count > 0)
+                {
+                    return allObjectsFastStringsNotOWBag;
+                }
+            }
+
+            return null;
+        }
+
         public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsFast()
         {
             bool isOW = false;
@@ -16143,6 +16802,7 @@ namespace BitchlandCheatConsoleBepInEx
             Dictionary<string, GameObject> list = new Dictionary<string, GameObject>();
 
             ConcurrentDictionary<string, GameObject> listex = new ConcurrentDictionary<string, GameObject>();
+            ConcurrentBag<string> bag = new ConcurrentBag<string>();
 
             List<GameObject> objects = getAllObjectsFast();
 
@@ -16184,6 +16844,7 @@ namespace BitchlandCheatConsoleBepInEx
                     }
 
                     listex.TryAdd(nametest, objected);
+                    bag.Add(nametest);
                     j++;
                    // Logger.LogInfo(j.ToString());
 
@@ -16206,11 +16867,15 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     allObjectsFastStringsOW.Clear();
                     allObjectsFastStringsOW.AddRange<string, GameObject>(listex);
+
+                    allObjectsFastStringsNotOWBag = bag;
                 }
                 else
                 {
                     allObjectsFastStringsNotOw.Clear();
                     allObjectsFastStringsNotOw.AddRange<string, GameObject>(listex);
+
+                    allObjectsFastStringsNotOWBag = bag;
                 }
             }
 
@@ -20184,13 +20849,99 @@ namespace BitchlandCheatConsoleBepInEx
 
         public static void BL_CloseEscMenu()
         {
+            try
+            {
+                if (Main.Instance.GameplayMenu.EscMenu.activeSelf)
+                {
+                    Main.Instance.GameplayMenu.CloseEscMenu();
+                }
+            } catch (Exception ex)
+            {
+            }
             Main.Instance.GameplayMenu.OpenEscMenu();
             Main.Instance.GameplayMenu.CloseEscMenu();
         }
         public static void BL_CloseJournal()
         {
+            try
+            {
+                if (Main.Instance.GameplayMenu.JournalMenu.activeSelf)
+                {
+                    Main.Instance.GameplayMenu.CloseJournal();
+                }
+            } catch (Exception ex)
+            {
+            }
             Main.Instance.GameplayMenu.OpenJournal();
             Main.Instance.GameplayMenu.CloseJournal();
+        }
+
+        public static void onOpenMe()
+        {
+            try
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                Main.Instance.Player.UserControl.TheCam.enabled = true;
+                Main.Instance.Player.UserControl.CanMove = true;
+            } catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.PerkDesc.SetActive(value: true);
+            } catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.NotificationPanel.SetActive(value: true);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            try
+            {
+                Canvas objectOfType = UnityEngine.Object.FindObjectOfType<Canvas>();
+                objectOfType.enabled = enableHealthBar;
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public static void onCloseMe()
+        {
+            try
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                Main.Instance.Player.UserControl.TheCam.enabled = true;
+                Main.Instance.Player.UserControl.CanMove = true;
+            } catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Main.Instance.GameplayMenu.PerkDesc.SetActive(value: true);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                Canvas objectOfType = UnityEngine.Object.FindObjectOfType<Canvas>();
+                objectOfType.enabled = enableHealthBar;
+            }
+            catch (Exception ex)
+            {
+            }
         }
         public void onOpenCheatConsole()
         {
@@ -20201,16 +20952,19 @@ namespace BitchlandCheatConsoleBepInEx
             onOpenCheat = true;
             try
             {
+                Main.Instance.GameplayMenu.CloseJournal();
+            }
+            catch (Exception ex)
+            {
+            }
+            try
+            {
                 BL_CloseEscMenu();
             }
             catch { }
             try
             {
                 BL_CloseJournal();
-            } catch { }
-            try
-            {
-                Main.Instance.GameplayMenu.CloseJournal();
             } catch { }
             try
             {
@@ -20226,8 +20980,14 @@ namespace BitchlandCheatConsoleBepInEx
             } catch { }
             try
             {
+                Main.Instance.GameplayMenu.UpdateHealth();
+            }
+            catch { }
+            try
+            {
                 Main.Instance.GameplayMenu.UpdateArousal();
             } catch {}
+            onOpenMe();
         }
 
         public void onCloseCheatConsole()
@@ -20237,6 +20997,13 @@ namespace BitchlandCheatConsoleBepInEx
                 return;
             }
             onOpenCheat = false;
+            try
+            {
+                Main.Instance.GameplayMenu.CloseJournal();
+            }
+            catch (Exception ex)
+            {
+            }
             try
             {
                 BL_CloseEscMenu();
@@ -20259,6 +21026,11 @@ namespace BitchlandCheatConsoleBepInEx
             } catch { }
             try
             {
+                Main.Instance.GameplayMenu.UpdateHealth();
+            }
+            catch { }
+            try
+            {
                 Main.Instance.GameplayMenu.UpdateArousal();
             } catch { }
             if (allowCursorOnClose)
@@ -20269,6 +21041,7 @@ namespace BitchlandCheatConsoleBepInEx
                 } catch { }
                 allowCursorOnClose = false;
             }
+            onCloseMe();
         }
 
         private static bool onOpenCheat = false;
