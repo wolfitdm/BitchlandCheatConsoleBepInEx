@@ -3692,6 +3692,7 @@ namespace BitchlandCheatConsoleBepInEx
             inst.SpawnClean = true;
             PersonGenerated.PutFeet();
             PersonGenerated.PersonType.ApplyTo(PersonGenerated, false, false, false, inst);
+
             if (PersonGenerated.Name == null || PersonGenerated.Name.Length == 0)
             {
                 PersonGenerated.Name = Main.Instance.GenerateRandomName();
