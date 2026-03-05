@@ -21880,6 +21880,21 @@ namespace BitchlandCheatConsoleBepInEx
         {
             try
             {
+                PatchHarmonyMethodUnity(typeof(UI_Settings), "Click_DownloadMods2", "UI_Settings_Click_DownloadMods2", false, true);
+            } catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                PatchHarmonyMethodUnity(typeof(UI_Settings), "Click_OpenModsFolder", "UI_Settings_Click_OpenModsFolder", false, true);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
                 if (!useHarmonyPatches)
                 {
                     return;
@@ -22087,6 +22102,22 @@ namespace BitchlandCheatConsoleBepInEx
             } catch (Exception ex)
             {
                 Logger.LogError(ex.ToString());
+            }
+        }
+        public static void UI_Settings_Click_DownloadMods2()
+        {
+            OpenUrl("https://github.com/wolfitdm/BitchlandModManager/releases/tag/1.0.0");
+            OpenUrl("https://discord.com/channels/1021414197558513664/1228264001893437491");
+        }
+
+        public static void UI_Settings_Click_OpenModsFolder()
+        {
+            try
+            {
+                string bepInExFolder = Application.dataPath + "/../BepInEx";
+                Application.OpenURL("file://" + bepInExFolder + "/plugins/");
+            } catch  (Exception ex)
+            {
             }
         }
 
