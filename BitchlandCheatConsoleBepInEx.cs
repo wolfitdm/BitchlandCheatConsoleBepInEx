@@ -172,7 +172,7 @@ namespace BitchlandCheatConsoleBepInEx
         private bool pressEnter = false;
         private string inputText = "";      // Stores user input
         private Rect windowRect = new Rect(20, 20, 600, 150); // GUI window position
-        private Rect windowRect2 = new Rect(20, 20, 350, 400);
+        private Rect windowRect2 = new Rect(20, 20, 350, 575);
         private static Dictionary<string, Vector3> spawnpoints = new Dictionary<string, Vector3>();
         private static List<string> itemsP = new List<string>();
         private static List<string> spawnpointsNames = new List<string>();
@@ -1657,16 +1657,25 @@ namespace BitchlandCheatConsoleBepInEx
 
         private Vector2 scrollPos;     // Scroll-Position
         private bool foldoutPlayer = false;
+        private bool foldoutNPC = false;
         private bool foldoutTeleports = false;
         private bool foldoutWeapons = false;
         private bool foldoutItems = false;
         private bool foldoutVehicles = false;
+        private bool foldoutAllSexMachines = false;
         private bool foldoutSexMachines = false;
+        private bool foldoutSexLockers = false;
+        private bool foldoutSexTubeBikes = false;
+        private bool foldoutWallPussies = false;
+        private bool foldoutPisses = false;
+        private bool foldoutSexSpots = false;
         private bool foldoutGameObjectsMove = false;
         private bool foldoutGameObjectsSpawn = false;
         private Texture2D transparentTexture = null;
         private GUIStyle invisibleStyle = null;
         private Color originalColor;
+        private int currentPage = 0;
+        private int totalPages = 1;
 
         private void DrawCheatWindow(int windowID)
         {
@@ -1678,6 +1687,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 handleCommand("warp f8");
             }
+
             GUI.skin.settings.cursorColor = new Color(0, 0, 0, 0); // Invisible
             GUI.SetNextControlName("Test");
             GUILayout.TextField("", invisibleStyle);
@@ -1704,6 +1714,43 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+            GUILayout.BeginVertical("box", GUILayout.Width(320));
+
+            // --- Page Navigation Buttons ---
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Previous", GUILayout.Width(100)))
+            {
+                currentPage = Mathf.Max(0, currentPage - 1);
+            }
+            
+            GUILayout.Label($"Page {currentPage} / {totalPages}", GUILayout.Width(100));
+
+            if (GUILayout.Button("Next", GUILayout.Width(100)))
+            {
+                currentPage = Mathf.Min(totalPages - 1, currentPage + 1);
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            // --- Page Content ---
+            switch (currentPage)
+            {
+                case 0:
+                    ShowPage1();
+                    break;
+            }
+
+            GUILayout.EndVertical();
+
+            GUILayout.EndScrollView();
+
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        public void ShowPage1()
+        {
 
             // Player-Cheats
             foldoutPlayer = EditorLikeFoldout(foldoutPlayer, "Player Cheats");
@@ -1761,6 +1808,13 @@ namespace BitchlandCheatConsoleBepInEx
 
             GUILayout.Space(10);
 
+            foldoutNPC = EditorLikeFoldout(foldoutNPC, "NPC Cheats");
+            if (foldoutNPC)
+            {
+            }
+
+            GUILayout.Space(10);
+
             // Teleports
             foldoutTeleports = EditorLikeFoldout(foldoutTeleports, "Teleports");
 
@@ -1801,7 +1855,8 @@ namespace BitchlandCheatConsoleBepInEx
                             }
                         }
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                 }
             }
@@ -1896,9 +1951,9 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
 
-            foldoutSexMachines = EditorLikeFoldout(foldoutSexMachines, "Sex Machines");
+            foldoutAllSexMachines = EditorLikeFoldout(foldoutAllSexMachines, "All Sex Machines");
 
-            if (foldoutSexMachines)
+            if (foldoutAllSexMachines)
             {
                 Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -1908,7 +1963,7 @@ namespace BitchlandCheatConsoleBepInEx
                 bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
                 if (int_SexMachines == null || int_SexLocker == null || int_SexTubeBikes == null || wallpussies == null || pisses == null || sexspots == null)
-                    goto end_here;
+                    goto end_here_all_sexmachines;
 
                 List<string> sexmachines = new List<string>();
                 List<string> sexlockers = new List<string>();
@@ -1937,7 +1992,7 @@ namespace BitchlandCheatConsoleBepInEx
                 for (int i = 0; i < sexmachines.Count; i++)
                 {
                     string name = sexmachines[i];
-                    
+
                     if (GUILayout.Button($"SexMachine ({name})"))
                     {
                         handleCommand($"spawn {name}");
@@ -2082,7 +2137,228 @@ namespace BitchlandCheatConsoleBepInEx
                 }
 
             }
-        end_here:
+
+        end_here_all_sexmachines:
+            foldoutSexMachines = EditorLikeFoldout(foldoutSexMachines, "Sex Machines");
+
+            if (foldoutSexMachines)
+            {
+                Int_SexMachine[] int_SexMachines = UnityEngine.Object.FindObjectsByType<Int_SexMachine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (int_SexMachines == null)
+                    goto end_here_sexmachines;
+
+                List<string> sexmachines = new List<string>();
+          
+                for (int i = 0; i < int_SexMachines.Length; i++)
+                {
+                    string name = int_SexMachines[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexmachines.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexmachines.Add(nametest);
+                }
+
+                for (int i = 0; i < sexmachines.Count; i++)
+                {
+                    string name = sexmachines[i];
+
+                    if (GUILayout.Button($"{name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+        end_here_sexmachines:
+            foldoutSexLockers = EditorLikeFoldout(foldoutSexLockers, "Sex Lockers");
+
+            if (foldoutSexLockers)
+            {
+                int_SexLocker[] int_SexLocker = UnityEngine.Object.FindObjectsByType<int_SexLocker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (int_SexLocker == null)
+                    goto end_here_sexlockers;
+
+                List<string> sexlockers = new List<string>();
+
+                for (int i = 0; i < int_SexLocker.Length; i++)
+                {
+                    string name = int_SexLocker[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexlockers.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexlockers.Add(nametest);
+                }
+
+
+                for (int i = 0; i < sexlockers.Count; i++)
+                {
+                    string name = sexlockers[i];
+
+                    if (GUILayout.Button($"{name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+
+        end_here_sexlockers:
+            foldoutSexTubeBikes = EditorLikeFoldout(foldoutSexTubeBikes, "Sex Tube Bikes");
+
+            if (foldoutSexTubeBikes)
+            {
+                int_SexTubeBike[] int_SexTubeBikes = UnityEngine.Object.FindObjectsByType<int_SexTubeBike>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (int_SexTubeBikes == null)
+                    goto end_here_sextubebikes;
+
+                List<string> sextubebikes = new List<string>();
+
+                for (int i = 0; i < int_SexTubeBikes.Length; i++)
+                {
+                    string name = int_SexTubeBikes[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sextubebikes.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sextubebikes.Add(nametest);
+                }
+
+                for (int i = 0; i < sextubebikes.Count; i++)
+                {
+                    string name = sextubebikes[i];
+
+                    if (GUILayout.Button($"{name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+        end_here_sextubebikes:
+            foldoutWallPussies = EditorLikeFoldout(foldoutWallPussies, "Wall Pussies");
+
+            if (foldoutWallPussies)
+            {
+                int_wallpussy[] wallpussies = UnityEngine.Object.FindObjectsByType<int_wallpussy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (wallpussies == null)
+                    goto end_here_wallpussies;
+
+                List<string> wallpussies_ = new List<string>();
+
+                for (int i = 0; i < wallpussies_.Count; i++)
+                {
+                    string name = wallpussies_[i];
+
+                    if (GUILayout.Button("${name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+        end_here_wallpussies:
+            foldoutPisses = EditorLikeFoldout(foldoutPisses, "Pisses");
+
+            if (foldoutPisses)
+            {
+                int_Piss[] pisses = UnityEngine.Object.FindObjectsByType<int_Piss>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (pisses == null)
+                    goto end_here_pisses;
+
+                List<string> pisses_ = new List<string>();
+
+                for (int i = 0; i < pisses.Length; i++)
+                {
+                    string name = pisses[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (pisses_.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    pisses_.Add(nametest);
+                }
+
+                for (int i = 0; i < pisses_.Count; i++)
+                {
+                    string name = pisses_[i];
+
+                    if (GUILayout.Button($"{name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+        end_here_pisses:
+            foldoutSexSpots = EditorLikeFoldout(foldoutSexSpots, "Sex Spots");
+
+            if (foldoutSexSpots)
+            {
+                bl_NoItemSexSpot[] sexspots = UnityEngine.Object.FindObjectsByType<bl_NoItemSexSpot>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                if (sexspots == null)
+                    goto end_here_sexspots;
+
+                List<string> sexspots_ = new List<string>();
+
+                for (int i = 0; i < sexspots.Length; i++)
+                {
+                    string name = sexspots[i].name.ToLower().Replace(" ", "_");
+
+                    string nametest = name;
+
+                    int k = 0;
+
+                    while (sexspots_.Contains(nametest))
+                    {
+                        nametest = name + k.ToString();
+                        k++;
+                    }
+
+                    sexspots_.Add(nametest);
+                }
+
+                for (int i = 0; i < sexspots_.Count; i++)
+                {
+                    string name = sexspots_[i];
+
+                    if (GUILayout.Button($"{name}"))
+                    {
+                        handleCommand($"spawn {name}");
+                    }
+                }
+            }
+
+        end_here_sexspots:
             foldoutGameObjectsMove = EditorLikeFoldout(foldoutGameObjectsMove, "Move GameObjects");
 
             if (foldoutGameObjectsMove)
@@ -2100,7 +2376,7 @@ namespace BitchlandCheatConsoleBepInEx
                         string name = allGameObjects[i];
                         if (GUILayout.Button($"{name}"))
                         {
-                           handleCommand($"move {name}");
+                            handleCommand($"move {name}");
                         }
                     }
                 }
@@ -2134,10 +2410,6 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                 }
             }
-
-            GUILayout.EndScrollView();
-
-            GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
         public static string vector3ToJsonString(Vector3 point)
