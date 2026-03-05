@@ -1671,11 +1671,15 @@ namespace BitchlandCheatConsoleBepInEx
         private bool foldoutSexSpots = false;
         private bool foldoutGameObjectsMove = false;
         private bool foldoutGameObjectsSpawn = false;
+
+        private bool foldoutBuildPlans = false;
         private Texture2D transparentTexture = null;
         private GUIStyle invisibleStyle = null;
         private Color originalColor;
-        private int currentPage = 0;
-        private int totalPages = 1;
+        private int currentPage = 1;
+        private int totalPages = 2;
+        private int minPage = 1;
+        private int maxPage = 2;
 
         private void DrawCheatWindow(int windowID)
         {
@@ -1721,14 +1725,14 @@ namespace BitchlandCheatConsoleBepInEx
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Previous", GUILayout.Width(100)))
             {
-                currentPage = Mathf.Max(0, currentPage - 1);
+                currentPage = Mathf.Max(minPage, currentPage - 1);
             }
             
             GUILayout.Label($"Page {currentPage} / {totalPages}", GUILayout.Width(100));
 
             if (GUILayout.Button("Next", GUILayout.Width(100)))
             {
-                currentPage = Mathf.Min(totalPages - 1, currentPage + 1);
+                currentPage = Mathf.Min(maxPage, currentPage + 1);
             }
             GUILayout.EndHorizontal();
 
@@ -1737,8 +1741,12 @@ namespace BitchlandCheatConsoleBepInEx
             // --- Page Content ---
             switch (currentPage)
             {
-                case 0:
+                case 1:
                     ShowPage1();
+                    break;
+
+                case 2:
+                    ShowPage2();
                     break;
             }
 
@@ -1749,9 +1757,33 @@ namespace BitchlandCheatConsoleBepInEx
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
+        public void ShowPage2()
+        {
+            foldoutBuildPlans = EditorLikeFoldout(foldoutBuildPlans, "Build Plans");
+            if (foldoutBuildPlans)
+            {
+                List<GameObject> list = getallbuildplans();
+
+                if (list.Count > 0)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        string name = list[i].name;
+                        if (GUILayout.Button($"Build {name} (New)"))
+                        {
+                            handleCommand($"buildplannew {name}");
+                        }
+                        if (GUILayout.Button($"Build {name} (Old)"))
+                        {
+                            handleCommand($"buildplan {name}");
+                        }
+                    }
+                }
+            }
+        }
+
         public void ShowPage1()
         {
-
             // Player-Cheats
             foldoutPlayer = EditorLikeFoldout(foldoutPlayer, "Player Cheats");
             if (foldoutPlayer)
@@ -1800,6 +1832,42 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("godmode");
                 }
+                if (GUILayout.Button("Toggle StripMode"))
+                {
+                    handleCommand("stripmode");
+                }
+                if (GUILayout.Button("Toggle StripMode Ultimate"))
+                {
+                    handleCommand("stripmodeultimate");
+                }
+                if (GUILayout.Button("Toggle StripMode Nympho"))
+                {
+                    handleCommand("stripmodenympho");
+                }
+                if (GUILayout.Button("Toggle StripMode Broken"))
+                {
+                    handleCommand("stripmodebroken");
+                }
+                if (GUILayout.Button("I am a Nympho"))
+                {
+                    handleCommand("iamanympho");
+                }
+                if (GUILayout.Button("I am Broken"))
+                {
+                    handleCommand("setpersonalityto broken");
+                }
+                if (GUILayout.Button("Toggle NoBuildTime"))
+                {
+                    handleCommand("nobuildtime");
+                }
+                if (GUILayout.Button("Toggle NoMiningTools"))
+                {
+                    handleCommand("nominingtools");
+                }
+                if (GUILayout.Button("Unstuck Me"))
+                {
+                    handleCommand("unstuckme");
+                }
                 if (GUILayout.Button("Unlock Gallery"))
                 {
                     handleCommand("fullgallery");
@@ -1811,6 +1879,26 @@ namespace BitchlandCheatConsoleBepInEx
             foldoutNPC = EditorLikeFoldout(foldoutNPC, "NPC Cheats");
             if (foldoutNPC)
             {
+                if (GUILayout.Button("Have Sex With NPC"))
+                {
+                    handleCommand("sexnpc");
+                }
+                if (GUILayout.Button("Toggle NPC GodMode"))
+                {
+                    handleCommand("npcgodmode");
+                }
+                if (GUILayout.Button("Teleport Followers"))
+                {
+                    handleCommand("warpfollower");
+                }
+                if (GUILayout.Button("NPC Personality To Nympho"))
+                {
+                    handleCommand("nympho");
+                }
+                if (GUILayout.Button("NPC Personality To Broken"))
+                {
+                    handleCommand("npcsetpersonalityto broken");
+                }
             }
 
             GUILayout.Space(10);
