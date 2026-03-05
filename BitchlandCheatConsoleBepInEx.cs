@@ -1673,6 +1673,10 @@ namespace BitchlandCheatConsoleBepInEx
         private bool foldoutGameObjectsSpawn = false;
 
         private bool foldoutBuildPlans = false;
+        private bool foldoutSpawnFemales = false;
+        private bool foldoutSpawnMales = false;
+        private bool foldoutPlayerChangeSkin = false;
+        private bool foldoutNPCChangeSkin = false;
         private Texture2D transparentTexture = null;
         private GUIStyle invisibleStyle = null;
         private Color originalColor;
@@ -1680,6 +1684,7 @@ namespace BitchlandCheatConsoleBepInEx
         private int totalPages = 2;
         private int minPage = 1;
         private int maxPage = 2;
+        private Rect windowRect2_Safe = new Rect(0,0,0,0);
 
         private void DrawCheatWindow(int windowID)
         {
@@ -1780,6 +1785,212 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                 }
             }
+
+            foldoutSpawnFemales = EditorLikeFoldout(foldoutSpawnFemales, "Spawn Females");
+
+            if (foldoutSpawnFemales)
+            {
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+
+                string[] files = Directory.GetFiles(femalesFolder);
+
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        if (GUILayout.Button($"{name} (Clothed Without Save)"))
+                        {
+                            handleCommand($"spawnfemale {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Clothed With Save)"))
+                        {
+                            handleCommand($"spawnfemalesave {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude Without Save)"))
+                        {
+                            handleCommand($"spawnfemalenude {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude With Save)"))
+                        {
+                            handleCommand($"spawnfemalenudesave {name}");
+                        }
+                    }
+                }
+            }
+
+            foldoutPlayerChangeSkin = EditorLikeFoldout(foldoutPlayerChangeSkin, "Player Change Skin");
+
+            if (foldoutPlayerChangeSkin)
+            {
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+
+                bool playerIsGirl = Main.Instance.Player is Girl;
+
+                string[] files = Directory.GetFiles(playerIsGirl ? femalesFolder : malesFolder);
+
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        if (GUILayout.Button($"{name}"))
+                        {
+                            handleCommand($"changeskin {name}");
+                        }
+                    }
+                }
+            }
+
+            foldoutNPCChangeSkin = EditorLikeFoldout(foldoutNPCChangeSkin, "NPC Change Skin");
+
+            if (foldoutNPCChangeSkin)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+
+                GameObject personGa = getPersonInteract();
+
+                if (personGa == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    } catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_change_skin_end_here;
+                }
+
+                Person person = MyGetComponentPerson<Person>(personGa);
+
+                if (person == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_change_skin_end_here;
+                }
+
+                bool playerIsGirl = person is Girl;
+
+                string[] files = Directory.GetFiles(playerIsGirl ? femalesFolder : malesFolder);
+
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        if (GUILayout.Button($"{name}"))
+                        {
+                            handleCommand($"npcchangeskin {name}");
+                        }
+                    }
+                }
+            }
+
+        foldout_npc_change_skin_end_here:
+            foldoutSpawnFemales = EditorLikeFoldout(foldoutSpawnFemales, "Spawn Females");
+
+            if (foldoutSpawnFemales)
+            {
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+
+                string[] files = Directory.GetFiles(femalesFolder);
+
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        if (GUILayout.Button($"{name} (Clothed Without Save)"))
+                        {
+                            handleCommand($"spawnfemale {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Clothed With Save)"))
+                        {
+                            handleCommand($"spawnfemalesave {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude Without Save)"))
+                        {
+                            handleCommand($"spawnfemalenude {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude With Save)"))
+                        {
+                            handleCommand($"spawnfemalenudesave {name}");
+                        }
+                    }
+                }
+            }
+
+            foldoutSpawnMales = EditorLikeFoldout(foldoutSpawnMales, "Spawn Males");
+
+            if (foldoutSpawnMales)
+            {
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+                Directory.CreateDirectory(malesFolder);
+                Directory.CreateDirectory(femalesFolder);
+
+                string[] files = Directory.GetFiles(malesFolder);
+
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        if (GUILayout.Button($"{name} (Clothed Without Save)"))
+                        {
+                            handleCommand($"spawnmale {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Clothed With Save)"))
+                        {
+                            handleCommand($"spawnmalesave {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude Without Save)"))
+                        {
+                            handleCommand($"spawnmalenude {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude With Save)"))
+                        {
+                            handleCommand($"spawnmalenudesave {name}");
+                        }
+                    }
+                }
+            }
         }
 
         public void ShowPage1()
@@ -1864,6 +2075,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("nominingtools");
                 }
+                if (GUILayout.Button("Clean SKin"))
+                {
+                    handleCommand("cleanskin");
+                }
                 if (GUILayout.Button("Unstuck Me"))
                 {
                     handleCommand("unstuckme");
@@ -1898,6 +2113,28 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("NPC Personality To Broken"))
                 {
                     handleCommand("npcsetpersonalityto broken");
+                }
+                if (GUILayout.Button("NPC Clean Skin"))
+                {
+                    handleCommand("npccleanskin");
+                }
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
                 }
             }
 
