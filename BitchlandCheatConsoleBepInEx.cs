@@ -1696,6 +1696,14 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 handleCommand("warp f8");
             }
+            if (GUILayout.Button("TP OpenWorld (F8)"))
+            {
+                handleCommand("openworld");
+            }
+            if (GUILayout.Button("TP MainCity"))
+            {
+                handleCommand("maincity");
+            }
 
             GUI.skin.settings.cursorColor = new Color(0, 0, 0, 0); // Invisible
             GUI.SetNextControlName("Test");
