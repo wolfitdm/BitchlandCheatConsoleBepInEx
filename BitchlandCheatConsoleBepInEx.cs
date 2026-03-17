@@ -172,7 +172,7 @@ namespace BitchlandCheatConsoleBepInEx
         private bool pressEnter = false;
         private string inputText = "";      // Stores user input
         private Rect windowRect = new Rect(20, 20, 600, 150); // GUI window position
-        private Rect windowRect2 = new Rect(20, 20, 350, 575);
+        private Rect windowRect2 = new Rect(20, 20, 350, 625);
         private static Dictionary<string, Vector3> spawnpoints = new Dictionary<string, Vector3>();
         private static List<string> itemsP = new List<string>();
         private static List<string> spawnpointsNames = new List<string>();
@@ -1677,6 +1677,7 @@ namespace BitchlandCheatConsoleBepInEx
         private bool foldoutSpawnMales = false;
         private bool foldoutPlayerChangeSkin = false;
         private bool foldoutNPCChangeSkin = false;
+        private bool foldoutOpenWorldTeleports = false;
         private Texture2D transparentTexture = null;
         private GUIStyle invisibleStyle = null;
         private Color originalColor;
@@ -1772,6 +1773,19 @@ namespace BitchlandCheatConsoleBepInEx
 
         public void ShowPage2()
         {
+            foldoutOpenWorldTeleports = EditorLikeFoldout(foldoutOpenWorldTeleports, "Open World Teleports");
+
+            if (foldoutOpenWorldTeleports)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    if (GUILayout.Button($"Go To OpenWorld Section ({i})"))
+                    {
+                        handleCommand($"openworldsection {i}");
+                    }
+                }
+            }
+
             foldoutBuildPlans = EditorLikeFoldout(foldoutBuildPlans, "Build Plans");
             if (foldoutBuildPlans)
             {
@@ -2018,6 +2032,10 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("Spawn Mining Kit"))
                 {
                     handleCommand("miningkit");
+                }
+                if (GUILayout.Button($"Spawn 5 Portable Pillories"))
+                {
+                    handleCommand($"spawnitem portable_pillory 5");
                 }
                 if (GUILayout.Button("Spawn Tank"))
                 {
@@ -16888,11 +16906,32 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "openworldsection":
+                    {
+                        openworldsection(value);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void openworldsection(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: openworldsection");
+            int section = stringValueToInt(value);
+
+            try
+            {
+                Main.Instance.GameplayMenu.GoToOpenWorld_Section(section);
+            } catch (Exception ex)
+            {
+
             }
         }
 
