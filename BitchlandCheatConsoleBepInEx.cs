@@ -7,6 +7,7 @@ using Defective.JSON;
 using Den.Tools;
 using HarmonyLib;
 using MonoMod.Utils;
+using SemanticVersioning;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -26,6 +27,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Networking;
 using UnityEngine.Video;
+using static com.heparo.terrain.toolkit.TerrainToolkit;
 using static Den.Tools.Serializer;
 using static Mono.Security.X509.X509Stores;
 using static UnityEngine.Random;
@@ -1678,15 +1680,34 @@ namespace BitchlandCheatConsoleBepInEx
         private bool foldoutPlayerChangeSkin = false;
         private bool foldoutNPCChangeSkin = false;
         private bool foldoutOpenWorldTeleports = false;
+        private bool foldoutPlayerPersonalities = false;
+        private bool foldoutNPCPersonalalities = false;
+        private bool foldoutPlayerPerks = false;
+        private bool foldoutNPCPerks = false;
+        private bool foldoutPlayerFetishes = false;
+        private bool foldoutNPCFetishes = false;
+        private bool foldoutPlayerPersonTypes = false;
+        private bool foldoutNPCPersonTypes = false;
+        private bool foldoutPlayerPersonStates = false;
+        private bool foldoutNPCPersonStates = false;
+        private bool foldoutPlayerSkinStates = false;
+        private bool foldoutNPCSkinStates = false;
         private Texture2D transparentTexture = null;
         private GUIStyle invisibleStyle = null;
         private Color originalColor;
         private int currentPage = 1;
-        private int totalPages = 2;
+        private int totalPages = 3;
         private int minPage = 1;
-        private int maxPage = 2;
+        private int maxPage = 3;
         private Rect windowRect2_Safe = new Rect(0,0,0,0);
 
+        public static void toggleButton(string var, bool set, Action action)
+        {
+            if (GUILayout.Button(var + ": " + (set ? "ON" : "OFF")))
+            {
+                action.Invoke();
+            }
+        }
         private void DrawCheatWindow(int windowID)
         {
             if (GUILayout.Button("Toggle Health Bar (F2)"))
@@ -1762,6 +1783,10 @@ namespace BitchlandCheatConsoleBepInEx
                 case 2:
                     ShowPage2();
                     break;
+
+                case 3:
+                    ShowPage3();
+                    break;
             }
 
             GUILayout.EndVertical();
@@ -1769,6 +1794,525 @@ namespace BitchlandCheatConsoleBepInEx
             GUILayout.EndScrollView();
 
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        public void ShowPage3()
+        {
+            foldoutPlayerSkinStates = EditorLikeFoldout(foldoutPlayerSkinStates, "Player Skin States");
+            if (foldoutPlayerSkinStates)
+            {
+               
+                Person person = Main.Instance.Player;
+
+                person.States = person.States;
+
+                try
+                {
+
+                    toggleButton("Dirty -10 Sexy", person.States[0], () =>
+                    {
+                        person.States[0] = !person.States[0];
+                    });
+
+                    toggleButton("Horny +10 Sexy", person.States[1], () =>
+                    {
+                        person.States[1] = !person.States[1];
+                    });
+
+                    toggleButton("Very Dirty -20 Sexy", person.States[2], () =>
+                    {
+                        person.States[2] = !person.States[2];
+                    });
+
+                    toggleButton("Shitten -20 Sexy", person.States[3], () =>
+                    {
+                        person.States[3] = !person.States[3];
+                    });
+
+                    toggleButton("Sleepy - speed", person.States[4], () =>
+                    {
+                        person.States[4] = !person.States[4];
+                    });
+
+                    toggleButton("Needs toilet", person.States[5], () =>
+                    {
+                        person.States[5] = !person.States[5];
+                    });
+
+                    toggleButton("Hungry", person.States[6], () =>
+                    {
+                        person.States[6] = !person.States[6];
+                    });
+
+                    toggleButton("Pregnant", person.States[7], () =>
+                    {
+                        person.States[7] = !person.States[7];
+                    });
+
+                    toggleButton("Bloody -10 Sexy", person.States[8], () =>
+                    {
+                        person.States[8] = !person.States[8];
+                    });
+
+                    toggleButton("Nude Clothing Vipe", person.States[9], () =>
+                    {
+                        person.States[9] = !person.States[9];
+
+                        if (person.States[9])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Nude;
+                        }
+                    });
+
+                    toggleButton("Casual Clothing Vipe", person.States[10], () =>
+                    {
+                        person.States[10] = !person.States[10];
+
+                        if (person.States[10])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Casual;
+                        }
+                    });
+
+                    toggleButton("Sexy Clothing Vipe", person.States[11], () =>
+                    {
+                        person.States[11] = !person.States[11];
+
+                        if (person.States[11])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Sexy;
+                        }
+                    });
+
+                    toggleButton("Cum Stains + 1 Sexy", person.States[12], () =>
+                    {
+                        person.States[12] = !person.States[12];
+                    });
+
+                    toggleButton("Cum Stains + 2 Sexy", person.States[13], () =>
+                    {
+                        person.States[13] = !person.States[13];
+                    });
+
+                    toggleButton("Cum Stains + 3 Sexy", person.States[14], () =>
+                    {
+                        person.States[14] = !person.States[14];
+                    });
+
+                    toggleButton("Cum Stains + 4 Sexy", person.States[15], () =>
+                    {
+                        person.States[15] = !person.States[15];
+                    });
+
+                    toggleButton("Cum Stains + 5 Sexy", person.States[16], () =>
+                    {
+                        person.States[16] = !person.States[16];
+                    });
+
+                    toggleButton("Body Writting + 1 Sexy", person.States[17], () =>
+                    {
+                        person.States[17] = !person.States[17];
+                    });
+
+                    toggleButton("Body Writting + 2 Sexy", person.States[18], () =>
+                    {
+                        person.States[18] = !person.States[18];
+                    });
+
+                    toggleButton("Body Writting + 3 Sexy", person.States[19], () =>
+                    {
+                        person.States[19] = !person.States[19];
+                    });
+
+                    toggleButton("Bruises - 10 Sexy", person.States[20], () =>
+                    {
+                        person.States[20] = !person.States[20];
+                    });
+
+                    toggleButton("Heavy Bruises - 20 Sexy", person.States[21], () =>
+                    {
+                        person.States[21] = !person.States[21];
+                    });
+
+                    toggleButton("Basic Makeup + 10 Sexy", person.States[22], () =>
+                    {
+                        person.States[22] = !person.States[22];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[23], () =>
+                    {
+                        person.States[23] = !person.States[23];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[24], () =>
+                    {
+                        person.States[24] = !person.States[24];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[25], () =>
+                    {
+                        person.States[25] = !person.States[25];
+                    });
+
+                    toggleButton("Cum in mouth + 1 Sexy", person.States[26], () =>
+                    {
+                        person.States[26] = !person.States[26];
+                    });
+
+                    toggleButton("Beard", person.States[27], () =>
+                    {
+                        person.States[27] = !person.States[27];
+                    });
+
+                    toggleButton("Lipstick", person.States[28], () =>
+                    {
+                        person.States[28] = !person.States[28];
+                    });
+
+                    toggleButton("Lipstick", person.States[29], () =>
+                    {
+                        person.States[29] = !person.States[29];
+                    });
+
+                    toggleButton("Lipstick", person.States[30], () =>
+                    {
+                        person.States[30] = !person.States[30];
+                    });
+
+                    toggleButton("Skin color lips", person.States[31], () =>
+                    {
+                        person.States[31] = !person.States[31];
+                    });
+
+                    toggleButton("Freckets", person.States[32], () =>
+                    {
+                        person.States[32] = !person.States[32];
+                    });
+
+                    toggleButton("Dirty mouth", person.States[33], () =>
+                    {
+                        person.States[33] = !person.States[33];
+                    });
+
+                    toggleButton("_SkinStates[0]", person._SkinStates[0], () =>
+                    {
+                        person._SkinStates[0] = !person._SkinStates[0];
+                    });
+
+                    toggleButton("_SkinStates[14]", person._SkinStates[14], () =>
+                    {
+                        person._SkinStates[14] = !person._SkinStates[14];
+                    });
+
+                    toggleButton("_FaceSkinStates[0]", person._FaceSkinStates[0], () =>
+                    {
+                        person._FaceSkinStates[0] = !person._FaceSkinStates[0];
+                    });
+
+                    for (int i = 0; i < Main.Instance._CustomBodySkinsName.Count; i++)
+                    {
+                        toggleButton(Main.Instance._CustomBodySkinsName[i], person._CustomSkinStates[i], () =>
+                        {
+                            person._CustomSkinStates[i] = !person._CustomSkinStates[i];
+                        });
+                    }
+
+                    for (int i = 0; i < Main.Instance._CustomFaceSkinsName.Count; i++)
+                    {
+                        toggleButton(Main.Instance._CustomFaceSkinsName[i], person._CustomFaceSkinStates[i], () =>
+                        {
+                            person._CustomFaceSkinStates[i] = !person._CustomFaceSkinStates[i];
+                        });
+                    }
+                } catch { }
+
+                try
+                {
+                    person.SetBodyTexture();
+                } catch { }
+            }
+
+            foldoutNPCSkinStates = EditorLikeFoldout(foldoutNPCSkinStates, "NPC Skin States");
+            if (foldoutNPCSkinStates)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+
+                GameObject personGa = getPersonInteract();
+
+                if (personGa == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_skin_states_end_here;
+                }
+
+                Person person = MyGetComponentPerson<Person>(personGa);
+
+                if (person == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_skin_states_end_here;
+                }
+
+                person.States = person.States;
+
+                try
+                {
+
+                    toggleButton("Dirty -10 Sexy", person.States[0], () =>
+                    {
+                        person.States[0] = !person.States[0];
+                    });
+
+                    toggleButton("Horny +10 Sexy", person.States[1], () =>
+                    {
+                        person.States[1] = !person.States[1];
+                    });
+
+                    toggleButton("Very Dirty -20 Sexy", person.States[2], () =>
+                    {
+                        person.States[2] = !person.States[2];
+                    });
+
+                    toggleButton("Shitten -20 Sexy", person.States[3], () =>
+                    {
+                        person.States[3] = !person.States[3];
+                    });
+
+                    toggleButton("Sleepy - speed", person.States[4], () =>
+                    {
+                        person.States[4] = !person.States[4];
+                    });
+
+                    toggleButton("Needs toilet", person.States[5], () =>
+                    {
+                        person.States[5] = !person.States[5];
+                    });
+
+                    toggleButton("Hungry", person.States[6], () =>
+                    {
+                        person.States[6] = !person.States[6];
+                    });
+
+                    toggleButton("Pregnant", person.States[7], () =>
+                    {
+                        person.States[7] = !person.States[7];
+                    });
+
+                    toggleButton("Bloody -10 Sexy", person.States[8], () =>
+                    {
+                        person.States[8] = !person.States[8];
+                    });
+
+                    toggleButton("Nude Clothing Vipe", person.States[9], () =>
+                    {
+                        person.States[9] = !person.States[9];
+
+                        if (person.States[9])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Nude;
+                        }
+                    });
+
+                    toggleButton("Casual Clothing Vipe", person.States[10], () =>
+                    {
+                        person.States[10] = !person.States[10];
+
+                        if (person.States[10])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Casual;
+                        }
+                    });
+
+                    toggleButton("Sexy Clothing Vipe", person.States[11], () =>
+                    {
+                        person.States[11] = !person.States[11];
+
+                        if (person.States[11])
+                        {
+                            person.ClothingCondition = e_ClothingCondition.Sexy;
+                        }
+                    });
+
+                    toggleButton("Cum Stains + 1 Sexy", person.States[12], () =>
+                    {
+                        person.States[12] = !person.States[12];
+                    });
+
+                    toggleButton("Cum Stains + 2 Sexy", person.States[13], () =>
+                    {
+                        person.States[13] = !person.States[13];
+                    });
+
+                    toggleButton("Cum Stains + 3 Sexy", person.States[14], () =>
+                    {
+                        person.States[14] = !person.States[14];
+                    });
+
+                    toggleButton("Cum Stains + 4 Sexy", person.States[15], () =>
+                    {
+                        person.States[15] = !person.States[15];
+                    });
+
+                    toggleButton("Cum Stains + 5 Sexy", person.States[16], () =>
+                    {
+                        person.States[16] = !person.States[16];
+                    });
+
+                    toggleButton("Body Writting + 1 Sexy", person.States[17], () =>
+                    {
+                        person.States[17] = !person.States[17];
+                    });
+
+                    toggleButton("Body Writting + 2 Sexy", person.States[18], () =>
+                    {
+                        person.States[18] = !person.States[18];
+                    });
+
+                    toggleButton("Body Writting + 3 Sexy", person.States[19], () =>
+                    {
+                        person.States[19] = !person.States[19];
+                    });
+
+                    toggleButton("Bruises - 10 Sexy", person.States[20], () =>
+                    {
+                        person.States[20] = !person.States[20];
+                    });
+
+                    toggleButton("Heavy Bruises - 20 Sexy", person.States[21], () =>
+                    {
+                        person.States[21] = !person.States[21];
+                    });
+
+                    toggleButton("Basic Makeup + 10 Sexy", person.States[22], () =>
+                    {
+                        person.States[22] = !person.States[22];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[23], () =>
+                    {
+                        person.States[23] = !person.States[23];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[24], () =>
+                    {
+                        person.States[24] = !person.States[24];
+                    });
+
+                    toggleButton("Runny Makeup + 1 Sexy", person.States[25], () =>
+                    {
+                        person.States[25] = !person.States[25];
+                    });
+
+                    toggleButton("Cum in mouth + 1 Sexy", person.States[26], () =>
+                    {
+                        person.States[26] = !person.States[26];
+                    });
+
+                    toggleButton("Beard", person.States[27], () =>
+                    {
+                        person.States[27] = !person.States[27];
+                    });
+
+                    toggleButton("Lipstick", person.States[28], () =>
+                    {
+                        person.States[28] = !person.States[28];
+                    });
+
+                    toggleButton("Lipstick", person.States[29], () =>
+                    {
+                        person.States[29] = !person.States[29];
+                    });
+
+                    toggleButton("Lipstick", person.States[30], () =>
+                    {
+                        person.States[30] = !person.States[30];
+                    });
+
+                    toggleButton("Skin color lips", person.States[31], () =>
+                    {
+                        person.States[31] = !person.States[31];
+                    });
+
+                    toggleButton("Freckets", person.States[32], () =>
+                    {
+                        person.States[32] = !person.States[32];
+                    });
+
+                    toggleButton("Dirty mouth", person.States[33], () =>
+                    {
+                        person.States[33] = !person.States[33];
+                    });
+
+                    toggleButton("_SkinStates[0]", person._SkinStates[0], () =>
+                    {
+                        person._SkinStates[0] = !person._SkinStates[0];
+                    });
+
+                    toggleButton("_SkinStates[14]", person._SkinStates[14], () =>
+                    {
+                        person._SkinStates[14] = !person._SkinStates[14];
+                    });
+
+                    toggleButton("_FaceSkinStates[0]", person._FaceSkinStates[0], () =>
+                    {
+                        person._FaceSkinStates[0] = !person._FaceSkinStates[0];
+                    });
+
+                    for (int i = 0; i < Main.Instance._CustomBodySkinsName.Count; i++)
+                    {
+                        toggleButton(Main.Instance._CustomBodySkinsName[i], person._CustomSkinStates[i], () =>
+                        {
+                            person._CustomSkinStates[i] = !person._CustomSkinStates[i];
+                        });
+                    }
+
+                    for (int i = 0; i < Main.Instance._CustomFaceSkinsName.Count; i++)
+                    {
+                        toggleButton(Main.Instance._CustomFaceSkinsName[i], person._CustomFaceSkinStates[i], () =>
+                        {
+                            person._CustomFaceSkinStates[i] = !person._CustomFaceSkinStates[i];
+                        });
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    person.SetBodyTexture();
+                }
+                catch { }
+            }
+        foldout_npc_skin_states_end_here:
+            return;
         }
 
         public void ShowPage2()
@@ -2013,6 +2557,381 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                 }
             }
+
+            foldoutPlayerPersonalities = EditorLikeFoldout(foldoutPlayerPersonalities, "Player Personalities");
+            if (foldoutPlayerPersonalities)
+            {
+                foreach (Personality_Type personality in Enum.GetValues(typeof(Personality_Type)))
+                {
+                    if (personality == Personality_Type.MAX)
+                    {
+                        continue;
+                    }
+
+                    if (GUILayout.Button($"Change personality to {personality}"))
+                    {
+                        handleCommand($"setpersonalityto {personality}");
+                    }
+                }
+            }
+
+            foldoutNPCPersonalalities = EditorLikeFoldout(foldoutNPCPersonalalities, "NPC Personalities");
+            if (foldoutNPCPersonalalities)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+                foreach (Personality_Type personality in Enum.GetValues(typeof(Personality_Type)))
+                {
+                    if (personality == Personality_Type.MAX)
+                    {
+                        continue;
+                    }
+
+                    if (GUILayout.Button($"Change NPC personality to {personality}"))
+                    {
+                        handleCommand($"npcsetpersonalityto {personality}");
+                    }
+                }
+            }
+
+            foldoutNPCPerks = EditorLikeFoldout(foldoutNPCPerks, "NPC Perks");
+            if (foldoutNPCPerks)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+                GameObject personGa = getPersonInteract();
+
+                if (personGa == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_perks_end_here;
+                }
+
+                Person person = MyGetComponentPerson<Person>(personGa);
+
+                if (person == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_perks_end_here;
+                }
+                misc_Perk[] objectsOfType = UnityEngine.Object.FindObjectsOfType<misc_Perk>(true);
+
+                for (int index = 0; index < objectsOfType.Length; ++index)
+                {
+                    string perk = objectsOfType[index].PerkID;
+                    if (!person.Perks.Contains(perk))
+                    {
+                        if (GUILayout.Button($"Add Perk {perk}"))
+                        {
+                            person.Perks.Add(perk);
+                        }
+                    } else
+                    {
+                        if (GUILayout.Button($"Remove Perk {perk}"))
+                        {
+                            person.Perks.Remove(perk);
+                        }
+                    }
+                }
+            }
+
+        foldout_npc_perks_end_here:
+            foldoutPlayerPerks = EditorLikeFoldout(foldoutPlayerPerks, "Player Perks");
+            if (foldoutPlayerPerks)
+            {
+
+                Person person =  Main.Instance.Player;
+
+                misc_Perk[] objectsOfType = UnityEngine.Object.FindObjectsOfType<misc_Perk>(true);
+
+                for (int index = 0; index < objectsOfType.Length; ++index)
+                {
+                    string perk = objectsOfType[index].PerkID;
+                    if (!person.Perks.Contains(perk))
+                    {
+                        if (GUILayout.Button($"Add Perk {perk}"))
+                        {
+                            person.Perks.Add(perk);
+                        }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button($"Remove Perk {perk}"))
+                        {
+                            person.Perks.Remove(perk);
+                        }
+                    }
+                }
+            }
+
+            foldoutPlayerFetishes = EditorLikeFoldout(foldoutPlayerFetishes, "Player Fetishes");
+            if (foldoutPlayerFetishes)
+            {
+                Person person = Main.Instance.Player;
+
+                List<e_Fetish> fetishes = Enum.GetValues(typeof(e_Fetish)).Cast<e_Fetish>().ToList();
+
+                for (int i = 0; i < fetishes.Count; i++)
+                {
+                    e_Fetish fetish = fetishes[i];
+
+                    if (fetish == e_Fetish.MAX)
+                    {
+                        continue;
+                    }
+
+                    if (!person.Fetishes.Contains(fetish))
+                    {
+                        if (GUILayout.Button($"Add Fetish {fetish}"))
+                        {
+                            person.Fetishes.Add(fetish);
+                        }
+                    } else
+                    {
+                        if (GUILayout.Button($"Remove Fetish {fetish}"))
+                        {
+                            person.Fetishes.Remove(fetish);
+                        }
+                    } 
+                }
+            }
+
+            foldoutNPCFetishes = EditorLikeFoldout(foldoutNPCFetishes, "NPC Fetishes");
+            if (foldoutNPCFetishes)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+                GameObject personGa = getPersonInteract();
+
+                if (personGa == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_fetishes_end_here;
+                }
+
+                Person person = MyGetComponentPerson<Person>(personGa);
+
+                if (person == null)
+                {
+                    try
+                    {
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    goto foldout_npc_fetishes_end_here;
+                }
+
+                List<e_Fetish> fetishes = Enum.GetValues(typeof(e_Fetish)).Cast<e_Fetish>().ToList();
+
+                for (int i = 0; i < fetishes.Count; i++)
+                {
+                    e_Fetish fetish = fetishes[i];
+                    
+                    if (fetish == e_Fetish.MAX)
+                    {
+                        continue;
+                    }
+
+                    if (!person.Fetishes.Contains(fetish))
+                    {
+                        if (GUILayout.Button($"Add Fetish {fetish}"))
+                        {
+                            person.Fetishes.Add(fetish);
+                        }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button($"Remove Fetish {fetish}"))
+                        {
+                            person.Fetishes.Remove(fetish);
+                        }
+                    }
+                }
+            }
+        foldout_npc_fetishes_end_here:
+            foldoutPlayerPersonTypes = EditorLikeFoldout(foldoutPlayerPersonTypes, "Player Person Types");
+            if (foldoutPlayerPersonTypes)
+            {
+                Person person = Main.Instance.Player;
+
+                List<Person_Type> person_types = Enum.GetValues(typeof(Person_Type)).Cast<Person_Type>().ToList();
+
+                for (int i = 0; i < person_types.Count; i++)
+                {
+                    Person_Type person_type = person_types[i];
+
+                    if (person_type == Person_Type.Max)
+                    {
+                        continue;
+                    }
+
+                    if (GUILayout.Button($"Set Person Type to {person_type}"))
+                    {
+                        handleCommand($"setpersontype {person_type}");
+                    }
+                }
+            }
+
+            foldoutNPCPersonTypes = EditorLikeFoldout(foldoutNPCPersonTypes, "NPC Person Types");
+            if (foldoutNPCPersonTypes)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+
+                List<Person_Type> person_types = Enum.GetValues(typeof(Person_Type)).Cast<Person_Type>().ToList();
+
+                for (int i = 0; i < person_types.Count; i++)
+                {
+                    Person_Type person_type = person_types[i];
+
+                    if (person_type == Person_Type.Max)
+                    {
+                        continue;
+                    }
+
+                    if (GUILayout.Button($"Set Person Type to {person_type}"))
+                    {
+                        handleCommand($"npcsetpersontype {person_type}");
+                    }
+                }
+            }
+
+            foldoutPlayerPersonStates = EditorLikeFoldout(foldoutPlayerPersonStates, "Player Person States");
+            if (foldoutPlayerPersonStates)
+            {
+                Person person = Main.Instance.Player;
+
+                List<Person_State> person_types = Enum.GetValues(typeof(Person_State)).Cast<Person_State>().ToList();
+
+                for (int i = 0; i < person_types.Count; i++)
+                {
+                    Person_State person_type = person_types[i];
+
+                    if (GUILayout.Button($"Set Person State to {person_type}"))
+                    {
+                        handleCommand($"setpersonstate {person_type}");
+                    }
+                }
+            }
+
+            foldoutNPCPersonStates = EditorLikeFoldout(foldoutNPCPersonStates, "NPC Person States");
+            if (foldoutNPCPersonStates)
+            {
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+
+                List<Person_State> person_types = Enum.GetValues(typeof(Person_State)).Cast<Person_State>().ToList();
+
+                for (int i = 0; i < person_types.Count; i++)
+                {
+                    Person_State person_type = person_types[i];
+
+                    if (GUILayout.Button($"Set Person State to {person_type}"))
+                    {
+                        handleCommand($"npcsetpersonstate {person_type}");
+                    }
+                }
+            }
         }
 
         public void ShowPage1()
@@ -2113,6 +3032,18 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("fullgallery");
                 }
+                if (GUILayout.Button($"Save The Game"))
+                {
+                    handleCommand($"save");
+                }
+                if (GUILayout.Button($"Save The Game (Autosave)"))
+                {
+                    handleCommand($"autosave");
+                }
+                if (GUILayout.Button($"Kill me"))
+                {
+                    handleCommand($"dieme");
+                }
             }
 
             GUILayout.Space(10);
@@ -2143,6 +3074,10 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("NPC Clean Skin"))
                 {
                     handleCommand("npccleanskin");
+                }
+                if (GUILayout.Button("Die"))
+                {
+                    handleCommand("die");
                 }
                 if (GUILayout.Button("CheatMenu Center Position"))
                 {
