@@ -349,6 +349,7 @@ commands with no params:
 * unleashplayer -> unleash the player
 * leash -> leashes the npc the you looked at or  chatted with
 * leashex -> leashes the npc the you looked at or  chatted with, but without the interrupting thing, it is a better version from the original leash function
+* leashexex -> leashes the npc the you looked at or  chatted with, but without the interrupting thing, it is a better version from the original leash function, and equip the npc also a portable pillory
 * unleash -> unleashes the npc the you looked at or chatted with
 * npcleash -> leashes the npc the you looked at or  chatted with, and equip the npc also a portable pillory
 * npcunleash -> unleashes the npc the you looked at or chatted with, and drops the portable pillory

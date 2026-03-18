@@ -2934,6 +2934,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
+        private bool followerusingtoggle = multiFollower || useMultiFollowerUpgrade || useMultiFollowerUpgradeEx;
         public void ShowPage1()
         {
             // Player-Cheats
@@ -3020,7 +3021,49 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("nominingtools");
                 }
-                if (GUILayout.Button("Clean SKin"))
+                if (GUILayout.Button("Toggle Fly"))
+                {
+                    handleCommand("fly");
+                }
+                toggleButton("Use followerusing/followerstopusing hotkeys", followerusingtoggle, () =>
+                {
+                    followerusingtoggle = !followerusingtoggle;
+                    multiFollower = followerusingtoggle;
+                    configUseMultiFollower.Value = followerusingtoggle;
+                    useMultiFollowerUpgrade = followerusingtoggle;
+                    configUseMultiFollowerUpgrade.Value = followerusingtoggle;
+                    useMultiFollowerUpgradeEx = followerusingtoggle;
+                    configUseMultiFollowerUpgradeEx.Value = followerusingtoggle;
+                });
+                toggleButton("Player Owned All", playerownedallvar, () =>
+                {
+                    handleCommand("playerownedall");
+                });
+                if (GUILayout.Button("Lock all"))
+                {
+                    handleCommand("lockall");
+                }
+                if (GUILayout.Button("Unlock all"))
+                {
+                    handleCommand("unlockall");
+                }
+                if (GUILayout.Button("Lock Follower"))
+                {
+                    handleCommand("lockfollower");
+                }
+                if (GUILayout.Button("Unlock Follower"))
+                {
+                    handleCommand("unlockfollower");
+                }
+                if (GUILayout.Button("Lock All Sexmachines"))
+                {
+                    handleCommand("locksexmachines");
+                }
+                if (GUILayout.Button("Unlock All Sexmachines"))
+                {
+                    handleCommand("unlocksexmachines");
+                }
+                if (GUILayout.Button("Clean Skin"))
                 {
                     handleCommand("cleanskin");
                 }
@@ -3054,6 +3097,14 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("Have Sex With NPC"))
                 {
                     handleCommand("sexnpc");
+                }
+                if (GUILayout.Button("Leash NPC"))
+                {
+                    handleCommand("leashexex");
+                }
+                if (GUILayout.Button("Unleash NPC"))
+                {
+                    handleCommand("unleash");
                 }
                 if (GUILayout.Button("Toggle NPC GodMode"))
                 {
@@ -14830,6 +14881,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "leashexex":
+                    {
+                        leashexex();
+                    }
+                    break;
+
                 case "npcleash":
                     {
                         npcleash();
@@ -15927,6 +15984,36 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                LeashEx(person.ThisPersonInt);
+            }
+            catch { }
+        }
+
+        private static void leashexex()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: leashexex");
+            GameObject personGa = getPersonInteract();
+
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            try
+            {
+                GameObject item = getAllItemByName("portable_pillory");
+
+                if (item != null)
+                {
+                    person.DressClothe(item);
+                }
+            }
+            catch { }
 
             try
             {
