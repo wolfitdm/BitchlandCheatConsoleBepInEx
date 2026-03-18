@@ -2060,7 +2060,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2074,7 +2074,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2447,7 +2447,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     } catch (Exception ex)
                     {
                     }
@@ -2460,7 +2460,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2637,7 +2637,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2651,7 +2651,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2767,7 +2767,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -2781,7 +2781,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     try
                     {
-                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc");
+                        Main.Instance.GameplayMenu.ShowNotification("You must look at a npc, or chat with a npc");
                     }
                     catch (Exception ex)
                     {
@@ -3035,7 +3035,7 @@ namespace BitchlandCheatConsoleBepInEx
                     useMultiFollowerUpgradeEx = followerusingtoggle;
                     configUseMultiFollowerUpgradeEx.Value = followerusingtoggle;
                 });
-                toggleButton("Player Owned All", playerownedallvar, () =>
+                toggleButton("Toggle Player Owned All", playerownedallvar, () =>
                 {
                     handleCommand("playerownedall");
                 });
