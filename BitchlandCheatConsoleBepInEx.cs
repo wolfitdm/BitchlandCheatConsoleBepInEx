@@ -2934,7 +2934,7 @@ namespace BitchlandCheatConsoleBepInEx
             }
         }
 
-        private bool followerusingtoggle = multiFollower || useMultiFollowerUpgrade || useMultiFollowerUpgradeEx;
+        private static bool followerusingtoggle = false;
         public void ShowPage1()
         {
             // Player-Cheats
@@ -22503,6 +22503,8 @@ namespace BitchlandCheatConsoleBepInEx
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
             everyNPCstripsNudeIfYouLookAtThem = configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants.Value;
             maxRelationShipIfYouHaveSex = configMaxRelationShipIfYouHaveSex.Value;
+
+            followerusingtoggle = multiFollower || useMultiFollowerUpgrade || useMultiFollowerUpgradeEx;
 
             if (useMultiFollowerUpgradeEx)
             {
