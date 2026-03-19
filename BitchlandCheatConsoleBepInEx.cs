@@ -884,12 +884,19 @@ namespace BitchlandCheatConsoleBepInEx
 
         private void HandleFlight()
         {
+            if (fly_rb != null && stopmovevar)
+            {
+                fly_rb.velocity = Vector3.zero;
+                return;
+            }
+
             if (fly_on == false || fly_rb == null)
             {
                 return;
             }
 
             Rigidbody rb = fly_rb;
+
             // Get input axes
             float horizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right
             float vertical = Input.GetAxis("Vertical");     // W/S or Up/Down (forward/back)
@@ -1044,6 +1051,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                     putMessageOnPressedKeyCode(key);
                     rotatedObject.transform.rotation = rotation1x;
+
+                    Logger.LogInfo(rotatedObject.transform.rotation.ToString());
                 }
             } catch { }
         }
@@ -1110,6 +1119,8 @@ namespace BitchlandCheatConsoleBepInEx
 
                     putMessageOnPressedKeyCode(key);
                     positionedObject.transform.position = position1x;
+
+                    Logger.LogInfo(positionedObject.transform.position.ToString());
                 }
             }
             catch { }
@@ -3067,6 +3078,30 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("Unlock Follower"))
                 {
                     handleCommand("unlockfollower");
+                }
+                if (GUILayout.Button("Fix Dildo Poles X"))
+                {
+                    handleCommand("fixdildopolesx");
+                }
+                if (GUILayout.Button("Fix Dildo Poles Y"))
+                {
+                    handleCommand("fixdildopolesy");
+                }
+                if (GUILayout.Button("Fix Dildo Poles Z"))
+                {
+                    handleCommand("fixdildopolesz");
+                }
+                if (GUILayout.Button("Fix Dildo Poles W"))
+                {
+                    handleCommand("fixdildopolesw");
+                }
+                if (GUILayout.Button("Stop Move"))
+                {
+                    handleCommand("stopmove");
+                }
+                if (GUILayout.Button("Enable Move"))
+                {
+                    handleCommand("enablemove");
                 }
                 if (GUILayout.Button("Lock All Sexmachines"))
                 {
@@ -15269,6 +15304,36 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "fixdildopolesx":
+                    {
+                        fixdildopoles("x");
+                    }
+                    break;
+
+                case "fixdildopolesy":
+                    {
+                        fixdildopoles("y");
+                    }
+                    break;
+
+                case "fixdildopolesz":
+                    {
+                        fixdildopoles("z");
+                    }
+                    break;
+
+                case "stopmove":
+                    {
+                        stopmove();
+                    }
+                    break;
+
+                case "enablemove":
+                    {
+                        enablemove();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -23400,11 +23465,27 @@ namespace BitchlandCheatConsoleBepInEx
         public static void locksexmachines()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: locksexmachines");
+
+            for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+            {
+                Person person = Main.Instance.PeopleFollowingPlayer[i];
+
+                person.NoEnergyLoss = true;
+            }
+
             extendedLock = true;
         }
         public static void unlocksexmachines()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: unlocksexmachines");
+
+            for (int i = 0; i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+            {
+                Person person = Main.Instance.PeopleFollowingPlayer[i];
+
+                person.NoEnergyLoss = false;
+            }
+
             extendedLock = false;
         }
         public static void lockfollower()
@@ -23528,6 +23609,97 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Main.Instance.GameplayMenu.ShowNotification("Nothing you owned!");
             }
+        }
+
+        public static void fixdildopoles(string axis)
+        {
+            Main.Instance.GameplayMenu.ShowNotification($"executed command: fixdildopoles{axis}");
+            lockFollowing = false;
+
+            GameObject[] all = null;
+
+            try
+            {
+                all = getAllObjectsByInteractibleType<Interactible>();
+            }
+            catch (Exception ex)
+            {
+                all = null;
+            }
+
+            if (all == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < all.Length; i++)
+            {
+                try
+                {
+                    Interactible s = MyGetComponent<Interactible>(all[i]);
+                    if (s == null)
+                    {
+                        continue;
+                    }
+                    float distance = Vector3.Distance(Main.Instance.Player.transform.position, s.transform.position);
+
+                    if (distance > 1)
+                    {
+                        continue;
+                    }
+
+                    if (MyGetComponent<int_DildoPole>(s.gameObject) != null)
+                    {
+                        continue;
+                    }
+
+                    Quaternion a = s.transform.rotation;
+
+                    switch (axis)
+                    {
+                        case "x":
+                            a.x -= 0.1f;
+                            break;
+
+                        case "y":
+                            a.y -= 0.1f;
+                            break;
+
+                        case "z":
+                            a.z -= 0.1f;
+                            break;
+
+                        case "w":
+                            a.w -= 0.1f;
+                            break;
+                    }
+
+                    s.transform.rotation = a;
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("Fix dildo poles");
+        }
+
+        private static bool stopmovevar = false;
+        public static void stopmove()
+        {
+            Main.Instance.GameplayMenu.ShowNotification($"executed command: stopmove");
+
+            fly_rb = Main.Instance.Player._Rigidbody;
+
+            stopmovevar = true;
+        }
+        public static void enablemove()
+        {
+            Main.Instance.GameplayMenu.ShowNotification($"executed command: enablemove");
+
+            fly_rb = Main.Instance.Player._Rigidbody;
+
+            stopmovevar = false;
         }
         public static void lockall()
         {
