@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.OleDb;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -22102,8 +22103,8 @@ namespace BitchlandCheatConsoleBepInEx
 
             configUseHarmonyGameMainThreadsPatch = Config.Bind(pluginKey,
                                   "UseHarmonyGameMainThreadsPatch",
-                                  true,
-                                 "Whether or not you want use harmony game main threads patch (default true also yes, you want it, and false = no)");
+                                  false,
+                                 "Whether or not you want use harmony game main threads patch (default false also no, you don't want it, and true = yes)");
 
             configUseHarmonyAddFollowingChatSexOptionPatch = Config.Bind(pluginKey,
                                   "UseHarmonyAddFollowingChatSexOptionPatch",
@@ -23001,11 +23002,11 @@ namespace BitchlandCheatConsoleBepInEx
                 }
                 if (useHarmonyAddChatSexOptionPatch)
                 {
-                    //try
-                    //{
-                    //    PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa2", "DefaultTalk_options_AddSexOption", false, true);
-                    //}
-                    //catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(Mis_Xoxa), "Chat_Xoxa2", "DefaultTalk_options_AddSexOption", false, true);
+                    }
+                    catch { }
                     try
                     {
                         PatchHarmonyMethodUnity(typeof(job_ArmyBuildingWork), "Chat_ReceptionGuard", "DefaultTalk_options_AddSexOption", false, true);
@@ -26034,6 +26035,46 @@ namespace BitchlandCheatConsoleBepInEx
 
             DefaultTalk_options_AddSexOption(__instance);
         }
+        public static void BL_AddChatOption(string chattext, Action onOption)
+        {
+            UI_Gameplay _gameplay = Main.Instance.GameplayMenu;
+
+            bool foundChatOption = false;
+            for (int i = 0; i < _gameplay.ChatOptions.Length; i++)
+            {
+                if (!_gameplay.ChatOptions[i].activeSelf)
+                {
+                    foundChatOption = true;
+                    break;
+                }
+            }
+
+            if (!foundChatOption)
+            {
+                int oldLength = _gameplay.ChatOptions.Length;
+
+                string old_chattext = _gameplay.ChatOptions_text[oldLength - 1].text;
+
+                old_chattext = Regex.Replace(old_chattext, @"[0-9]+\s+.\s+", "");
+                Action old_chatcode = _gameplay.ChatOptions_code[oldLength - 1];
+
+
+                _gameplay.ChatOptions[oldLength - 1].SetActive(value: false);
+
+                _gameplay.AddChatOption("[Next options]", () =>
+                {
+                    _gameplay.RemoveAllChatOptions();
+                    _gameplay.AddChatOption(chattext, onOption);
+                    _gameplay.AddChatOption(old_chattext, old_chatcode);
+                    _gameplay.SelectChatOption(0);
+                    Main.Instance.MainThreads.Add(new Action(Main.Instance.GameplayMenu.OpenedChatOptionsThread));
+                });
+            }
+            else
+            {
+                _gameplay.AddChatOption(chattext, onOption);
+            }
+        }
         public static void DefaultTalk_options_AddSexOption(object __instance)
         {
             if (!useHarmonyPatches)
@@ -26061,7 +26102,8 @@ namespace BitchlandCheatConsoleBepInEx
 
             Person personEx = _this != null ? _this.ThisPerson : Main.Instance.Player;
 
-            _gameplay.AddChatOption("Lets have sex here", (Action)(() =>
+            string chattext = "Lets have sex here";
+            Action onOption = (Action)(() =>
             {
                 if (_this == null)
                 {
@@ -26083,6 +26125,8 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     personEx.CreatePersonRelationship();
                     personEx.Favor = 100000000;
+                    personEx.SexMultiplier = 1.5f;
+                    personEx.SexMAddictionultiplier = 2.0f;
                 }
 
                 if (Main.Instance.Player.HasPenis)
@@ -26092,7 +26136,9 @@ namespace BitchlandCheatConsoleBepInEx
                 else
                     Main.Instance.SexScene.SpawnSexScene(2, 0, Main.Instance.Player, personEx);
                 _this.EndTheChat();
-            }));
+            });
+
+            BL_AddChatOption(chattext, onOption);
         }
         public static void DefaultTalk_options_GiveMe90MioCashChatOption(object __instance)
         {
@@ -26119,13 +26165,15 @@ namespace BitchlandCheatConsoleBepInEx
                 _this = person != null ? person.ThisPersonInt : Main.Instance.Player.ThisPersonInt;
             }
 
-            _gameplay.AddChatOption("(Nympho) Give Me 90 Mio Cash", (Action)(() =>
+            string chattext = "(Nympho) Give Me 90 Mio Cash";
+            Action onOption = (Action)(() =>
             {
                 _this.ThisPerson.Money += 90000000;
                 Main.Instance.Player.Money += 90000000;
                 Main.Instance.GameplayMenu.ShowNotification("Give Me 90 Mio Cash");
                 _gameplay.DisplaySubtitle("Ok", (AudioClip)null, new Action(_this.EndTheChat));
-            }));
+            });
+            BL_AddChatOption(chattext, onOption);
         }
         public static bool MainUpdatePrefix()
         {
