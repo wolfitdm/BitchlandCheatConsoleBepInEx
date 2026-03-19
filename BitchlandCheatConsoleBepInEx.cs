@@ -3026,6 +3026,18 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("fly");
                 }
+                if (GUILayout.Button("More flyspeed"))
+                {
+                    handleCommand("flyspeedmore");
+                }
+                if (GUILayout.Button("Less flyspeed"))
+                {
+                    handleCommand("flyspeedless");
+                }
+                if (GUILayout.Button("Normal Flyspeed"))
+                {
+                    handleCommand("flyspeednormal");
+                }
                 toggleButton("Use followerusing/followerstopusing hotkeys", followerusingtoggle, () =>
                 {
                     followerusingtoggle = !followerusingtoggle;
