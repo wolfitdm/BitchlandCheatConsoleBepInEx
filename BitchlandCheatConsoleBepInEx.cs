@@ -20,6 +20,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1720,6 +1721,23 @@ namespace BitchlandCheatConsoleBepInEx
                 action.Invoke();
             }
         }
+
+        public static float slider(string var, float x, float min, float max)
+        {
+            GUILayout.Space(5);
+            GUILayout.Label($"{var}: / Current {var}: {x}");
+            x = (int)GUILayout.HorizontalSlider((float)x, (float)min, (float)max);
+            GUILayout.Space(5);
+            return x;
+        }
+
+        public static void actionButton(string var, Action action)
+        {
+            if (GUILayout.Button(var))
+            {
+                action.Invoke();
+            }
+        }
         private void DrawCheatWindow(int windowID)
         {
             if (GUILayout.Button("Toggle Health Bar (F2)"))
@@ -1807,6 +1825,14 @@ namespace BitchlandCheatConsoleBepInEx
 
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
+
+        bool foldoutAudio = false;
+        bool foldoutVideo = false;
+        float audiovolume_ = 0;
+        float videoaudiovolume_ = 0;
+        float gameaudiovolume_ = 0;
+        string currentFileNameAudio = "Nothing.mp3";
+        string currentFileNameVideo = "Nothing.mp4";
 
         public void ShowPage3()
         {
@@ -2324,7 +2350,263 @@ namespace BitchlandCheatConsoleBepInEx
                 catch { }
             }
         foldout_npc_skin_states_end_here:
-            return;
+            foldoutAudio = EditorLikeFoldout(foldoutAudio, "Audio");
+            if (foldoutAudio)
+            {
+                string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+                string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+                string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+                GUILayout.Label($"Audio Files Directory Path: {audioFolder}");
+
+                Directory.CreateDirectory(objectsFolder);
+
+                Directory.CreateDirectory(malesFolder);
+
+                Directory.CreateDirectory(femalesFolder);
+
+                Directory.CreateDirectory(audioFolder);
+
+                Directory.CreateDirectory(videoFolder);
+
+                string[] files = Directory.GetFiles(audioFolder);
+
+                if (files != null)
+                {
+                    string currentFileName = currentFileNameAudio;
+
+                    foreach (string file in files)
+                    {
+                        string fileName = Path.GetFileName(file);
+
+                        if (GUILayout.Button($"Play {fileName}"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playaudio {fileName}");
+                        }
+                    }
+
+                    currentFileNameAudio = currentFileName;
+
+                    if (GUILayout.Button($"Stop {currentFileName}"))
+                    {
+                        handleCommand($"stopaudio");
+                    }
+
+                    if (GUILayout.Button($"Mute {currentFileName}"))
+                    {
+                        handleCommand($"muteaudio");
+                    }
+
+                    if (GUILayout.Button($"Unmute {currentFileName}"))
+                    {
+                        handleCommand($"unmuteaudio");
+                    }
+
+                    if (GUILayout.Button($"Pause {currentFileName}"))
+                    {
+                        handleCommand($"pauseaudio");
+                    }
+
+                    if (GUILayout.Button($"Unpause {currentFileName}"))
+                    {
+                        handleCommand($"unpauseaudio");
+                    }
+
+                    if (GUILayout.Button("Mute Game Audio"))
+                    {
+                        handleCommand("mutegameaudio");
+                    }
+
+                    if (GUILayout.Button("Unmute Game Audio"))
+                    {
+                        handleCommand("unmutegameaudio");
+                    }
+
+                    if (GUILayout.Button($"Reset Audio Volume {currentFileName}"))
+                    {
+                        audiovolume_ = 0;
+                        handleCommand($"audiovolumedefault");
+                    }
+
+                    audiovolume_ = slider("Audio Volume", audiovolume_, 0, 10);
+
+                    if (GUILayout.Button($"Set Audio Volume {audiovolume_}"))
+                    {
+                        handleCommand($"audiovolume {audiovolume_}");
+                    }
+
+                    if (GUILayout.Button($"Reset Game Audio Volume"))
+                    {
+                        gameaudiovolume_ = 0;
+                        handleCommand($"gameaudiovolumedefault");
+                    }
+
+                    gameaudiovolume_ = slider("Game Audio Volume", gameaudiovolume_, 0, 10);
+
+                    if (GUILayout.Button($"Set Game Audio Volume {gameaudiovolume_}"))
+                    {
+                        handleCommand($"gameaudiovolume {gameaudiovolume_}");
+                    }
+                }
+            }
+
+            foldoutVideo = EditorLikeFoldout(foldoutVideo, "Video");
+
+            if (foldoutVideo)
+            {
+                string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+                string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+                string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+                string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+                string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+                GUILayout.Label($"Video Files Directory Path: {videoFolder}");
+
+                Directory.CreateDirectory(objectsFolder);
+
+                Directory.CreateDirectory(malesFolder);
+
+                Directory.CreateDirectory(femalesFolder);
+
+                Directory.CreateDirectory(audioFolder);
+
+                Directory.CreateDirectory(videoFolder);
+
+                string[] files = Directory.GetFiles(videoFolder);
+
+                if (files != null)
+                {
+                    string currentFileName = currentFileNameVideo;
+
+                    foreach (string file in files)
+                    {
+                        string fileName = Path.GetFileName(file);
+
+                        if (GUILayout.Button($"Play {fileName} (Fullscreen)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideof {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Fullscreen Loop)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideofl {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Medium)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideom {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Medium Loop)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideoml {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Little)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideol {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Little Loop)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideoll {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Very Little)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideovl {fileName}");
+                        }
+
+                        if (GUILayout.Button($"Play {fileName} (Screen Very Little Loop)"))
+                        {
+                            currentFileName = fileName;
+                            handleCommand($"playvideovll {fileName}");
+                        }
+                    }
+
+                    currentFileNameVideo = currentFileName;
+
+                    if (GUILayout.Button($"Stop {currentFileName}"))
+                    {
+                        handleCommand($"stopvideo");
+                    }
+
+                    if (GUILayout.Button($"Mute {currentFileName}"))
+                    {
+                        handleCommand($"mutevideo");
+                    }
+
+                    if (GUILayout.Button($"Unmute {currentFileName}"))
+                    {
+                        handleCommand($"unmutevideo");
+                    }
+
+                    if (GUILayout.Button($"Pause {currentFileName}"))
+                    {
+                        handleCommand($"pausevideo");
+                    }
+
+                    if (GUILayout.Button($"Unpause {currentFileName}"))
+                    {
+                        handleCommand($"unpausevideo");
+                    }
+
+                    if (GUILayout.Button("Mute Game Audio"))
+                    {
+                        handleCommand("mutegameaudio");
+                    }
+
+                    if (GUILayout.Button("Unmute Game Audio"))
+                    {
+                        handleCommand("unmutegameaudio");
+                    }
+
+                    if (GUILayout.Button($"Reset Video Audio Volume {currentFileName}"))
+                    {
+                        videoaudiovolume_ = 0;
+                        handleCommand($"videoaudiovolumedefault");
+                    }
+
+                    videoaudiovolume_ = slider("Video Audio Volume", videoaudiovolume_, 0, 10);
+
+                    if (GUILayout.Button($"Set Video Audio Volume {videoaudiovolume_}"))
+                    {
+                        handleCommand($"videoaudiovolume {videoaudiovolume_}");
+                    }
+
+                    if (GUILayout.Button($"Reset Game Audio Volume"))
+                    {
+                        gameaudiovolume_ = 0;
+                        handleCommand($"gameaudiovolumedefault");
+                    }
+
+                    gameaudiovolume_ = slider("Game Audio Volume", gameaudiovolume_, 0, 10);
+
+                    if (GUILayout.Button($"Set Game Audio Volume {gameaudiovolume_}"))
+                    {
+                        handleCommand($"gameaudiovolume {gameaudiovolume_}");
+                    }
+                }
+            }
+            return; 
         }
 
         public void ShowPage2()
@@ -2947,6 +3229,8 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
         private static bool followerusingtoggle = false;
+        bool togglePhotoMode = false;
+        bool toggleAnimEnabled = false;
         public void ShowPage1()
         {
             // Player-Cheats
@@ -3103,6 +3387,35 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("enablemove");
                 }
+                toggleButton("Bitchland Photo Mode (Free Cam) (F3)", togglePhotoMode,  () => {
+                        togglePhotoMode = !togglePhotoMode;
+                        if (!togglePhotoMode)
+                        {
+                            bl_PhotoMode.Active = false;
+                        }
+                        else
+                        {
+                            if (Main.Instance.Player != null && Main.Instance.Player.gameObject.activeSelf)
+                                bl_PhotoMode.Active = true;
+                        }
+                });
+                toggleButton("Enable Player Animations (F4)", toggleAnimEnabled, () => {
+                    toggleAnimEnabled = !toggleAnimEnabled;
+                    if ((double)Time.timeScale == 0.0 && toggleAnimEnabled)
+                    {
+                        Main.Instance.Player.Anim.enabled = true;
+                        FreeCamRotation.NoDeltaTime = false;
+                        Time.timeScale = 1f;
+                        toggleAnimEnabled = true;
+                    }
+                    else
+                    {
+                        toggleAnimEnabled = false;
+                        Main.Instance.Player.Anim.enabled = false;
+                        FreeCamRotation.NoDeltaTime = true;
+                        Time.timeScale = 0.0f;
+                    }
+                });
                 if (GUILayout.Button("Lock All Sexmachines"))
                 {
                     handleCommand("locksexmachines");
