@@ -819,7 +819,7 @@ namespace BitchlandCheatConsoleBepInEx
             spawnpoints.Add("safearea4", new Vector3(-49.10827f, 3.067196f, 14.40517f));
             spawnpoints.Add("slums", new Vector3(46.70115f, 5.960464E-08f, 34.79505f));
             spawnpoints.Add("plaza", new Vector3(20.92864f, 0.06719887f, 2.584693f));
-            spawnpoints.Add("clinic", new Vector3(18.31792f, 0.06720525f, 15.40343f));
+            spawnpoints.Add("clinic", new Vector3(17.87813f, 0.06720501f, -14.02852f));
             spawnpoints.Add("hs", new Vector3(70.0073f, 0.05544364f, -59.5325f));
             spawnpoints.Add("highstreet", new Vector3(70.0073f, 0.05544364f, -59.5325f));
             spawnpoints.Add("vs", new Vector3(86.47327f, 0.06720108f, -6.379012f));
