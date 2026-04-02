@@ -1834,6 +1834,10 @@ namespace BitchlandCheatConsoleBepInEx
         string currentFileNameAudio = "Nothing.mp3";
         string currentFileNameVideo = "Nothing.mp4";
 
+        bool foldoutAnimations = false;
+        bool foldoutNPCAnimations = false;
+        bool foldoutFollowers = false;
+
         public void ShowPage3()
         {
             foldoutPlayerSkinStates = EditorLikeFoldout(foldoutPlayerSkinStates, "Player Skin States");
@@ -2606,6 +2610,132 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                 }
             }
+            
+            foldoutAnimations = EditorLikeFoldout(foldoutAnimations, "Player Animations");
+
+            if (foldoutAnimations)
+            {
+                if (!useHarmonyPatches || !useHarmonyListAnimsPatch)
+                {
+                    actionButton($"Activate Get Animations List Patch", () => {
+                        try
+                        {
+                            useHarmonyPatches = true;
+                            useHarmonyListAnimsPatch = true;
+                            configUseHarmonyListAnimsPatch.Value = useHarmonyListAnimsPatch;
+                            Main.Instance.GameplayMenu.ShowNotification("Animslist Patch activated");
+                        }
+                        catch { }
+                    });
+                }
+                for (int i = 0; i < animsList.Count; i++)
+                {
+                    actionButton($"Play Animation {animsList[i]}", () =>
+                    {
+                        handleCommand($"animplay {animsList[i]}");
+                    });
+                }
+            }
+
+            foldoutNPCAnimations = EditorLikeFoldout(foldoutNPCAnimations, "NPC Animations");
+
+            if (foldoutNPCAnimations)
+            {
+                if (!useHarmonyPatches || !useHarmonyListAnimsPatch)
+                {
+                    actionButton($"Activate Get Animations List Patch", () => {
+                        try
+                        {
+                            useHarmonyPatches = true;
+                            useHarmonyListAnimsPatch = true;
+                            configUseHarmonyListAnimsPatch.Value = useHarmonyListAnimsPatch;
+                            Main.Instance.GameplayMenu.ShowNotification("Animslist Patch activated");
+                        }
+                        catch { }
+                    });
+                }
+                if (GUILayout.Button("CheatMenu Center Position"))
+                {
+                    Rect windowRectNew = new Rect(Screen.width / 2 - windowRect2.width / 2, Screen.height / 2 - windowRect2.height / 2, windowRect2.width, windowRect2.height);
+
+                    if (windowRect2 != windowRectNew)
+                    {
+                        windowRect2_Safe = windowRect2;
+                    }
+
+                    windowRect2 = windowRectNew;
+                }
+                if (GUILayout.Button("Undo CheatMenu Center Position"))
+                {
+                    if (windowRect2_Safe != new Rect(0, 0, 0, 0))
+                    {
+                        windowRect2 = windowRect2_Safe;
+                    }
+                }
+                for (int i = 0; i < animsList.Count; i++)
+                {
+                    actionButton($"Play Animation {animsList[i]}", () =>
+                    {
+                        handleCommand($"npcanimplay {animsList[i]}");
+                    });
+                }
+            }
+
+            foldoutFollowers = EditorLikeFoldout(foldoutFollowers, "List Followers (Page) MultiFollowers HotKey");
+
+            if (foldoutFollowers)
+            {
+                int cp = currentpage;
+                int cmp = currentmaximumpage;
+                GUILayout.Label("currentpage: " + cp.ToString());
+                GUILayout.Label("maximumpage: " + cmp.ToString());
+
+                if (cp < cmp)
+                {
+                    actionButton("Next Page", () =>
+                    {
+                        currentpage++;
+                        if (currentpage <= 0)
+                        {
+                            currentpage = 0;
+                        }
+                        if (currentpage >= currentmaximumpage)
+                        {
+                            currentpage = currentmaximumpage;
+                        }
+                    });
+                }
+
+                if (cp > 0)
+                {
+                    actionButton("Previous Page", () =>
+                    {
+                        currentpage--;
+                        if (currentpage <= 0)
+                        {
+                            currentpage = 0;
+                        }
+                        if (currentpage >= currentmaximumpage)
+                        {
+                            currentpage = currentmaximumpage;
+                        }
+                    });
+                }
+
+                int index = cp * 10;
+                int maxindex = index + 9;
+                int pageindex = 0;
+
+                GUILayout.Label("Followers Current Page: " + cp.ToString());
+
+                for (int i = index; i <= maxindex && i < Main.Instance.PeopleFollowingPlayer.Count; i++)
+                {
+                    string message = "Keypad " + pageindex.ToString() + ": " + Main.Instance.PeopleFollowingPlayer[i].Name.ToString();
+                    GUILayout.Label(message);
+                    pageindex++;
+                }
+            }
+
             return; 
         }
 
