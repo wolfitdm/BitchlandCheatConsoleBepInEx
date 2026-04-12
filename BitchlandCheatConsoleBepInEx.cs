@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -28,12 +29,14 @@ using TinyJson;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static com.heparo.terrain.toolkit.TerrainToolkit;
 using static Den.Tools.Serializer;
 using static Mono.Security.X509.X509Stores;
 using static UnityEngine.Random;
 using static UnityEngine.Rendering.DebugUI;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using Component = UnityEngine.Component;
 using Cursor = UnityEngine.Cursor;
 using Quaternion = UnityEngine.Quaternion;
@@ -765,6 +768,16 @@ namespace BitchlandCheatConsoleBepInEx
             deinitVideoSource();
 
             deinitAudioSource();
+
+            foreach (AssetBundle myBundle in loadedAssetBundles)
+            {
+                try
+                {
+                    myBundle.Unload(unloadAllLoadedObjects: true);
+                    Logger.LogInfo($"bundle {myBundle.name} unloaded");
+                }
+                catch { }
+            }
         }
 
         private void Init()
@@ -1053,7 +1066,31 @@ namespace BitchlandCheatConsoleBepInEx
                     putMessageOnPressedKeyCode(key);
                     rotatedObject.transform.rotation = rotation1x;
 
-                    Logger.LogInfo(rotatedObject.transform.rotation.ToString());
+                    // Get input axes
+                    float horizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right
+                    float vertical = Input.GetAxis("Vertical");     // W/S or Up/Down (forward/back)
+                    float ascend = 1.0f;
+
+                    Transform playerTransform = Main.Instance.Player._Rigidbody.transform;
+
+                    // Calculate movement direction relative to camera
+                    Vector3 moveDirection = (playerTransform.forward * vertical) +
+                                               (playerTransform.transform.right * horizontal) +
+                                               (playerTransform.transform.up * ascend);
+
+                    Logger.LogInfo("moveDirection: " + vector3ToString(moveDirection));
+                    Logger.LogInfo("moveDirectionNormalized: " + vector3ToString(moveDirection.normalized));
+
+                    Vector3 diff1 = Main.Instance.Player.transform.position - rotatedObject.transform.position;
+                    Vector3 diff2 = rotatedObject.transform.position - Main.Instance.Player.transform.position;
+
+                    Logger.LogInfo("Diff 1: " + vector3ToString(diff1));
+                    Logger.LogInfo("Diff 2: " + vector3ToString(diff2));
+
+                    Logger.LogInfo("Player Position : " + vector3ToString(Main.Instance.Player.transform.position));
+                    Logger.LogInfo("Player Rotation : " + quat3ToString(Main.Instance.Player.transform.rotation));
+                    Logger.LogInfo("Object Position : " + vector3ToString(rotatedObject.transform.position));
+                    Logger.LogInfo("Object Rotation : " + quat3ToString(rotatedObject.transform.rotation));
                 }
             } catch { }
         }
@@ -1121,7 +1158,31 @@ namespace BitchlandCheatConsoleBepInEx
                     putMessageOnPressedKeyCode(key);
                     positionedObject.transform.position = position1x;
 
-                    Logger.LogInfo(positionedObject.transform.position.ToString());
+                    // Get input axes
+                    float horizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right
+                    float vertical = Input.GetAxis("Vertical");     // W/S or Up/Down (forward/back)
+                    float ascend = 1.0f;
+
+                    Transform playerTransform = Main.Instance.Player._Rigidbody.transform;
+
+                    // Calculate movement direction relative to camera
+                    Vector3 moveDirection = (playerTransform.forward * vertical) +
+                                               (playerTransform.transform.right * horizontal) +
+                                               (playerTransform.transform.up * ascend);
+
+                    Logger.LogInfo("moveDirection: " + vector3ToString(moveDirection));
+                    Logger.LogInfo("moveDirectionNormalized: " + vector3ToString(moveDirection.normalized));
+
+                    Vector3 diff1 = Main.Instance.Player.transform.position - positionedObject.transform.position;
+                    Vector3 diff2 = positionedObject.transform.position - Main.Instance.Player.transform.position;
+
+                    Logger.LogInfo("Diff 1: " + vector3ToString(diff1));
+                    Logger.LogInfo("Diff 2: " + vector3ToString(diff2));
+
+                    Logger.LogInfo("Player Position : " + vector3ToString(Main.Instance.Player.transform.position));
+                    Logger.LogInfo("Player Rotation : " + quat3ToString(Main.Instance.Player.transform.rotation));
+                    Logger.LogInfo("Object Position : " + vector3ToString(positionedObject.transform.position));
+                    Logger.LogInfo("Object Rotation : " + quat3ToString(positionedObject.transform.rotation));
                 }
             }
             catch { }
@@ -1837,6 +1898,8 @@ namespace BitchlandCheatConsoleBepInEx
         bool foldoutAnimations = false;
         bool foldoutNPCAnimations = false;
         bool foldoutFollowers = false;
+        bool foldoutSpawnAnimals = false;
+        bool foldoutWolfMalesController = false;
 
         public void ShowPage3()
         {
@@ -2733,6 +2796,135 @@ namespace BitchlandCheatConsoleBepInEx
                     string message = "Keypad " + pageindex.ToString() + ": " + Main.Instance.PeopleFollowingPlayer[i].Name.ToString();
                     GUILayout.Label(message);
                     pageindex++;
+                }
+            }
+
+            foldoutSpawnAnimals = EditorLikeFoldout(foldoutSpawnAnimals, "Spawn Animals");
+
+            if (foldoutSpawnAnimals)
+            {
+                actionButton("Spawn Wolf Male", () =>
+                {
+                    handleCommand("spawnwolfmale");
+                });
+            }
+
+            foldoutWolfMalesController = EditorLikeFoldout(foldoutWolfMalesController, "Wolf Males Controller");
+
+            if (foldoutWolfMalesController)
+            {
+                string bundleName = "Wolf_AnimatedBundle";
+
+                string name = "Wolf_AnimatedBundle";
+
+                string prefab = "assets/bundles/wolf_animated/prefabs/wolf1.prefab";
+
+                string wolfMalesKey = $"{bundleName}_{name}_{prefab}";
+
+                actionButton("Player Fuck Position (Press C 2x)", () => {
+                    Main.Instance.Player.UserControl.m_Character.StandState = bl_ThirdPersonCharacter.bl_StandState.Crawling;
+                });
+
+                actionButton("Player Normal Position (Press C)", () => {
+                    Main.Instance.Player.UserControl.m_Character.StandState = bl_ThirdPersonCharacter.bl_StandState.Standing;
+                });
+
+                toggleButton("Bitchland Photo Mode (Free Cam) (F3)", togglePhotoMode, () => {
+                    togglePhotoMode = !togglePhotoMode;
+                    if (!togglePhotoMode)
+                    {
+                        bl_PhotoMode.Active = false;
+                    }
+                    else
+                    {
+                        if (Main.Instance.Player != null && Main.Instance.Player.gameObject.activeSelf)
+                            bl_PhotoMode.Active = true;
+                    }
+                });
+
+                foreach (string key in wolfMales.Keys)
+                {
+                    int wolfMalePosition = wolfMalesPosition[key];
+                    GameObject wolfMaleObject = wolfMales[key];
+
+                    if (wolfMaleObject == null)
+                    {
+                        continue;
+                    }
+
+                    bool destroyObject = false;
+
+                    actionButton($"{wolfMalePosition}: {key} -> Destroy", () => {
+                        try
+                        {
+                            spawnedPrefabs[wolfMalesKey][wolfMalePosition] = null;
+                        } catch { }
+                        
+                        try
+                        {
+                            UnityEngine.Object.Destroy(wolfMaleObject);
+                            wolfMales[key] = null;
+                            destroyObject = true;
+                        }
+                        catch { }
+                    });
+
+                    if (destroyObject)
+                    {
+                        continue;
+                    }
+
+                    actionButton($"{wolfMalePosition}: {key} -> TP To Player", () => {
+                        wolfMaleObject.transform.position = Main.Instance.Player.transform.position;
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> Change To Player Rotation", () => {
+                        wolfMaleObject.transform.rotation = Main.Instance.Player.transform.rotation;
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> run", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "Wolf_run");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> walk", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "walk");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> sit", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "sit");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> attack1", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "attack1");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> attack2", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "attack2");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> breathes", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "breathes");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> damage", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "damege");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> Digs", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "Digs");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> eating", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "eating");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> howl", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "howl");
+                    });
+
+                    actionButton($"{wolfMalePosition}: {key} -> die", () => {
+                        PlayAnimWolfMale(wolfMaleObject, "die");    
+                    });
                 }
             }
 
@@ -4267,6 +4459,21 @@ namespace BitchlandCheatConsoleBepInEx
             return vstring;
         }
 
+        public static string quat3ToString(Quaternion point)
+        {
+            if (point == null)
+            {
+                point = new Quaternion(0, 0, 0, 0);
+            }
+
+            string x = point.x.ToString("G", culture);
+            string y = point.y.ToString("G", culture);
+            string z = point.z.ToString("G", culture);
+            string w = point.w.ToString("G", culture);
+            string vstring = $"x: {x}, y: {y}, z: {z}, w: {w}";
+            return vstring;
+        }
+
         public static JSONObject addWarpPoint(JSONObject json, string name, Vector3 point)
         {
             if (json == null)
@@ -5211,225 +5418,399 @@ namespace BitchlandCheatConsoleBepInEx
             return PersonGenerated.gameObject;
         }
 
-     /*   public static GameObject BasicPerson()
+        private static Dictionary<string, GameObject> wolfMales = new Dictionary<string, GameObject>();
+        private static Dictionary<string, int> wolfMalesPosition = new Dictionary<string, int>();
+        public static GameObject CreateWolfMaleNew(bool reload = false)
         {
-            bool spawnFemale = Main.Instance.Player is Girl ? true : false;
-            GameObject personPrefab = spawnFemale ? Main.Instance.PersonPrefab : Main.Instance.PersonGuyPrefab;
+            string bundleName = "Wolf_AnimatedBundle";
 
-            if (personPrefab == null)
+            string name = "Wolf_AnimatedBundle";
+
+            string prefab = "assets/bundles/wolf_animated/prefabs/wolf1.prefab";
+
+            loadbundle(bundleName, name, reload);
+
+            GameObject wolfmale = getprefabfrombundle(bundleName, name, prefab);
+
+            GameObject wolfmale_spawned = Main.Spawn(wolfmale);
+
+            string wolfName = Main.Instance.GenerateRandomName();
+
+            while(wolfMales.ContainsKey(wolfName))
             {
-                return Main.Instance.Player.gameObject;
+                wolfName += Main.Instance.GenerateRandomName();
             }
 
-            Person person = MyGetComponentPerson<Person>(personPrefab);
+            wolfMales.Add(wolfName, wolfmale_spawned);
 
-            if (person == null)
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
             {
-                return Main.Instance.Player.gameObject;
+                spawnedPrefabs.Add(key, new List<GameObject>());
             }
 
-            Person player = Main.Instance.Player;
+            wolfmale_spawned.transform.position = Main.Instance.Player.transform.position;
 
-            player.DEBUG = person.DEBUG;
-            player.Penis = person.Penis;
-            player.PenisEnabled = person.PenisEnabled;
-            player.HasPenis = person.HasPenis;
-            player.HasCondomPut = person.HasCondomPut;
-            player.UnparentOnStart = person.UnparentOnStart;
-            player.Anim = person.Anim;
-            player.navMesh = person.navMesh;
-            player._Rigidbody = person._Rigidbody;
-            player.Eyes = person.Eyes;
-            player.EyesSpot = person.EyesSpot;
-            player.LOD = person.LOD;
-            player.ProxSeen = person.ProxSeen;
-            player.CantBeHit = person.CantBeHit;
-            player.VoicePitch = person.VoicePitch;
-            player.ViewPoint = person.ViewPoint;
-            player.TorsoViewPoint = person.TorsoViewPoint;
-            player._DontLoadInteraction = person._DontLoadInteraction;
-            player._DontLoadClothing = person._DontLoadClothing;
-            player.MainBodyLowPoly = person.MainBodyLowPoly;
-            player.MainBody = person.MainBody;
-            player.EyesObjects = person.EyesObjects;
-            player.RagdollParts = person.RagdollParts;
-            player.StartingClothes = person.StartingClothes;
-            player._StartingClothes = person._StartingClothes;
-            player.StartingWeapons = person.StartingWeapons;
-            player._StartingWeapons = person._StartingWeapons;
-            player.CurrentShoes = person.CurrentShoes;
-            player.CurrentPants = person.CurrentPants;
-            player.CurrentTop = person.CurrentTop;
-            player.CurrentUnderwearTop = person.CurrentUnderwearTop;
-            player.CurrentUnderwearLower = person.CurrentUnderwearLower;
-            player.CurrentGarter = person.CurrentGarter;
-            player.CurrentSocks = person.CurrentSocks;
-            player.CurrentHat = person.CurrentHat;
-            player.CurrentHair = person.CurrentHair;
-            player.CurrentFeet = person.CurrentFeet;
-            player.CurrentBeard = person.CurrentBeard;
-            player.CurrentFeetMesh = person.CurrentFeetMesh;
-            player.CurrentAnys = person.CurrentAnys;
-            player.CurrentBody = person.CurrentBody;
-            player.CurrentHead = person.CurrentHead;
-            player.NaturalSkinColor = person.NaturalSkinColor;
-            player.NaturalHairColor = person.NaturalHairColor;
-            player.NaturalEyeColor = person.NaturalEyeColor;
-            player.TannedSkinColor = person.TannedSkinColor;
-            player.DyedHairColor = person.DyedHairColor;
-            player.DyedEyeColor = person.DyedEyeColor;
-            player._CustomSkinStates = person._CustomSkinStates;
-            player._CustomFaceSkinStates = person._CustomFaceSkinStates;
-            player._FaceSkinStates = person._FaceSkinStates;
-            player._SkinStates = person._SkinStates;
-            player._States = person._States;
-            player._PersonalityData = person._PersonalityData;
-            player.BoobSize = person.BoobSize;
-            player.AssSize = person.AssSize;
-            player.FatSize = person.FatSize;
-            player.AnalTraining = person.AnalTraining;
-            player.VaginalTraining = person.VaginalTraining;
-            player.NippleTraining = person.NippleTraining;
-            player.ClitTraining = person.ClitTraining;
-            player.BodyTraining = person.BodyTraining;
-            player.EquippedClothes = person.EquippedClothes;
-            player.SPAWN_noUglyHair = person.SPAWN_noUglyHair;
-            player.SPAWN_onlyGoodHair = person.SPAWN_onlyGoodHair;
-            player.SecondWeapon = person.SecondWeapon;
-            player.PersonType = person.PersonType;
-            player.Inited = person.Inited;
-            player.Holes = person.Holes;
-            player.PenisBones = person.PenisBones;
-            player._CharacterVisible = person._CharacterVisible;
-            player._StartedMastPP = person._StartedMastPP;
-            player.Do_Schedule_GoingToTargetThread = person.Do_Schedule_GoingToTargetThread;
-            player._PathRedo = person._PathRedo;
-            player._TimeGoingToTarget = person._TimeGoingToTarget;
-            player.RandActionTimer = person.RandActionTimer;
-            player.WhileDoingAction = person.WhileDoingAction;
-            player.RuntimeActions = person.RuntimeActions;
-            player.TEMP_HANDLENEEDS_OFF = person.TEMP_HANDLENEEDS_OFF;
-            player.TEMP_HANDLEANIMS_OFF = person.TEMP_HANDLEANIMS_OFF;
-            player.TEMP_SEXUPDATE_OFF = person.TEMP_SEXUPDATE_OFF;
-            player.TEMP_UPDATE_OFF = person.TEMP_UPDATE_OFF;
-            player.TEMP_RUNTIME_OFF = person.TEMP_RUNTIME_OFF;
-            player.DecideTimer = person.DecideTimer;
-            player._ShootBlind = person._ShootBlind;
-            player.CombatDistance = person.CombatDistance;
-            player.EndingCombat = person.EndingCombat;
-            player.HavingSex_Scene = person.HavingSex_Scene;
-            player.HavingSexWith = person.HavingSexWith;
-            player.Orgasming = person.Orgasming;
-            player.NoEnergyLoss = person.NoEnergyLoss;
-            player._HiddenHead = person._HiddenHead;
-            player._ClothingBatch1Bones = person._ClothingBatch1Bones;
-            player.ObjInHand = person.ObjInHand;
-            player.HeadStuff = person.HeadStuff;
-            player.RightHandStuff = person.RightHandStuff;
-            player.LeftHandStuff = person.LeftHandStuff;
-            player.RightHandWankCenter = person.RightHandWankCenter;
-            player.AllFaceBones = person.AllFaceBones;
-            player.Head = person.Head;
-            player.MouthBase = person.MouthBase;
-            player.MouthLeft = person.MouthLeft;
-            player.MouthRight = person.MouthRight;
-            player.MouthTop = person.MouthTop;
-            player.MouthBottom = person.MouthBottom;
-            player.CheekLowLeft = person.CheekLowLeft;
-            player.CheekLowRight = person.CheekLowRight;
-            player.CheekUpLeft = person.CheekUpLeft;
-            player.CheekUpRight = person.CheekUpRight;
-            player.Jaw = person.Jaw;
-            player.JawLow = person.JawLow;
-            player.Chin = person.Chin;
-            player.EarLeft = person.EarLeft;
-            player.EarLeftLow = person.EarLeftLow;
-            player.EarLeftHigh = person.EarLeftHigh;
-            player.EarRight = person.EarRight;
-            player.EarRightLow = person.EarRightLow;
-            player.EarRightHigh = person.EarRightHigh;
-            player.Nose = person.Nose;
-            player.NoseBridge = person.NoseBridge;
-            player.NoseTip = person.NoseTip;
-            player.NostrilLeft = person.NostrilLeft;
-            player.NostrilRight = person.NostrilRight;
-            player.EyeLeft = person.EyeLeft;
-            player.EyeRight = person.EyeRight;
-            player.EyeBallLeft = person.EyeBallLeft;
-            player.EyeBallRight = person.EyeBallRight;
-            player.EyeLeftTop = person.EyeLeftTop;
-            player.EyeLeftLow = person.EyeLeftLow;
-            player.EyeLeftInner = person.EyeLeftInner;
-            player.EyeLeftOuter = person.EyeLeftOuter;
-            player.EyeRightTop = person.EyeRightTop;
-            player.EyeRightLow = person.EyeRightLow;
-            player.EyeRightInner = person.EyeRightInner;
-            player.EyeRightOuter = person.EyeRightOuter;
-            player.AllBodyBones = person.AllBodyBones;
-            player.BoobLeft = person.BoobLeft;
-            player.BoobRight = person.BoobRight;
-            player.NippleLeft = person.NippleLeft;
-            player.NippleRight = person.NippleRight;
-            player.AssCheekLeft = person.AssCheekLeft;
-            player.AssCheekRight = person.AssCheekRight;
-            player.LegLeft = person.LegLeft;
-            player.LegRight = person.LegRight;
-            player.UpperThighLeft = person.UpperThighLeft;
-            player.UpperThighRight = person.UpperThighRight;
-            player.MidThighLeft = person.MidThighLeft;
-            player.MidThighRight = person.MidThighRight;
-            player.LowerThighLeft = person.LowerThighLeft;
-            player.LowerThighRight = person.LowerThighRight;
-            player.KneeLeft = person.KneeLeft;
-            player.KneeRight = person.KneeRight;
-            player.CalveLeft = person.CalveLeft;
-            player.CalveRight = person.CalveRight;
-            player.FootLeft = person.FootLeft;
-            player.FootRight = person.FootRight;
-            player.ActualHips = person.ActualHips;
-            player.Hips = person.Hips;
-            player.Hips2 = person.Hips2;
-            player.Belly = person.Belly;
-            player.Waist = person.Waist;
-            player.Ribcage = person.Ribcage;
-            player.Torso = person.Torso;
-            player.Neck = person.Neck;
-            player.ShoulderLeft = person.ShoulderLeft;
-            player.UpperArmLeft = person.UpperArmLeft;
-            player.ForeArmLeft = person.ForeArmLeft;
-            player.HandLeft = person.HandLeft;
-            player.ShoulderRight = person.ShoulderRight;
-            player.UpperArmRight = person.UpperArmRight;
-            player.ForeArmRight = person.ForeArmRight;
-            player.HandRight = person.HandRight;
-            player.Height = person.Height;
-            player.CurrentLOD = person.CurrentLOD;
-            player.CinematicCharacter = person.CinematicCharacter;
-            player._CantBeForced = person._CantBeForced;
-            player.CallWhenHighCol = person.CallWhenHighCol;
-            player._DirtySkin = person._DirtySkin;
-            player.MainBodyTex = person.MainBodyTex;
-            player.MainFaceTex = person.MainFaceTex;
-            player.CustomMainBodyTex = person.CustomMainBodyTex;
-            player.CustomMainFaceTex = person.CustomMainFaceTex;
-            player.sBodyTexIndex = person.sBodyTexIndex;
-            player.sFaceTexIndex = person.sFaceTexIndex;
-            player.sCustomBodyTexIndex = person.sCustomBodyTexIndex;
-            player.sCustomFaceTexIndex = person.sCustomFaceTexIndex;
-            player.MaterialTypeNPC = person.MaterialTypeNPC;
-            player.PunchingAnim = person.PunchingAnim;
-            player.PersonThrowingDown = person.PersonThrowingDown;
-            player._CurrentPunchPower = person._CurrentPunchPower;
-            player.MeleeHitBox = person.MeleeHitBox;
-            player.Doing_Punch = person.Doing_Punch;
-            player.Doing_ThrowDown = person.Doing_ThrowDown;
-            player.Doing_MeleeHit = person.Doing_MeleeHit;
-            player.ClothingCondition = person.ClothingCondition;
-            player.transform.position = person.transform.position;
-            player.transform.rotation = person.transform.rotation;
+            PlayAnimWolfMale(wolfmale_spawned, "howl");
 
-            return player.gameObject;
-        }*/
+            wolfMalesPosition.Add(wolfName, spawnedPrefabs[key].Count);
+
+            spawnedPrefabs[key].Add(wolfmale_spawned);
+
+            return wolfmale_spawned;
+        }
+
+        public static void PlayAnimWolfMale(GameObject wolf, string anim)
+        {
+            if (wolf == null)
+            {
+                return;
+            }
+
+            RuntimeAnimatorController animatorController = wolf.GetComponent<RuntimeAnimatorController>();
+            Animator animator = wolf.GetComponent<Animator>();
+
+            AnimationClip[] anims = animatorController == null ? null : animatorController.animationClips;
+
+            if (anims == null)
+            {
+                anims = new AnimationClip[0];
+            }
+
+            foreach (AnimationClip animCLip in anims)
+            {
+               Main.Instance.GameplayMenu.ShowNotification(animCLip.name);
+            }
+
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.Play(anim);
+        }
+
+        public static void PlayAnimWolfMaleAll(string anim)
+        {
+            string bundleName = "Wolf_AnimatedBundle";
+
+            string name = "Wolf_AnimatedBundle";
+
+            string prefab = "assets/bundles/wolf_animated/prefabs/wolf1.prefab";
+
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            foreach (GameObject wolf in spawnedPrefabs[key])
+            {
+                if (wolf == null)
+                {
+                    continue;
+                }
+
+                PlayAnimWolfMale(wolf, anim);
+            }
+        }
+
+        public static void spawnwolfmale_command(bool reload = false)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnwolfmale");
+            CreateWolfMaleNew(reload);
+        }
+
+        public static void playwolfmale_command(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: playwolfmale");
+            PlayAnimWolfMaleAll(value);
+        }
+
+        public static void wolfmalepositionmode()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: wolfmalepositionmode");
+            string bundleName = "Wolf_AnimatedBundle";
+
+            string name = "Wolf_AnimatedBundle";
+
+            string prefab = "assets/bundles/wolf_animated/prefabs/wolf1.prefab";
+
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            copyObj = spawnedPrefabs[key].ToArray();
+
+            positionedObjects = copyObj;
+
+            positionmodevar = !positionmodevar;
+
+            if (positionmodevar)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("positionmode wolfmale on");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("positionmode wolfmale off");
+            }
+        }
+
+        public static void wolfmalerotatemode()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: wolfmalerotatemode");
+            string bundleName = "Wolf_AnimatedBundle";
+
+            string name = "Wolf_AnimatedBundle";
+
+            string prefab = "assets/bundles/wolf_animated/prefabs/wolf1.prefab";
+
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            copyObj = spawnedPrefabs[key].ToArray();
+
+            rotatedObjects = copyObj;
+
+            rotatemodevar = !rotatemodevar;
+
+            if (rotatemodevar)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("rotatemode wolfmale on");
+            }
+            else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("rotatemode wolfmale off");
+            }
+        }
+
+        /*   public static GameObject BasicPerson()
+           {
+               bool spawnFemale = Main.Instance.Player is Girl ? true : false;
+               GameObject personPrefab = spawnFemale ? Main.Instance.PersonPrefab : Main.Instance.PersonGuyPrefab;
+
+               if (personPrefab == null)
+               {
+                   return Main.Instance.Player.gameObject;
+               }
+
+               Person person = MyGetComponentPerson<Person>(personPrefab);
+
+               if (person == null)
+               {
+                   return Main.Instance.Player.gameObject;
+               }
+
+               Person player = Main.Instance.Player;
+
+               player.DEBUG = person.DEBUG;
+               player.Penis = person.Penis;
+               player.PenisEnabled = person.PenisEnabled;
+               player.HasPenis = person.HasPenis;
+               player.HasCondomPut = person.HasCondomPut;
+               player.UnparentOnStart = person.UnparentOnStart;
+               player.Anim = person.Anim;
+               player.navMesh = person.navMesh;
+               player._Rigidbody = person._Rigidbody;
+               player.Eyes = person.Eyes;
+               player.EyesSpot = person.EyesSpot;
+               player.LOD = person.LOD;
+               player.ProxSeen = person.ProxSeen;
+               player.CantBeHit = person.CantBeHit;
+               player.VoicePitch = person.VoicePitch;
+               player.ViewPoint = person.ViewPoint;
+               player.TorsoViewPoint = person.TorsoViewPoint;
+               player._DontLoadInteraction = person._DontLoadInteraction;
+               player._DontLoadClothing = person._DontLoadClothing;
+               player.MainBodyLowPoly = person.MainBodyLowPoly;
+               player.MainBody = person.MainBody;
+               player.EyesObjects = person.EyesObjects;
+               player.RagdollParts = person.RagdollParts;
+               player.StartingClothes = person.StartingClothes;
+               player._StartingClothes = person._StartingClothes;
+               player.StartingWeapons = person.StartingWeapons;
+               player._StartingWeapons = person._StartingWeapons;
+               player.CurrentShoes = person.CurrentShoes;
+               player.CurrentPants = person.CurrentPants;
+               player.CurrentTop = person.CurrentTop;
+               player.CurrentUnderwearTop = person.CurrentUnderwearTop;
+               player.CurrentUnderwearLower = person.CurrentUnderwearLower;
+               player.CurrentGarter = person.CurrentGarter;
+               player.CurrentSocks = person.CurrentSocks;
+               player.CurrentHat = person.CurrentHat;
+               player.CurrentHair = person.CurrentHair;
+               player.CurrentFeet = person.CurrentFeet;
+               player.CurrentBeard = person.CurrentBeard;
+               player.CurrentFeetMesh = person.CurrentFeetMesh;
+               player.CurrentAnys = person.CurrentAnys;
+               player.CurrentBody = person.CurrentBody;
+               player.CurrentHead = person.CurrentHead;
+               player.NaturalSkinColor = person.NaturalSkinColor;
+               player.NaturalHairColor = person.NaturalHairColor;
+               player.NaturalEyeColor = person.NaturalEyeColor;
+               player.TannedSkinColor = person.TannedSkinColor;
+               player.DyedHairColor = person.DyedHairColor;
+               player.DyedEyeColor = person.DyedEyeColor;
+               player._CustomSkinStates = person._CustomSkinStates;
+               player._CustomFaceSkinStates = person._CustomFaceSkinStates;
+               player._FaceSkinStates = person._FaceSkinStates;
+               player._SkinStates = person._SkinStates;
+               player._States = person._States;
+               player._PersonalityData = person._PersonalityData;
+               player.BoobSize = person.BoobSize;
+               player.AssSize = person.AssSize;
+               player.FatSize = person.FatSize;
+               player.AnalTraining = person.AnalTraining;
+               player.VaginalTraining = person.VaginalTraining;
+               player.NippleTraining = person.NippleTraining;
+               player.ClitTraining = person.ClitTraining;
+               player.BodyTraining = person.BodyTraining;
+               player.EquippedClothes = person.EquippedClothes;
+               player.SPAWN_noUglyHair = person.SPAWN_noUglyHair;
+               player.SPAWN_onlyGoodHair = person.SPAWN_onlyGoodHair;
+               player.SecondWeapon = person.SecondWeapon;
+               player.PersonType = person.PersonType;
+               player.Inited = person.Inited;
+               player.Holes = person.Holes;
+               player.PenisBones = person.PenisBones;
+               player._CharacterVisible = person._CharacterVisible;
+               player._StartedMastPP = person._StartedMastPP;
+               player.Do_Schedule_GoingToTargetThread = person.Do_Schedule_GoingToTargetThread;
+               player._PathRedo = person._PathRedo;
+               player._TimeGoingToTarget = person._TimeGoingToTarget;
+               player.RandActionTimer = person.RandActionTimer;
+               player.WhileDoingAction = person.WhileDoingAction;
+               player.RuntimeActions = person.RuntimeActions;
+               player.TEMP_HANDLENEEDS_OFF = person.TEMP_HANDLENEEDS_OFF;
+               player.TEMP_HANDLEANIMS_OFF = person.TEMP_HANDLEANIMS_OFF;
+               player.TEMP_SEXUPDATE_OFF = person.TEMP_SEXUPDATE_OFF;
+               player.TEMP_UPDATE_OFF = person.TEMP_UPDATE_OFF;
+               player.TEMP_RUNTIME_OFF = person.TEMP_RUNTIME_OFF;
+               player.DecideTimer = person.DecideTimer;
+               player._ShootBlind = person._ShootBlind;
+               player.CombatDistance = person.CombatDistance;
+               player.EndingCombat = person.EndingCombat;
+               player.HavingSex_Scene = person.HavingSex_Scene;
+               player.HavingSexWith = person.HavingSexWith;
+               player.Orgasming = person.Orgasming;
+               player.NoEnergyLoss = person.NoEnergyLoss;
+               player._HiddenHead = person._HiddenHead;
+               player._ClothingBatch1Bones = person._ClothingBatch1Bones;
+               player.ObjInHand = person.ObjInHand;
+               player.HeadStuff = person.HeadStuff;
+               player.RightHandStuff = person.RightHandStuff;
+               player.LeftHandStuff = person.LeftHandStuff;
+               player.RightHandWankCenter = person.RightHandWankCenter;
+               player.AllFaceBones = person.AllFaceBones;
+               player.Head = person.Head;
+               player.MouthBase = person.MouthBase;
+               player.MouthLeft = person.MouthLeft;
+               player.MouthRight = person.MouthRight;
+               player.MouthTop = person.MouthTop;
+               player.MouthBottom = person.MouthBottom;
+               player.CheekLowLeft = person.CheekLowLeft;
+               player.CheekLowRight = person.CheekLowRight;
+               player.CheekUpLeft = person.CheekUpLeft;
+               player.CheekUpRight = person.CheekUpRight;
+               player.Jaw = person.Jaw;
+               player.JawLow = person.JawLow;
+               player.Chin = person.Chin;
+               player.EarLeft = person.EarLeft;
+               player.EarLeftLow = person.EarLeftLow;
+               player.EarLeftHigh = person.EarLeftHigh;
+               player.EarRight = person.EarRight;
+               player.EarRightLow = person.EarRightLow;
+               player.EarRightHigh = person.EarRightHigh;
+               player.Nose = person.Nose;
+               player.NoseBridge = person.NoseBridge;
+               player.NoseTip = person.NoseTip;
+               player.NostrilLeft = person.NostrilLeft;
+               player.NostrilRight = person.NostrilRight;
+               player.EyeLeft = person.EyeLeft;
+               player.EyeRight = person.EyeRight;
+               player.EyeBallLeft = person.EyeBallLeft;
+               player.EyeBallRight = person.EyeBallRight;
+               player.EyeLeftTop = person.EyeLeftTop;
+               player.EyeLeftLow = person.EyeLeftLow;
+               player.EyeLeftInner = person.EyeLeftInner;
+               player.EyeLeftOuter = person.EyeLeftOuter;
+               player.EyeRightTop = person.EyeRightTop;
+               player.EyeRightLow = person.EyeRightLow;
+               player.EyeRightInner = person.EyeRightInner;
+               player.EyeRightOuter = person.EyeRightOuter;
+               player.AllBodyBones = person.AllBodyBones;
+               player.BoobLeft = person.BoobLeft;
+               player.BoobRight = person.BoobRight;
+               player.NippleLeft = person.NippleLeft;
+               player.NippleRight = person.NippleRight;
+               player.AssCheekLeft = person.AssCheekLeft;
+               player.AssCheekRight = person.AssCheekRight;
+               player.LegLeft = person.LegLeft;
+               player.LegRight = person.LegRight;
+               player.UpperThighLeft = person.UpperThighLeft;
+               player.UpperThighRight = person.UpperThighRight;
+               player.MidThighLeft = person.MidThighLeft;
+               player.MidThighRight = person.MidThighRight;
+               player.LowerThighLeft = person.LowerThighLeft;
+               player.LowerThighRight = person.LowerThighRight;
+               player.KneeLeft = person.KneeLeft;
+               player.KneeRight = person.KneeRight;
+               player.CalveLeft = person.CalveLeft;
+               player.CalveRight = person.CalveRight;
+               player.FootLeft = person.FootLeft;
+               player.FootRight = person.FootRight;
+               player.ActualHips = person.ActualHips;
+               player.Hips = person.Hips;
+               player.Hips2 = person.Hips2;
+               player.Belly = person.Belly;
+               player.Waist = person.Waist;
+               player.Ribcage = person.Ribcage;
+               player.Torso = person.Torso;
+               player.Neck = person.Neck;
+               player.ShoulderLeft = person.ShoulderLeft;
+               player.UpperArmLeft = person.UpperArmLeft;
+               player.ForeArmLeft = person.ForeArmLeft;
+               player.HandLeft = person.HandLeft;
+               player.ShoulderRight = person.ShoulderRight;
+               player.UpperArmRight = person.UpperArmRight;
+               player.ForeArmRight = person.ForeArmRight;
+               player.HandRight = person.HandRight;
+               player.Height = person.Height;
+               player.CurrentLOD = person.CurrentLOD;
+               player.CinematicCharacter = person.CinematicCharacter;
+               player._CantBeForced = person._CantBeForced;
+               player.CallWhenHighCol = person.CallWhenHighCol;
+               player._DirtySkin = person._DirtySkin;
+               player.MainBodyTex = person.MainBodyTex;
+               player.MainFaceTex = person.MainFaceTex;
+               player.CustomMainBodyTex = person.CustomMainBodyTex;
+               player.CustomMainFaceTex = person.CustomMainFaceTex;
+               player.sBodyTexIndex = person.sBodyTexIndex;
+               player.sFaceTexIndex = person.sFaceTexIndex;
+               player.sCustomBodyTexIndex = person.sCustomBodyTexIndex;
+               player.sCustomFaceTexIndex = person.sCustomFaceTexIndex;
+               player.MaterialTypeNPC = person.MaterialTypeNPC;
+               player.PunchingAnim = person.PunchingAnim;
+               player.PersonThrowingDown = person.PersonThrowingDown;
+               player._CurrentPunchPower = person._CurrentPunchPower;
+               player.MeleeHitBox = person.MeleeHitBox;
+               player.Doing_Punch = person.Doing_Punch;
+               player.Doing_ThrowDown = person.Doing_ThrowDown;
+               player.Doing_MeleeHit = person.Doing_MeleeHit;
+               player.ClothingCondition = person.ClothingCondition;
+               player.transform.position = person.transform.position;
+               player.transform.rotation = person.transform.rotation;
+
+               return player.gameObject;
+           }*/
 
         public static void UpdatePerson(GameObject DisplayPersonGa, bool spawnFemale, string filename)
         {
@@ -15468,6 +15849,18 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "wolfmalepositionmode":
+                    {
+                        wolfmalepositionmode();
+                    }
+                    break;
+
+                case "wolfmalerotatemode":
+                    {
+                        wolfmalerotatemode();
+                    }
+                    break;
+
                 case "positionmode2":
                     {
                         positionmode2(null);
@@ -15774,6 +16167,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "enablemove":
                     {
                         enablemove();
+                    }
+                    break;
+
+                case "spawnwolfmale":
+                    {
+                        spawnwolfmale_command();
+                    }
+                    break;
+
+                case "spawnwolfmalereload":
+                    {
+                        spawnwolfmale_command(true);
                     }
                     break;
 
@@ -18431,6 +18836,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "scenemanagerloadscene":
+                    {
+                        scenemanagerloadscene(valueOriginal);
+                    }
+                    break;
+
                 case "listalltypes":
                     {
                         listalltypes(value);
@@ -18452,6 +18863,30 @@ namespace BitchlandCheatConsoleBepInEx
                 case "openworldsection":
                     {
                         openworldsection(value);
+                    }
+                    break;
+
+                case "loadbundle":
+                    {
+                        loadbundle_command(valueOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "listassetsfrombundle":
+                    {
+                        listassetsfrombundle(valueOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "listscenepathsfrombundle":
+                    {
+                        listscenepathsfrombundle(valueOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "playwolfmale":
+                    {
+                        playwolfmale_command(valueOriginal);
                     }
                     break;
 
@@ -18499,6 +18934,19 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 LoadingScene.LoadScene(stringValueToInt(value));
             } catch (Exception ex)
+            {
+            }
+        }
+
+        private static void scenemanagerloadscene(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: scenemanagerloadscene");
+
+            try
+            {
+                SceneManager.LoadScene(value, LoadSceneMode.Additive);
+            }
+            catch (Exception ex)
             {
             }
         }
@@ -19845,6 +20293,42 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnprefabfrombundle":
+                    {
+                        spawnprefabfrombundle(keyOriginal, keyOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "playanimonprefabfrombundle":
+                    {
+                        playanimonprefabfrombundle(keyOriginal, keyOriginal, valueOriginal, "Wolf_animation");
+                    }
+                    break;
+
+                case "changeanimatorcontrollerprefabfrombundle":
+                    {
+                        changeanimatorcontrollerprefabfrombundle(keyOriginal, keyOriginal, valueOriginal, "assets/wolf_animated/model/wolf_animation.controller");
+                    }
+                    break;
+
+                case "loadbundle":
+                    {
+                        loadbundle_command(keyOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "listassetsfrombundle":
+                    {
+                        listassetsfrombundle(keyOriginal, valueOriginal);
+                    }
+                    break;
+
+                case "listscenepathsfrombundle":
+                    {
+                        listscenepathsfrombundle(keyOriginal, valueOriginal);
+                    }
+                    break;
+
                 default:
                     {
                         Main.Instance.GameplayMenu.ShowNotification("No command");
@@ -19933,6 +20417,24 @@ namespace BitchlandCheatConsoleBepInEx
                 case "gameobjectfind":
                     {
                         gameobjectfind(key + " " + value + " " + value2);
+                    }
+                    break;
+
+                case "spawnprefabfrombundle":
+                    {
+                        spawnprefabfrombundle(key, value, value2);
+                    }
+                    break;
+
+                case "playanimonprefabfrombundle":
+                    {
+                        playanimonprefabfrombundle(key, value, value2, "Wolf_animation");
+                    }
+                    break;
+
+                case "changeanimatorcontrollerprefabfrombundle":
+                    {
+                        changeanimatorcontrollerprefabfrombundle(key, value, value2, "assets/wolf_animated/model/wolf_animation.controller");
                     }
                     break;
 
@@ -20025,6 +20527,18 @@ namespace BitchlandCheatConsoleBepInEx
                 case "gameobjectfind":
                     {
                         gameobjectfind(key + " " + value + " " + value2 + " " + value3);
+                    }
+                    break;
+
+                case "playanimonprefabfrombundle":
+                    {
+                        playanimonprefabfrombundle(key, value, value2, value3);
+                    }
+                    break;
+
+                case "changeanimatorcontrollerprefabfrombundle":
+                    {
+                        changeanimatorcontrollerprefabfrombundle(key, value, value2, value3);
                     }
                     break;
 
@@ -21706,6 +22220,587 @@ namespace BitchlandCheatConsoleBepInEx
                 Main.Instance.GameplayMenu.ShowNotification("playvideo: no video source to play video!");
             }
         }
+
+        private static List<AssetBundle> loadedAssetBundles = new List<AssetBundle>();
+
+        private static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
+
+        private static Dictionary<string, List<string>> assetBundlesMultiple = new Dictionary<string, List<string>>();
+
+        public static AssetBundle loadbundle(string bundleName, string name, bool reload = false)
+        {
+            if (reload)
+            {
+                if (assetBundlesMultiple.ContainsKey(name))
+                {
+                    List<string> assetBundlesStrings = assetBundlesMultiple[name];
+
+                    foreach (string assetBundleString in assetBundlesStrings)
+                    {
+                        try
+                        {
+                            AssetBundle assetBundle = assetBundles[assetBundleString];
+
+                            loadedAssetBundles.Remove(assetBundle);
+
+                            try
+                            {
+                                assetBundle.Unload(unloadAllLoadedObjects: true);
+                                Logger.LogInfo($"bundle {assetBundle.name} unloaded");
+                            }
+                            catch { }
+
+                            assetBundles.Remove(assetBundleString);
+                        } catch { }
+                    }
+                    assetBundlesMultiple[name].Clear();
+                }
+            }
+
+            if (assetBundles.ContainsKey(name))
+            {
+                return assetBundles[name];
+            }
+
+            string objectsFolder = $"{Main.AssetsFolder}/wolfitdm/objects";
+
+            string malesFolder = $"{Main.AssetsFolder}/wolfitdm/males";
+
+            string femalesFolder = $"{Main.AssetsFolder}/wolfitdm/females";
+
+            string audioFolder = $"{Main.AssetsFolder}/wolfitdm/audio";
+
+            string videoFolder = $"{Main.AssetsFolder}/wolfitdm/video";
+
+            string bundleFolder = $"{Main.AssetsFolder}/wolfitdm/objects/bundles";
+
+            string bundleNameFolder = $"{Main.AssetsFolder}/wolfitdm/objects/bundles/{bundleName}";
+
+            Directory.CreateDirectory(objectsFolder);
+
+            Directory.CreateDirectory(malesFolder);
+
+            Directory.CreateDirectory(femalesFolder);
+
+            Directory.CreateDirectory(audioFolder);
+
+            Directory.CreateDirectory(videoFolder);
+
+            Directory.CreateDirectory(bundleFolder);
+
+            Directory.CreateDirectory(bundleNameFolder);
+
+            AssetBundle myBundle;
+
+            string bundlePath1 = $"{bundleNameFolder}/{name}";
+
+            string bundlePath2 = $"{bundleNameFolder}/{name}.bundle";
+
+            string bundlePath = bundlePath1;
+
+            if (!File.Exists(bundlePath1)) 
+            {
+                if (!File.Exists(bundlePath2))
+                {
+                    Logger.LogError($"AssetBundle not found at: {bundlePath1}");
+                    Logger.LogError($"AssetBundle not found at: {bundlePath2}");
+                    return null;
+                } else
+                {
+                    bundlePath = bundlePath2;
+                }
+            } else
+            {
+                bundlePath = bundlePath1;
+            }
+
+            myBundle = AssetBundle.LoadFromFile(bundlePath);
+
+            if (myBundle == null)
+            {
+                Logger.LogError("Failed to load AssetBundle.");
+                return null;
+            }
+
+            if (!assetBundlesMultiple.ContainsKey(name))
+            {
+                assetBundlesMultiple.Add(name, new List<string>());
+            }
+
+            assetBundlesMultiple[name].Add(name);
+
+            loadedAssetBundles.Add(myBundle);
+
+            if (!assetBundles.ContainsKey(name))
+            {
+                assetBundles.Add(name, myBundle);
+            } else
+            {
+                assetBundles[name] = myBundle;
+            }
+
+            AssetBundleManifest manifest = myBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            if (manifest != null)
+            {
+                string[] names = manifest.GetAllAssetBundles();
+
+                foreach (string namex in names)
+                {
+                    bundlePath1 = $"{bundleNameFolder}/{namex}";
+
+                    bundlePath2 = $"{bundleNameFolder}/{namex}.bundle";
+                    
+                    if (!File.Exists(bundlePath1))
+                    {
+                        if (!File.Exists(bundlePath2))
+                        {
+                            Logger.LogError($"AssetBundle not found at: {bundlePath1}");
+                            Logger.LogError($"AssetBundle not found at: {bundlePath2}");
+                            continue;
+                        }
+                        else
+                        {
+                            bundlePath = bundlePath2;
+                        }
+                    }
+                    else
+                    {
+                        bundlePath = bundlePath1;
+                    }
+
+                    myBundle = AssetBundle.LoadFromFile(bundlePath);
+
+                    if (myBundle == null)
+                    {
+                        Logger.LogError($"Failed to load AssetBundle. {bundlePath}");
+                        continue;
+                    }
+
+                    assetBundlesMultiple[name].Add(namex);
+
+                    loadedAssetBundles.Add(myBundle);
+
+                    if (!assetBundles.ContainsKey(namex))
+                    {
+                        assetBundles.Add(namex, myBundle);
+                    }
+                    else
+                    {
+                        assetBundles[namex] = myBundle;
+                    }
+                }
+            }
+
+            return assetBundles[name];
+        }
+
+        private static Dictionary<string, GameObject> loadedPrefabs = new Dictionary<string, GameObject>();
+        public static GameObject getprefabfrombundle(string bundleName, string name, string prefab)
+        {
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (loadedPrefabs.ContainsKey(key))
+            {
+                return loadedPrefabs[key];
+            }
+
+            AssetBundle myBundle = loadbundle(bundleName, name);
+
+            if (myBundle == null)
+            {
+                Logger.LogError($"bundle can not be loaded {name}");
+                return null;
+            }
+
+            GameObject prefabLoaded = null;
+
+            AssetBundleManifest manifest = myBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            if (manifest != null)
+            {
+                string[] names = manifest.GetAllAssetBundles();
+
+                foreach (string namex in names)
+                {
+                    if (!assetBundles.ContainsKey(namex))
+                    {
+                        continue;
+                    }
+
+                    myBundle = assetBundles[namex];
+
+                    if (myBundle == null)
+                    {
+                        continue;
+                    }
+
+                    string[] allAssetNames = myBundle.GetAllAssetNames();
+
+                    foreach (string assetName in allAssetNames)
+                    {
+                        if (prefab == assetName)
+                        {
+                            prefabLoaded = myBundle.LoadAsset<GameObject>(prefab);
+                            goto end_here;
+                        }
+                    }
+                }
+            } 
+            else
+            {
+                string[] allAssetNames = myBundle.GetAllAssetNames();
+
+                foreach (string assetName in allAssetNames)
+                {
+                    if (prefab == assetName)
+                    {
+                        prefabLoaded = myBundle.LoadAsset<GameObject>(prefab);
+                        goto end_here;
+                    }
+                }
+            }
+
+        end_here:
+            if (prefabLoaded == null)
+            {
+                Logger.LogError($"prefab can not be loaded {prefab}");
+                return null;
+            }
+
+            if (!loadedPrefabs.ContainsKey(key))
+            {
+                loadedPrefabs.Add(key, prefabLoaded);
+            } else
+            {
+                loadedPrefabs[key] = prefabLoaded;
+            }
+
+            return prefabLoaded;
+        }
+
+        private static Dictionary<string, RuntimeAnimatorController> loadedAnimatorController = new Dictionary<string, RuntimeAnimatorController>();
+        public static RuntimeAnimatorController getanimatorcontrollerfrombundle(string bundleName, string name, string prefab)
+        {
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (loadedAnimatorController.ContainsKey(key))
+            {
+                return loadedAnimatorController[key];
+            }
+
+            AssetBundle myBundle = loadbundle(bundleName, name);
+
+            if (myBundle == null)
+            {
+                Logger.LogError($"bundle can not be loaded {name}");
+                return null;
+            }
+
+            RuntimeAnimatorController prefabLoaded = null;
+
+            AssetBundleManifest manifest = myBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            if (manifest != null)
+            {
+                string[] names = manifest.GetAllAssetBundles();
+
+                foreach (string namex in names)
+                {
+                    if (!assetBundles.ContainsKey(namex))
+                    {
+                        continue;
+                    }
+
+                    myBundle = assetBundles[namex];
+
+                    if (myBundle == null)
+                    {
+                        continue;
+                    }
+
+                    string[] allAssetNames = myBundle.GetAllAssetNames();
+
+                    foreach (string assetName in allAssetNames)
+                    {
+                        if (prefab == assetName)
+                        {
+                            prefabLoaded = myBundle.LoadAsset<RuntimeAnimatorController>(prefab);
+                            goto end_here;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                string[] allAssetNames = myBundle.GetAllAssetNames();
+
+                foreach (string assetName in allAssetNames)
+                {
+                    if (prefab == assetName)
+                    {
+                        prefabLoaded = myBundle.LoadAsset<RuntimeAnimatorController>(prefab);
+                        goto end_here;
+                    }
+                }
+            }
+
+        end_here:
+            if (prefabLoaded == null)
+            {
+                Logger.LogError($"prefab can not be loaded {prefab}");
+                return null;
+            }
+
+            if (!loadedAnimatorController.ContainsKey(key))
+            {
+                loadedAnimatorController.Add(key, prefabLoaded);
+            }
+            else
+            {
+                loadedAnimatorController[key] = prefabLoaded;
+            }
+
+            return prefabLoaded;
+        }
+        public static List<string> getAllAssetNamesFromBundle(string bundleName, string name)
+        {
+            AssetBundle myBundle = loadbundle(bundleName, name);
+
+            List<string> allAssetNames = new List<string>();
+
+            if (myBundle == null)
+            {
+                return allAssetNames;
+            }
+
+            AssetBundleManifest manifest = myBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            if (manifest != null)
+            {
+                string[] names = manifest.GetAllAssetBundles();
+
+                foreach (string namex in names)
+                {
+                    if (!assetBundles.ContainsKey(namex))
+                    {
+                        continue;
+                    }
+
+                    myBundle = assetBundles[namex];
+
+                    if (myBundle == null)
+                    {
+                        continue;
+                    }
+
+                    allAssetNames.AddRange(myBundle.GetAllAssetNames());    
+                }
+            }
+            else
+            {
+                allAssetNames.AddRange(myBundle.GetAllAssetNames());
+            }
+
+            return allAssetNames;
+        }
+
+        public static List<string> getAllScenePathsFromBundle(string bundleName, string name)
+        {
+            AssetBundle myBundle = loadbundle(bundleName, name);
+
+            List<string> allAssetNames = new List<string>();
+
+            if (myBundle == null)
+            {
+                return allAssetNames;
+            }
+
+            AssetBundleManifest manifest = myBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            if (manifest != null)
+            {
+                string[] names = manifest.GetAllAssetBundles();
+
+                foreach (string namex in names)
+                {
+                    if (!assetBundles.ContainsKey(namex))
+                    {
+                        continue;
+                    }
+
+                    myBundle = assetBundles[namex];
+
+                    if (myBundle == null)
+                    {
+                        continue;
+                    }
+
+                    allAssetNames.AddRange(myBundle.GetAllScenePaths());
+                }
+            }
+            else
+            {
+                allAssetNames.AddRange(myBundle.GetAllScenePaths());
+            }
+
+            return allAssetNames;
+        }
+        public static void loadbundle_command(string bundleName, string name, bool isCommand = true)
+        {
+            if (isCommand)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: loadbundle");
+            }
+
+            AssetBundle myBundle = loadbundle(bundleName, name);
+
+            if (!isCommand)
+            {
+                return;
+            }
+
+            if (myBundle == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("Bundle can not be loaded, see BepInEx Console for more details!");
+            } else
+            {
+                Main.Instance.GameplayMenu.ShowNotification("Bundle successfully loaded!");
+            }
+        }
+
+        private static Dictionary<string, List<GameObject>> spawnedPrefabs = new Dictionary<string, List<GameObject>>();
+        public static void spawnprefabfrombundle(string bundleName, string name, string prefab, bool isCommand = true)
+        {
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            if (isCommand)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: spawnprefabfrombundle");
+            }
+
+            GameObject prefabLoaded = getprefabfrombundle(bundleName, name, prefab);
+
+            if (prefabLoaded == null)
+            {
+                if (isCommand)
+                {
+                    Main.Instance.GameplayMenu.ShowNotification("prefab can not be loaded, see BepInEx Console for more details!");
+                }
+                return;
+            }
+
+            GameObject spawned = Main.Spawn(prefabLoaded);
+
+            spawnedPrefabs[key].Add(spawned);
+
+            spawned.transform.position = Main.Instance.Player.transform.position;
+        }
+
+        public static void playanimonprefabfrombundle(string bundleName, string name, string prefab, string anim, bool isCommand = true)
+        {
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            if (isCommand)
+                Main.Instance.GameplayMenu.ShowNotification("executed command: playanimonprefabfrombundle");
+
+
+            List<GameObject> spawned = spawnedPrefabs[key];
+
+            foreach (GameObject spawnedPrefab in spawned)
+            {
+                Animator animator = spawnedPrefab.GetComponent<Animator>();
+
+                if (animator == null)
+                {
+                    continue;
+                }
+
+                animator.Play(anim);
+            }
+        }
+
+        public static void changeanimatorcontrollerprefabfrombundle(string bundleName, string name, string prefab, string anim, bool isCommand = true)
+        {
+            string key = $"{bundleName}_{name}_{prefab}";
+
+            if (!spawnedPrefabs.ContainsKey(key))
+            {
+                spawnedPrefabs.Add(key, new List<GameObject>());
+            }
+
+            RuntimeAnimatorController controller = null;
+
+            try
+            {
+                controller = getanimatorcontrollerfrombundle(bundleName, name, anim);
+            } catch { }
+
+            if (controller == null && isCommand)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("RuntimeAnimatorController can not be found!");
+            }
+
+            if (isCommand)
+                Main.Instance.GameplayMenu.ShowNotification("executed command: changeanimatorcontrollerprefabfrombundle");
+
+            List<GameObject> spawned = spawnedPrefabs[key];
+
+            foreach (GameObject spawnedPrefab in spawned)
+            {
+                Animator animator = spawnedPrefab.GetComponent<Animator>();
+
+                if (animator == null)
+                {
+                    continue;
+                }
+                animator.runtimeAnimatorController = controller;
+            }
+        }
+
+        public static void listassetsfrombundle(string bundleName, string name, bool isCommand = true)
+        {
+            if (isCommand)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: listassetsfrombundle");
+
+                Main.Instance.GameplayMenu.ShowNotification("See BepInEx Console for full list");
+            }
+
+            Logger.LogInfo("AssetNames: ");
+
+            foreach (string namex in getAllAssetNamesFromBundle(bundleName, name))
+            {
+                Logger.LogInfo(namex);
+            }
+        }
+        public static void listscenepathsfrombundle(string bundleName, string name, bool isCommand = true)
+        {
+            if (isCommand)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("executed command: listscenepathsfrombundle");
+
+                Main.Instance.GameplayMenu.ShowNotification("See BepInEx Console for full list");
+            }
+
+            Logger.LogInfo("ScenePaths: ");
+
+            foreach (string namex in getAllScenePathsFromBundle(bundleName, name))
+            {
+                Logger.LogInfo(namex);
+            }
+        }
+
         public static void fly()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: fly");
