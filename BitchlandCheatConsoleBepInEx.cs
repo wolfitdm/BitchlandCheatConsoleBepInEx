@@ -1900,6 +1900,8 @@ namespace BitchlandCheatConsoleBepInEx
         bool foldoutFollowers = false;
         bool foldoutSpawnAnimals = false;
         bool foldoutWolfMalesController = false;
+        bool foldoutLoadBundles = false;
+        bool foldoutSpawnPrefabFromBundle = false;
 
         public void ShowPage3()
         {
@@ -2925,6 +2927,214 @@ namespace BitchlandCheatConsoleBepInEx
                     actionButton($"{wolfMalePosition}: {key} -> die", () => {
                         PlayAnimWolfMale(wolfMaleObject, "die");    
                     });
+                }
+            }
+
+            foldoutLoadBundles = EditorLikeFoldout(foldoutLoadBundles, "Load Asset Bundles");
+
+            if (foldoutLoadBundles)
+            {
+                string bundlesFolder = $"{Main.AssetsFolder}/wolfitdm/objects/bundles";
+
+                GUILayout.Label($"Asset Bundles Directory Path: {bundlesFolder}");
+
+                Directory.CreateDirectory(bundlesFolder);
+
+                string[] paths = Directory.GetDirectories(bundlesFolder);
+
+                foreach (string path in paths)
+                {
+                    string bundleName = new DirectoryInfo(path).Name;
+
+                    actionButton($"Load Asset Bundle {bundleName}", () =>
+                    {
+                        try
+                        {
+                            string[] files = Directory.GetFiles(path);
+
+                            foreach (string file in files)
+                            {
+                                if (file.EndsWith(".meta"))
+                                {
+                                    continue;
+                                }
+
+                                if (file.EndsWith(".manifest"))
+                                {
+                                    continue;
+                                }
+
+                                string name = Path.GetFileNameWithoutExtension(file);
+
+                                AssetBundle myBundle = loadbundle(bundleName, name, false);
+
+                                if (myBundle != null)
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"Bundle {myBundle.name} loaded");
+                                }
+                            }
+                        } catch { }
+                    });
+
+                    actionButton($"Reload Asset Bundle {bundleName} (Not Safe)", () =>
+                    {
+                        try
+                        {
+                            string[] files = Directory.GetFiles(path);
+
+                            foreach (string file in files)
+                            {
+                                if (file.EndsWith(".meta"))
+                                {
+                                    continue;
+                                }
+
+                                if (file.EndsWith(".manifest"))
+                                {
+                                    continue;
+                                }
+
+                                string name = Path.GetFileNameWithoutExtension(file);
+
+                                AssetBundle myBundle = loadbundle(bundleName, name, true);
+
+                                if (myBundle != null)
+                                {
+                                    Main.Instance.GameplayMenu.ShowNotification($"Bundle {myBundle.name} loaded");
+                                }
+                            }
+                        }
+                        catch { }
+                    });
+                }
+            }
+
+            foldoutSpawnPrefabFromBundle = EditorLikeFoldout(foldoutSpawnPrefabFromBundle, "Spawn Prefab / Load Scene from bundle");
+
+            if (foldoutSpawnPrefabFromBundle)
+            {
+                string bundlesFolder = $"{Main.AssetsFolder}/wolfitdm/objects/bundles";
+
+                GUILayout.Label($"Asset Bundles Directory Path: {bundlesFolder}");
+
+                GUILayout.Label("Prefab File Name must end with .prefab");
+
+                GUILayout.Label("Scene file Name must end with .unity");
+
+                Directory.CreateDirectory(bundlesFolder);
+
+                string[] paths = Directory.GetDirectories(bundlesFolder);
+
+                foreach (string path in paths)
+                {
+                    string bundleName = new DirectoryInfo(path).Name;
+
+                    try
+                    {
+                         string[] files = Directory.GetFiles(path);
+
+                         foreach (string file in files)
+                         {
+                            List<string> assetNames = new List<string>();
+
+                            List<string> assetNamesScene = new List<string>();
+
+                            if (file.EndsWith(".meta"))
+                             {
+                                continue;
+                             }
+
+                             if (file.EndsWith(".manifest"))
+                             {
+                                continue;
+                             }
+
+                             string name = Path.GetFileNameWithoutExtension(file);
+
+                             AssetBundle myBundle = loadbundle(bundleName, name, false);
+
+                             if (myBundle == null)
+                             {
+                                continue;
+                             }
+
+                             foreach (string assetName in myBundle.GetAllAssetNames())
+                             {
+                                bool isPrefab = assetName.EndsWith(".prefab");
+
+                                if (!isPrefab)
+                                {
+                                    continue;
+                                }
+
+                                if (isPrefab && assetNames.Contains(assetName))
+                                {
+                                    continue;
+                                }
+
+                                assetNames.Add(assetName);
+                             }
+
+                             foreach (string assetName in myBundle.GetAllScenePaths())
+                             {
+                                bool isScene = assetName.EndsWith(".unity");
+
+                                if (!isScene)
+                                {
+                                    continue;
+                                }
+
+                                if (assetNamesScene.Contains(assetName))
+                                {
+                                    continue;
+                                }
+
+                                assetNamesScene.Add(assetName);
+                             }
+
+                             foreach (string assetName in assetNames)
+                             {
+                                actionButton($"Spawn Prefab {assetName} from bundle {bundleName}/{name}", () =>
+                                {
+                                    spawnprefabfrombundle(bundleName, name, assetName);
+                                });
+
+                                actionButton($"Destroy Prefabs {assetName} from bundle {bundleName}/{name}", () =>
+                                { 
+                                    string key = $"{bundleName}_{name}_{assetName}";
+
+                                    if (!spawnedPrefabs.ContainsKey(key))
+                                    {
+                                        spawnedPrefabs.Add(key, new List<GameObject>());
+                                    }
+
+                                    List<GameObject> prefabs = spawnedPrefabs[key];
+
+                                    for(int i = 0; i < prefabs.Count; i++)
+                                    {
+                                        try
+                                        {
+                                            UnityEngine.Object.Destroy(prefabs[i]);
+
+                                            prefabs[i] = null;
+                                        }
+                                        catch { }
+                                    }
+
+                                    spawnedPrefabs[key] = prefabs;
+                                });
+                            }
+
+                            foreach (string assetNameScene in assetNamesScene)
+                            {
+                                actionButton($"Load Scene {assetNameScene} from bundle {bundleName}/{name}", () =>
+                                {
+                                    scenemanagerloadscene(assetNameScene);
+                                });
+                            }
+                         }
+                    }
+                    catch { }
                 }
             }
 
