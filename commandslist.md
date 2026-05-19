@@ -402,6 +402,12 @@ commands with no params:
 * cursor -> you see the mouse cursor
 * nocursor -> hides the mouse cursor
 * nominingtools -> toggle you don't longer need mining tools and you can very fast mining
+* piss -> you are start pissing, if you are looking at an NPC at the time—she will kneel down in a pissing stance and turn toward you to be pissed on.
+* pissface -> you are start pissing in someone's face, and you are looking at an NPC while doing so, she will kneel down in a "pissing stance" and turn toward you to be pissed on.
+* npcpiss -> The NPC you are looking at is pissing on you.
+* npcpissface -> the npc are start pissing in your face, you will kneel down in a "pissing stance" and turn toward the npc to be pissed on.
+* pissmode -> every npc pisses on you
+* pissfacemode -> every npc pisses on your face
 
 commands with 1 param:
 
@@ -579,6 +585,12 @@ commands with 1 param:
 * listalltypes2 name -> list all components of a gameobject 2 , the have you selected with the copy name command, and show his scripts (only for developer important)
 * loadscene scene -> load a scene, 1 -> maincity, 2 -> openworld in the future, not now
 * move name -> same effect like spawn name, except that the original object is moved to you, not spawn the object name, and make sure you can see the object, see for more objects  https://raw.githubusercontent.com/wolfitdm/BitchlandCheatConsoleBepInEx/refs/heads/main/objectslist.txt
+* piss duration -> you are start pissing for duration seconds, if you are looking at an NPC at the time—she will kneel down in a pissing stance and turn toward you to be pissed on.
+* pissface duration -> you are start pissing in someone's face for duration seconds, and you are looking at an NPC while doing so, she will kneel down in a "pissing stance" and turn toward you to be pissed on.
+* npcpiss duration -> The NPC you are looking at is pissing for duration seconds on you.
+* npcpissface duration -> the npc are start pissing in your face for duration seconds, you will kneel down in a "pissing stance" and turn toward the npc to be pissed on.
+* pissmode -> every npc pisses for duration seconds on you
+* pissfacemode -> every npc pisses for duration seconds on your face
 
 This commands are maybe removed in the future (please do not use this commands):
 

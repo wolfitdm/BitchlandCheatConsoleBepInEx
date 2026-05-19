@@ -29,6 +29,7 @@ using TinyJson;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using static com.heparo.terrain.toolkit.TerrainToolkit;
@@ -172,6 +173,115 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             return null;
+        }
+        public static List<int> animatorGetAnimStates(Animator animator)
+        {
+            List<int> animStates = new List<int>();
+
+            if (animator == null) return animStates;
+
+            int layers = animator.layerCount;
+
+            if (layers == 0)
+            {
+                return animStates;
+            }
+
+            for (int i = 0; i < layers; i++)
+            {
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(i);
+
+                int clipHash = stateInfo.shortNameHash;
+
+                animStates.Add(clipHash);
+            }
+
+            return animStates;
+        }
+
+        public static List<string> animatorGetAnimClips(Animator animator)
+        {
+            List<string> animClips = new List<string>();
+
+            if (animator == null) return animClips;
+
+            int layers = animator.layerCount;
+
+            if (layers == 0)
+            {
+                return animClips;
+            }
+
+            for (int i = 0; i < layers; i++)
+            {
+                AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(i);
+
+                int clipInfoLength = clipInfo.Length;
+
+                for (int j = 0; j < clipInfoLength; j++)
+                {
+                    string clipName = clipInfo[j].clip.name;
+
+                    animClips.Add(clipName);
+                }
+            }
+
+            return animClips;
+        }
+        public static bool animatorHasAnimState(Animator animator, int anim)
+        {
+            if (animator == null) return false;
+
+            int layers = animator.layerCount;
+
+            if (layers == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < layers; i++)
+            {
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(i);
+
+                int clipHash = stateInfo.shortNameHash;
+
+                if (anim == clipHash)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public static bool animatorHasAnimClip(Animator animator, string anim)
+        {
+            if (animator == null) return false;
+
+            int layers = animator.layerCount;
+
+            if (layers == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < layers; i++)
+            {
+                AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(i);
+
+                int clipInfoLength = clipInfo.Length;
+
+                for (int j = 0; j < clipInfoLength; j++)
+                {
+                    string clipName = clipInfo[j].clip.name;
+
+                    if (clipName == anim)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static bool showMenu = false; // show Menu
@@ -1541,6 +1651,31 @@ namespace BitchlandCheatConsoleBepInEx
             }
             HandleFlight();
             handleCommandKeys();
+
+            if (!usePissHotKeys)
+            {
+                return;
+            }
+
+            if (Input.GetKeyUp(keyCodePiss))
+            {
+                pissPerson(Main.Instance.Player.gameObject, getPersonInteract());
+            }
+
+            if (Input.GetKeyUp(keyCodeNPCPiss))
+            {
+                pissPerson(getPersonInteract());
+            }
+
+            if (Input.GetKeyUp(keyCodePissFace))
+            {
+                pissPerson(Main.Instance.Player.gameObject, getPersonInteract(), true);
+            }
+
+            if (Input.GetKeyUp(keyCodeNPCPissFace))
+            {
+                pissPerson(getPersonInteract(), null, true);
+            }
         }
 
         private static string lastCommand = "";
@@ -3845,6 +3980,22 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("nobuildtime");
                 }
+                if (GUILayout.Button("Toggle PissMode"))
+                {
+                    handleCommand("pissmode");
+                }
+                if (GUILayout.Button("Toggle PissFaceMode"))
+                {
+                    handleCommand("pissfacemode");
+                }
+                if (GUILayout.Button("Piss"))
+                {
+                    handleCommand("piss");
+                }
+                if (GUILayout.Button("Piss Face"))
+                {
+                    handleCommand("pissface");
+                }
                 if (GUILayout.Button("Toggle NoMiningTools"))
                 {
                     handleCommand("nominingtools");
@@ -3990,6 +4141,14 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("Have Sex With NPC"))
                 {
                     handleCommand("sexnpc");
+                }
+                if (GUILayout.Button("Let The NPC Piss"))
+                {
+                    handleCommand("npcpiss");
+                }
+                if (GUILayout.Button("Let The NPC Piss In To Your Face"))
+                {
+                    handleCommand("npcpissface");
                 }
                 if (GUILayout.Button("Leash NPC"))
                 {
@@ -6781,8 +6940,219 @@ namespace BitchlandCheatConsoleBepInEx
             _this.States[24] = false;
             _this.States[25] = false;
             _this.DirtySkin = false;
+
+            if (_this.IsPlayer)
+            {
+                playerPissedMeState = false;
+            }
         }
 
+
+        public static Quaternion TurnToTarget(Transform baseTransform, Transform target)
+        {
+            Vector3 direction = target.position - baseTransform.position;
+
+            // Prevent rotation if target is exactly at the same position
+            if (direction.sqrMagnitude < 0.0001f)
+                return baseTransform.rotation;
+
+            // Get the desired rotation
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+            baseTransform.rotation = targetRotation;
+
+            return baseTransform.rotation;
+        }
+
+        public static void pissPerson(GameObject personGa, GameObject secondPersonGa = null, bool pissErect = false, float duration = 10f)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (person.HasMoveBlocker("pissing"))
+            {
+                return;
+            }
+
+            Person secondPerson = null;
+
+            if (secondPersonGa != null)
+            {
+                Person secondPerson_ = MyGetComponentPerson<Person>(personGa);
+
+                if (secondPerson_ != null)
+                {
+                    secondPerson = secondPerson_;
+                }
+            }
+
+            person.AddMoveBlocker("pissing");
+
+            if (person.CurrentPants != null)
+            {
+                foreach (Renderer componentsInChild in person.CurrentPants.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    componentsInChild.enabled = false;
+            }
+            if (person.CurrentUnderwearLower != null)
+            {
+                foreach (Renderer componentsInChild in person.CurrentUnderwearLower.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    componentsInChild.enabled = false;
+            }
+
+            bool hasPenis = false;
+
+            if (!(person is Girl))
+            {
+                hasPenis = true;
+                if (!person.HasPenis)
+                {
+                    person.PutPenis();
+                }
+                person.PenisErect = true;
+            }
+
+            if (person is Girl && ((Girl)person).Futa)
+            {
+                hasPenis = true;
+                if (!person.HasPenis)
+                {
+                    person.PutPenis();
+                }
+                person.PenisErect = true;
+            }
+
+
+            if (person.HasPenis)
+            {
+                hasPenis = true;
+            }
+
+            float allowedDistance = 0.70f;
+
+            if (hasPenis)
+            {
+                person.PenisErect = true;
+                person.Anim.Play("mast2pp");
+                if (!pissErect)
+                {
+                    person.PenisBones[5].position = person.PenisBones[2].position;
+                    person.PenisBones[2].SetParent(person.PenisBones[5]);
+                    person.PenisBones[2].localPosition = Vector3.zero;
+                    person.PenisBones[2].localEulerAngles = new Vector3(90f, 0.0f, 0.0f);
+                    person.PenisBones[5].localEulerAngles = Vector3.zero;
+                    person.RightArmIK.enabled = true;
+                    person.RightArmIK.Target.SetParent(person.PenisBones[2]);
+                    person.RightArmIK.Target.localPosition = new Vector3(0.0151f, 3f / 500f, -0.0111f);
+                    person.RightArmIK.Target.localEulerAngles = new Vector3(313.04892f, 215.515991f, 65.49016f);
+                    person.RightArmIK.Pole.localPosition = new Vector3(0.425f, 1.315f, -0.445f);
+                }
+                else
+                {
+                    allowedDistance = 1.10f;
+                }
+            }
+            else
+                person.Anim.Play("Mast2");
+
+            UnityEngine.Object.Instantiate<GameObject>(Main.Instance.PissPrefab, person.SquirtSpots[person.SquirtSpots.Count - 1]);       
+
+            if (!person.IsPlayer)
+            {
+                secondPerson = Main.Instance.Player;
+            }
+
+            if (secondPerson != null)
+            {
+                SaveableBehaviour personBase = (SaveableBehaviour)person;
+                SaveableBehaviour secondPersonBase = (SaveableBehaviour)secondPerson;
+                personBase.transform.rotation = TurnToTarget(personBase.transform, secondPerson.transform);
+                secondPersonBase.transform.rotation = TurnToTarget(secondPersonBase.transform, person.transform);
+                float distance = Vector3.Distance(secondPerson.transform.position, person.transform.position);
+
+                secondPerson.Anim.Play("Anim_SquatSit");
+
+                if (secondPerson.IsPlayer)
+                {
+                    if (distance < allowedDistance)
+                    {
+                        playerPissedMeState = true;
+                    }
+                }
+
+                Main.RunInSeconds((Action)(() => stopPissing(person.gameObject, secondPerson.gameObject)), duration);
+            }
+        }
+
+        public static void stopPissing(GameObject personGa, GameObject secondPersonGa = null)
+        {
+            if (personGa == null)
+            {
+                return;
+            }
+
+            Person person = MyGetComponentPerson<Person>(personGa);
+
+            if (person == null)
+            {
+                return;
+            }
+
+            Person secondPerson = null;
+
+            if (secondPersonGa != null)
+            {
+                Person secondPerson_ = MyGetComponentPerson<Person>(personGa);
+
+                if (secondPerson_ != null)
+                {
+                    secondPerson = secondPerson_;
+                }
+            }
+
+            if (!person.HasMoveBlocker("pissing"))
+            {
+                return;
+            }
+
+            if (person != null)
+            {
+                if (secondPerson != null)
+                {
+                    secondPerson.Anim.Play("GainControl");
+                }
+
+                person.Anim.Play("GainControl");
+                Main.Instance.Player.Anim.Play("GainControl");
+
+                person.RemoveMoveBlocker("pissing");
+                if ((UnityEngine.Object)person.CurrentPants != (UnityEngine.Object)null)
+                {
+                    foreach (Renderer componentsInChild in person.CurrentPants.GetComponentsInChildren<SkinnedMeshRenderer>())
+                        componentsInChild.enabled = true;
+                }
+                if ((UnityEngine.Object)person.CurrentUnderwearLower != (UnityEngine.Object)null)
+                {
+                    foreach (Renderer componentsInChild in person.CurrentUnderwearLower.GetComponentsInChildren<SkinnedMeshRenderer>())
+                        componentsInChild.enabled = true;
+                }
+                if (person.HasPenis)
+                {
+                    person.RightArmIK.enabled = false;
+                    person._StartedMastPP = true;
+                    person.PenisBones[5].localPosition = Vector3.zero;
+                    person.Masturbating = false;
+                }
+            }
+        }
         public static void addAllFetishesToPerson(GameObject personGa, bool cleanOrDirt = true)
         {
             if (personGa == null)
@@ -14841,6 +15211,42 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "piss":
+                    {
+                        pissplayer();
+                    }
+                    break;
+
+                case "npcpiss":
+                    {
+                        npcpiss();
+                    }
+                    break;
+
+                case "pissface":
+                    {
+                        pissplayer(true);
+                    }
+                    break;
+
+                case "npcpissface":
+                    {
+                        npcpiss(true);
+                    }
+                    break;
+
+                case "pissmode":
+                    {
+                        pissmode_command();
+                    }
+                    break;
+
+                case "pissfacemode":
+                    {
+                        pissfacemode_command();
+                    }
+                    break;
+
                 case "npcnohunger":
                     {
                         npcnohunger();
@@ -15667,6 +16073,13 @@ namespace BitchlandCheatConsoleBepInEx
                         togglePatch("usenewmultifollowerupgradekeypadinterface");
                     }
                     break;
+
+                case "useharmonypissmeon":
+                    {
+                        togglePatch("useharmonypissmeon");
+                    }
+                    break;
+
                 case "animplay":
                     {
                         animplay("pickup_10");
@@ -16392,6 +16805,12 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listmoveblockers":
+                    {
+                        listmoveblockers();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -16410,6 +16829,169 @@ namespace BitchlandCheatConsoleBepInEx
                         Main.Instance.GameplayMenu.ShowNotification("No command");
                     }
                     break;
+            }
+        }
+
+        private static void pissmode_command(string duration = "10")
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: pissmode");
+
+            pissfacemode = false;
+
+            float duration_ = (float)stringValueToInt(duration);
+
+            if (duration_ <= 0)
+            {
+                duration_ = 10f;
+            }
+
+            pissDuration = duration_;
+
+            if (pissmode)
+            {
+                pissmode = false;
+                Main.Instance.GameplayMenu.ShowNotification("pissmode off");
+            } else
+            {
+                pissmode = true;
+                Main.Instance.GameplayMenu.ShowNotification("pissmode on");
+            }
+        }
+
+        private static void pissfacemode_command(string duration = "10")
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: pissfacemode");
+
+            pissmode = false;
+
+            float duration_ = (float)stringValueToInt(duration);
+
+            if (duration_ <= 0)
+            {
+                duration_ = 10f;
+            }
+
+            pissDuration = duration_;
+
+            if (pissfacemode)
+            {
+                pissfacemode = false;
+                Main.Instance.GameplayMenu.ShowNotification("pissfacemode off");
+            }
+            else
+            {
+                pissfacemode = true;
+                Main.Instance.GameplayMenu.ShowNotification("pissfacemode on");
+            }
+        }
+        private static void npcpiss(bool face = false, string duration = "10")
+        {
+            string command = face ? "npcpissface" : "npcpiss";
+            Main.Instance.GameplayMenu.ShowNotification($"executed command: {command}");
+
+            GameObject personGa = getPersonInteract();
+
+            float duration_ = (float)stringValueToInt(duration);
+
+            if (duration_ <= 0)
+            {
+                duration_ = 10f;
+            }
+
+            pissPerson(personGa, null, face, duration_);
+        }
+        private static void pissplayer(bool face = false, string duration = "10")
+        {
+            string command = face ? "pissface" : "piss";
+            Main.Instance.GameplayMenu.ShowNotification($"executed command: {command}");
+
+            GameObject personGa = getPersonInteract();
+
+            float duration_ = (float)stringValueToInt(duration);
+
+            if (duration_ <= 0)
+            {
+                duration_ = 10f;
+            }
+
+            pissPerson(Main.Instance.Player.gameObject, personGa, face, duration_);
+        }
+
+        private static void GetAnimState(Person person, int layer)
+        {
+            Animator animator = person.Anim;
+
+            if (animator == null) return;
+
+            // Check the current animation state in layer 0
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(layer);
+
+            // Example: print the animation name
+            // Note: stateInfo.shortNameHash is a hash, so we compare with Animator.StringToHash
+            Logger.LogInfo("Current animation hash: " + stateInfo.shortNameHash);
+
+            // If you want the actual clip name:
+            AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(layer);
+            if (clipInfo.Length > 0)
+            {
+                string clipName = clipInfo[0].clip.name;
+                Logger.LogInfo("Currently playing animation: " + clipName);
+            }
+        }
+
+        private static void GetAnimStates(Person person)
+        {
+            Animator animator = person.Anim;
+
+            if (animator == null) return;
+
+            int layers = animator.layerCount;
+
+            if (layers == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < layers; i++)
+            {
+                int layer = i;
+                // Check the current animation state in layer 0
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(layer);
+
+                // Example: print the animation name
+                // Note: stateInfo.shortNameHash is a hash, so we compare with Animator.StringToHash
+                string xyz = "Current animation hash: " + stateInfo.shortNameHash;
+                Logger.LogInfo(xyz);
+                Main.Instance.GameplayMenu.ShowNotification(xyz);
+
+                // If you want the actual clip name:
+                AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(layer);
+                if (clipInfo.Length > 0)
+                {
+                    string clipName = clipInfo[0].clip.name;
+                    string xyzw = "Currently playing animation: " + clipName;
+                    Logger.LogInfo(xyzw);
+                    Main.Instance.GameplayMenu.ShowNotification(xyzw);
+                }
+            }
+        }
+
+        private static void listmoveblockers()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listmoveblockers");
+
+            GetAnimStates(Main.Instance.Player);
+
+            List<string> moveBlockers = Main.Instance.Player.MoveBlockers;
+
+            if (moveBlockers == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < moveBlockers.Count; i++)
+            {
+                Logger.LogInfo(moveBlockers[i]);
             }
         }
 
@@ -19097,6 +19679,42 @@ namespace BitchlandCheatConsoleBepInEx
                 case "playwolfmale":
                     {
                         playwolfmale_command(valueOriginal);
+                    }
+                    break;
+
+                case "piss":
+                    {
+                        pissplayer(false, value);
+                    }
+                    break;
+
+                case "npcpiss":
+                    {
+                        npcpiss(false, value);
+                    }
+                    break;
+
+                case "pissface":
+                    {
+                        pissplayer(true, value);
+                    }
+                    break;
+
+                case "npcpissface":
+                    {
+                        npcpiss(true, value);
+                    }
+                    break;
+
+                case "pissmode":
+                    {
+                        pissmode_command(value);
+                    }
+                    break;
+
+                case "pissfacemode":
+                    {
+                        pissfacemode_command(value);
                     }
                     break;
 
@@ -23734,6 +24352,8 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<bool> configUseHarmonyLastCommandsPatch;
         private static ConfigEntry<bool> configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants;
         private static ConfigEntry<bool> configMaxRelationShipIfYouHaveSex;
+        private static ConfigEntry<bool> configUseHarmonyPissMeOn;
+        private static ConfigEntry<bool> configUsePissHotKeys;
 
         private static ConfigEntry<KeyCode> configKeyCodeFlyUp;
         private static ConfigEntry<KeyCode> configKeyCodeFlyDown;
@@ -23790,6 +24410,12 @@ namespace BitchlandCheatConsoleBepInEx
         private static ConfigEntry<KeyCode> configKeyCodeRotateZMinus;
         private static ConfigEntry<KeyCode> configKeyCodeRotateWPlus;
         private static ConfigEntry<KeyCode> configKeyCodeRotateWMinus;
+
+        private static ConfigEntry<KeyCode> configKeyCodePiss;
+        private static ConfigEntry<KeyCode> configKeyCodeNPCPiss;
+        private static ConfigEntry<KeyCode> configKeyCodePissFace;
+        private static ConfigEntry<KeyCode> configKeyCodeNPCPissFace;
+
         private static ConfigEntry<float> configRotateValue;
         public BitchlandCheatConsoleBepInEx()
         {
@@ -23814,6 +24440,7 @@ namespace BitchlandCheatConsoleBepInEx
         private static string pluginKeyControlsMoreWeaponSlots = "NoreWeaponSlots.KeyControls";
         private static string pluginKeyControlsPositionMode = "PositionMode.KeyControls";
         private static string pluginKeyControlsRotateMode = "RotateMode.KeyControls";
+        private static string pluginKeyControlsPiss = "Piss.KeyControls";
 
         public static bool useHarmonyPatches = false;
 
@@ -23834,6 +24461,8 @@ namespace BitchlandCheatConsoleBepInEx
         public static bool useHarmonySexModePatch = false;
         public static bool useHarmonyLastCommandsPatch = false;
         public static bool useHarmonyExtendedLockPatch = true;
+        public static bool useHarmonyPissMeOnPatch = true;
+        public static bool usePissHotKeys = true;
 
         public static bool nobuildtime = false;
         public static bool stripmode = false;
@@ -23898,6 +24527,12 @@ namespace BitchlandCheatConsoleBepInEx
         private static KeyCode keyCodePositionYMinus;
         private static KeyCode keyCodePositionZPlus;
         private static KeyCode keyCodePositionZMinus;
+
+        private static KeyCode keyCodePiss;
+        private static KeyCode keyCodeNPCPiss;
+        private static KeyCode keyCodePissFace;
+        private static KeyCode keyCodeNPCPissFace;
+
         private static float positionValue;
 
         private void Awake()
@@ -23998,8 +24633,8 @@ namespace BitchlandCheatConsoleBepInEx
 
             configUseHarmonySlaveSystemPatch = Config.Bind(pluginKey,
                 "UseHarmonySlaveSystemPatch",
-                true,
-                "Whether or not you want use harmony slave system patch (default true also yes, you want it, and false = no)");
+                false,
+                "Whether or not you want use harmony slave system patch (default false also no, you dont want it, and true = yes)");
 
             configUseNewMultiFollowerUpgradeKeyPadInterface = Config.Bind(pluginKey,
                 "UseNewMultiFollowerUpgradeKeyPadInterface",
@@ -24250,6 +24885,36 @@ namespace BitchlandCheatConsoleBepInEx
                                         KeyCode.T,
                                         "KeyCode in rotate mode in order to decrease the w axis, default T");
 
+            configUseHarmonyPissMeOn = Config.Bind(pluginKey,
+                    "UseHarmonyPissMeOn",
+                    true,
+                    "Whether or not you want use harmony piss me on patch (default true also yes, you want it, and false = no)");
+
+            configUsePissHotKeys = Config.Bind(pluginKey,
+                    "UsePissHotKeys",
+                    true,
+                    "Whether or not you want use piss hot keys (default true also yes, you want it, and false = no)");
+
+            configKeyCodePiss = Config.Bind(pluginKeyControlsPiss,
+                                               "KeyCodePlayerPiss",
+                                                KeyCode.F7,
+                                               "KeyCode to piss, default F7");
+
+            configKeyCodeNPCPiss = Config.Bind(pluginKeyControlsPiss,
+                                   "KeyCodeNPCPiss",
+                                    KeyCode.F10,
+                                   "KeyCode for npc to piss, default F10");
+
+            configKeyCodePissFace = Config.Bind(pluginKeyControlsPiss,
+                                   "KeyCodePlayerPissFace",
+                                    KeyCode.F9,
+                                   "KeyCode to piss face, default F9");
+
+            configKeyCodeNPCPissFace = Config.Bind(pluginKeyControlsPiss,
+                                   "KeyCodeNPCPissFace",
+                                    KeyCode.F11,
+                                   "KeyCode for npc to piss face, default F11");
+
             KeyCodeFlyUp = configKeyCodeFlyUp.Value;
             KeyCodeFlyDown = configKeyCodeFlyDown.Value;
             KeyCodeFlySpeedMore = configKeyCodeFlySpeedMore.Value;
@@ -24329,6 +24994,13 @@ namespace BitchlandCheatConsoleBepInEx
             useNewMultiFollowerUpgradeKeyPadInterface = configUseNewMultiFollowerUpgradeKeyPadInterface.Value;
             everyNPCstripsNudeIfYouLookAtThem = configEveryNPCstripsNudeIfYouLookAtThemÍnStripModeVariants.Value;
             maxRelationShipIfYouHaveSex = configMaxRelationShipIfYouHaveSex.Value;
+            useHarmonyPissMeOnPatch = configUseHarmonyPissMeOn.Value;
+            usePissHotKeys = configUsePissHotKeys.Value;
+
+            keyCodePiss = configKeyCodePiss.Value;
+            keyCodeNPCPiss = configKeyCodeNPCPiss.Value;
+            keyCodePissFace = configKeyCodePissFace.Value;
+            keyCodeNPCPissFace = configKeyCodeNPCPissFace.Value;
 
             followerusingtoggle = multiFollower || useMultiFollowerUpgrade || useMultiFollowerUpgradeEx;
 
@@ -24771,6 +25443,13 @@ namespace BitchlandCheatConsoleBepInEx
                         configUseNewMultiFollowerUpgradeKeyPadInterface.Value = useNewMultiFollowerUpgradeKeyPadInterface;
                     }
                     break;
+
+                case "useharmonypissmeon":
+                    {
+                        set = useHarmonyPissMeOnPatch = !useHarmonyPissMeOnPatch;
+                        configUseHarmonyPissMeOn.Value = useHarmonyPissMeOnPatch;
+                    }
+                    break;
             }
             Main.Instance.GameplayMenu.ShowNotification($"set {patch} to {set.ToString()}");
         }
@@ -24930,7 +25609,30 @@ namespace BitchlandCheatConsoleBepInEx
                     PatchHarmonyMethodUnity(typeof(bl_ThirdPersonUserControl), "Update", "bl_ThirdPersonUserControl_Update", false, true);
                     PatchHarmonyMethodUnity(typeof(bl_meleeHitBox), "OnTriggerEnter", "OnSlaveEnter", true, false);
                 }
-                if (useHarmonyMoreWeaponSlotsPatch || useHarmonyNoBuildTimePatch || useHarmonySexModePatch)
+                if (useHarmonyPissMeOnPatch)
+                {
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Piss), "Interact", "int_Piss_Interact_PissMeOn", true, false);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Piss), "StopInteracting", "int_Piss_StopInteracting_PissMeOn", true, false, new Type[] {typeof(Person)});
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(int_Bathe), "StopInteracting", "int_Bathe_StopInteracting_PissMeOn", false, true);
+                    }
+                    catch { }
+                    try
+                    {
+                        PatchHarmonyMethodUnity(typeof(UI_Gameplay), "SelectInventory", "SelectInventory_PissMeOn", false, true);
+                    }
+                    catch { }
+                }
+                if (useHarmonyMoreWeaponSlotsPatch || useHarmonyNoBuildTimePatch || useHarmonySexModePatch || useHarmonyPissMeOnPatch)
                 {
                     PatchHarmonyMethodUnity(typeof(WeaponSystem), "Update", "WeaponSystem_Update", true, false);
                 }
@@ -24977,7 +25679,7 @@ namespace BitchlandCheatConsoleBepInEx
                     catch { }
                     try
                     {
-                        PatchHarmonyMethodUnity(typeof(int_Piss), "StopInteracting", "int_Piss_StopInteracting", true, false);
+                        PatchHarmonyMethodUnity(typeof(int_Piss), "StopInteracting", "int_Piss_StopInteracting", true, false, new Type[] { typeof(Person) });
                     }
                     catch { }
                     try
@@ -25184,13 +25886,150 @@ namespace BitchlandCheatConsoleBepInEx
             return true;
         }
 
-        public static bool int_Piss_StopInteracting(object __instance)
+        public static bool int_Piss_StopInteracting(object __instance, Person person)
         {
             if (extendedLock)
             {
                 return false;
             }
             return true;
+        }
+        public static List<GameObject> playerPissedMe = new List<GameObject>();
+        private static bool playerPissedMeState = false;
+        private static bool pissmode = false;
+        private static bool pissfacemode = false;
+        private static float pissDuration = 10f;
+        public static bool int_Piss_Interact_PissMeOn(Person person, object __instance)
+        {
+            if (person.IsPlayer)
+            {
+                return true;
+            }
+
+            float distance = Vector3.Distance(Main.Instance.Player.transform.position, person.transform.position);
+
+            if (distance < 0.70)
+            {
+                if (animatorHasAnimClip(Main.Instance.Player.Anim, "Anim_SquatSit") || animatorHasAnimClip(Main.Instance.Player.Anim, "urinal2idle"))
+                {
+                    playerPissedMe.Add(person.gameObject);
+                    playerPissedMeState = true;
+                }
+            }
+
+            return true;
+        }
+        public static bool int_Piss_StopInteracting_PissMeOn(object __instance, Person person)
+        {
+            if (person.IsPlayer)
+            {
+                return true;
+            }
+
+            if (playerPissedMe.Contains(person.gameObject))
+            {
+                playerPissedMe.Remove(person.gameObject);
+            }
+
+            return true;
+        }
+        public static void int_Bathe_StopInteracting_PissMeOn(object __instance)
+        {
+            int_Bathe _this = (int_Bathe)__instance;
+
+            if (_this == null)
+            {
+                return;
+            }
+
+            Person person = _this.InteractingPerson;
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (!person.IsPlayer)
+            {
+                return;
+            }
+
+            playerPissedMeState = false;
+        }
+        public static void SelectInventory_PissMeOn(object __instance)
+        {
+            if (__instance == null)
+            {
+                return;
+            }
+
+            UI_Gameplay _this = (UI_Gameplay)__instance;
+
+            if (_this == null)
+            {
+                return;
+            }
+
+            string pissState = "Piss wet (-15 Sexy)";
+
+            if (_this.StatesEntries == null)
+            {
+                return;
+            }
+
+            int stateEntriesLength = _this.StatesEntries.Count;
+
+            for (int i = 0; i < stateEntriesLength; i++)
+            {
+                GameObject gameObjectX = _this.StatesEntries[i];
+                
+                if (gameObjectX == null)
+                {
+                    continue;
+                }
+
+                if (gameObjectX.transform == null)
+                {
+                    continue;
+                }
+
+                Transform textFind = gameObjectX.transform.Find("text");
+
+                if (textFind == null)
+                {
+                    continue;
+                }
+
+                UnityEngine.UI.Text textComponent = textFind.GetComponent<UnityEngine.UI.Text>();
+
+                if (textComponent == null)
+                {
+                    continue;
+                }
+
+                string text = textComponent.text;
+
+                if (text == null)
+                {
+                    continue;
+                }
+
+                if (text == pissState)
+                {
+                    playerPissedMeState = true;
+                    return;
+                }
+            }
+
+            if (!playerPissedMeState)
+            {
+                return;
+            }
+
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(_this.StatesEntry, _this.StatesEntry.transform.parent);
+            gameObject.transform.Find("text").GetComponent<UnityEngine.UI.Text>().text = pissState;
+            gameObject.SetActive(true);
+            _this.StatesEntries.Add(gameObject);
         }
         public static bool bl_NoItemSexSpot_StopInteracting(object __instance)
         {
@@ -25700,11 +26539,21 @@ namespace BitchlandCheatConsoleBepInEx
                 return true;
             }
 
+            if (__instance == null)
+            {
+                return true;
+            }
+
             WeaponSystem _this = (WeaponSystem)__instance;
 
-            if (useHarmonyNoBuildTimePatch || useHarmonySexModePatch || useHarmonyLastCommandsPatch)
+            if (_this == null)
             {
-                if (nobuildtime || stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality || lastCommandsLookAt)
+                return true;
+            }
+
+            if (useHarmonyNoBuildTimePatch || useHarmonySexModePatch || useHarmonyLastCommandsPatch || useHarmonyPissMeOnPatch)
+            {
+                if (nobuildtime || stripmode || stripmodebroken || stripmodenympho || stripmodeultimate || stripmodepersonality || lastCommandsLookAt || pissmode || pissfacemode)
                 {
                     try
                     {
@@ -25727,6 +26576,17 @@ namespace BitchlandCheatConsoleBepInEx
 
                                     if (obj_ != null)
                                     {
+                                        if (pissmode || pissfacemode)
+                                        {
+                                            if (obj_ is int_Person)
+                                            {
+                                                bool pissErect = pissfacemode;
+                                                int_Person obj = (int_Person)obj_;
+                                                Person objPerson = obj.ThisPerson;
+                                                pissPerson(objPerson.gameObject, null, pissErect, pissDuration);
+                                            }
+                                        }
+
                                         if (lastCommandsLookAt)
                                         {
                                             lastcommands();
@@ -25791,6 +26651,17 @@ namespace BitchlandCheatConsoleBepInEx
 
                                     if (obj2_ != null)
                                     {
+                                        if (pissmode || pissfacemode)
+                                        {
+                                            if (obj2_ is int_Person)
+                                            {
+                                                bool pissErect = pissfacemode;
+                                                int_Person obj2 = (int_Person)obj2_;
+                                                Person obj2Person = obj2.ThisPerson;
+                                                pissPerson(obj2Person.gameObject, null, pissErect, pissDuration);
+                                            }
+                                        }
+
                                         if (lastCommandsLookAt)
                                         {
                                             lastcommands();
@@ -25845,7 +26716,7 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     catch (Exception ex)
                     {
-
+                        Logger.LogInfo(ex.ToString());
                     }
                 }
             }
