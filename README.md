@@ -400,6 +400,9 @@ commands with no params:
 * npcpissface -> the npc are start pissing in your face, you will kneel down in a "pissing stance" and turn toward the npc to be pissed on.
 * pissmode -> every npc pisses on you
 * pissfacemode -> every npc pisses on your face
+* showplayer -> fixes the main body from player is hidden bug
+* showmine -> fixes the main body from player is hidden bug in the mine
+* showall -> fixes the main body from player is hidden bug overall
 
 commands with 1 param:
 
