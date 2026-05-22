@@ -6181,6 +6181,28 @@ namespace BitchlandCheatConsoleBepInEx
                return player.gameObject;
            }*/
 
+        private static List<GameObject> activeGameObjectsBeforeGoToMine5 = new List<GameObject>();
+        private static List<GameObject> activeGameObjectsBeforeGoToMine1 = new List<GameObject>();
+        public static void fixSceneBug11e(GameObject gameObject)
+        {
+
+            foreach (GameObject rootGameObject in SceneManager.GetSceneByBuildIndex(5).GetRootGameObjects())
+            {
+                if (rootGameObject.activeSelf)
+                {
+                    activeGameObjectsBeforeGoToMine5.Add(rootGameObject);
+                    Main.Instance.GameplayMenu.ShowNotification(rootGameObject.name);
+                }
+            }
+            foreach (GameObject rootGameObject in SceneManager.GetSceneByBuildIndex(1).GetRootGameObjects())
+            {
+                if (rootGameObject.activeSelf)
+                {
+                    activeGameObjectsBeforeGoToMine1.Add(rootGameObject);
+                    Main.Instance.GameplayMenu.ShowNotification(rootGameObject.name);
+                }
+            }
+        }
         public static void UpdatePerson(GameObject DisplayPersonGa, bool spawnFemale, string filename)
         {
             if (DisplayPersonGa == null) {
@@ -6392,10 +6414,85 @@ namespace BitchlandCheatConsoleBepInEx
             setReverseWildStates(PersonGenerated.gameObject);
             return PersonGenerated.gameObject;
         }
-
         public static GameObject ChangeSkin(string name, bool loadclothes = true)
         {
             return ChangeSkin(Main.Instance.Player.gameObject, name, true, loadclothes);
+        }
+        public static void showAll()
+        {
+            if (Main.Instance.Player != null && Main.Instance.Player.MainBody != null)
+            {
+                Main.Instance.Player.MainBody.gameObject.SetActive(true);
+            }
+
+            List<Person> persons = Main.Instance.PeopleFollowingPlayer;
+
+            if (persons != null)
+            {
+                for (int i = 0; i < persons.Count; i++)
+                {
+                    if (persons[i].MainBody != null)
+                    {
+                        persons[i].MainBody.gameObject.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void showAllMine()
+        {
+            bl_UndergroundMine2 objectOfType = UnityEngine.Object.FindObjectOfType<bl_UndergroundMine2>(true);
+
+            if (objectOfType == null)
+            {
+                return;
+            }
+
+            if (objectOfType.PrevOn == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < objectOfType.PrevOn.Count; i++)
+            {
+                if (objectOfType.PrevOn[i] == null)
+                {
+                    continue;
+                }
+
+                if (objectOfType.PrevOn[i].name == "o_body_cf.001")
+                {
+                    objectOfType.PrevOn[i].SetActive(true);
+                }
+
+                if (objectOfType.PrevOn[i].name == "UMA_Human_Male")
+                {
+                    objectOfType.PrevOn[i].SetActive(true);
+                }
+            }
+        }
+        public static void showPlayer_command()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: showplayer");
+            showAll();
+        }
+        public static void showMine_command()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: showmine");
+            showAllMine();
+        }
+
+        public static void showAll_command()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: showall");
+            showAll();
+            showAllMine();
+        }
+        public static void StartLoadingMines(int x, int y)
+        {
+            showAll();
+            showAllMine();
         }
 
         public static void StripPerson(GameObject personGa)
@@ -16811,6 +16908,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "showplayer":
+                    {
+                        showPlayer_command();
+                    }
+                    break;
+
+                case "showmine":
+                    {
+                        showMine_command();
+                    }
+                    break;
+
+                case "showall":
+                    {
+                        showAll_command();
+                    }
+                    break;
+
                 case "version":
                     {
                         Main.Instance.GameplayMenu.ShowNotification("version: final 7.0");
@@ -25457,6 +25572,12 @@ namespace BitchlandCheatConsoleBepInEx
         {
             try
             {
+                PatchHarmonyMethodUnity(typeof(int_MineEntrance), "StartLoadingMines", "StartLoadingMines", false, true);
+            }
+            catch { }
+
+            try
+            {
                 PatchHarmonyMethodUnity(typeof(UI_Settings), "Click_DownloadMods2", "UI_Settings_Click_DownloadMods2", false, true);
             } catch (Exception ex)
             {
@@ -25476,6 +25597,7 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     return;
                 }
+
                 //Harmony.CreateAndPatchAll(typeof(BitchlandCheatConsoleBepInEx));
                 if (useHarmonyGameAudioSourcePatch)
                 {
