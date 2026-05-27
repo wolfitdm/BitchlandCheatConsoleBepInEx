@@ -7184,9 +7184,9 @@ namespace BitchlandCheatConsoleBepInEx
                         playerPissedMeState = true;
                     }
                 }
-
-                Main.RunInSeconds((Action)(() => stopPissing(person.gameObject, secondPerson.gameObject)), duration);
             }
+
+            Main.RunInSeconds((Action)(() => stopPissing(person.gameObject, secondPersonGa)), duration);
         }
 
         public static void stopPissing(GameObject personGa, GameObject secondPersonGa = null)
@@ -25445,6 +25445,45 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
                 return;
+            }
+
+            ParameterInfo[] parameterInfosOriginal = original.GetParameters();
+            ParameterInfo[] parameterInfosPatched = patched.GetParameters();
+
+            List<ParameterInfo> parametersOriginal = new List<ParameterInfo>();
+            List<ParameterInfo> parametersPatched = new List<ParameterInfo>();
+
+            if (parameterInfosPatched != null)
+            {
+                for (int i = 0; i < parameterInfosPatched.Length; i++)
+                {
+                    if (parameterInfosPatched[i].Name.StartsWith("__"))
+                    {
+                        continue;
+                    }
+
+                    parametersPatched.Add(parameterInfosPatched[i]);
+                }
+
+                parameterInfosPatched = parametersPatched.ToArray();
+            }
+
+            if (parameterInfosOriginal != null)
+            {
+                for (int i = 0; i < parameterInfosOriginal.Length; i++)
+                {
+                    parametersOriginal.Add(parameterInfosOriginal[i]);
+                }
+
+                parameterInfosOriginal = parametersOriginal.ToArray();
+            }
+
+            if (parameterInfosPatched != null && parameterInfosOriginal != null)
+            {
+                if (parameterInfosOriginal.Length != parameterInfosPatched.Length)
+                {
+                    Logger.LogError($"[CRITICAL] Patched Method Parameters have Changed, patchedMethodName: {patchedMethodName}, originalMethodName {originalMethodName}");
+                }
             }
 
             HarmonyMethod patchedMethod = new HarmonyMethod(patched);
