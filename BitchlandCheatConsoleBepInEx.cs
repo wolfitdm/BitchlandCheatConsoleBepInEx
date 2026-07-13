@@ -3318,7 +3318,7 @@ namespace BitchlandCheatConsoleBepInEx
                         string name = allGameObjects[i];
                         if (GUILayout.Button($"{name}"))
                         {
-                            handleCommand($"moveother {name}");
+                            handleCommand($"spawnother {name}");
                         }
                     }
                 }
@@ -4024,6 +4024,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand("car2");
                 }
+                if (GUILayout.Button("Spawn Health Pod"))
+                {
+                    handleCommand("spawnhealthpod");
+                }
                 if (GUILayout.Button("Max Relationships"))
                 {
                     handleCommand("maxrs");
@@ -4219,6 +4223,10 @@ namespace BitchlandCheatConsoleBepInEx
                 {
                     handleCommand($"dieme");
                 }
+                if (GUILayout.Button("Spawn Birth"))
+                {
+                    handleCommand("spawnbirth");
+                }
             }
 
             GUILayout.Space(10);
@@ -4269,6 +4277,10 @@ namespace BitchlandCheatConsoleBepInEx
                 if (GUILayout.Button("Die"))
                 {
                     handleCommand("die");
+                }
+                if (GUILayout.Button("Spawn Birth By Follower"))
+                {
+                    handleCommand("spawnbirthnpc");
                 }
                 if (GUILayout.Button("CheatMenu Center Position"))
                 {
@@ -12226,6 +12238,105 @@ namespace BitchlandCheatConsoleBepInEx
             podAvailable.Interact(offspring);
             offspring.IsPlayerDescendant = true;
             offspring.CantBeForced = true;
+
+            try
+            {
+                if ((Main.Instance.Player as Girl).Pregnant)
+                {
+                    (Main.Instance.Player as Girl).GiveBirth();
+                }
+            } catch { }
+        }
+
+        public static void spawnbirthintopodex()
+        {
+            Girl _npcFemalePreg = (Girl)null;
+            bool foundpregnant = false;
+            if (Main.Instance.PeopleFollowingPlayer.Count != 0)
+            {
+                for (int index = 0; index < Main.Instance.PeopleFollowingPlayer.Count; ++index)
+                {
+                    if ((UnityEngine.Object)Main.Instance.PeopleFollowingPlayer[index] != (UnityEngine.Object)null && Main.Instance.PeopleFollowingPlayer[index] is Girl && (Main.Instance.PeopleFollowingPlayer[index] as Girl).Pregnant)
+                    {
+                        _npcFemalePreg = Main.Instance.PeopleFollowingPlayer[index] as Girl;
+                        foundpregnant = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!foundpregnant)
+            {
+                return;
+            }
+
+            Person pregnancyParent3 = _npcFemalePreg.PregnancyParent;
+            if ((UnityEngine.Object)pregnancyParent3 == (UnityEngine.Object)null && pregnancyParent3 is Girl && (pregnancyParent3 as Girl).s_PregnancyParent.Length > 0)
+            {
+                string pregnancyParent4 = (pregnancyParent3 as Girl).s_PregnancyParent;
+                for (int index = 0; index < Main.Instance.SpawnedPeople.Count; ++index)
+                {
+                    if (Main.Instance.SpawnedPeople[index].WorldSaveID == pregnancyParent4)
+                    {
+                        pregnancyParent3 = Main.Instance.SpawnedPeople[index];
+                        break;
+                    }
+                }
+            }
+            Person parent1 = (Person)_npcFemalePreg;
+            Person parent2 = pregnancyParent3;
+            GameObject podAvailableFree = getHealthPodInteract();
+
+            if (podAvailableFree == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("You must look at a HealthPod, in the clinic you can found a healthpod, or in the lab you can also found a healthpod");
+                return;
+            }
+
+            int_HealthPod podAvailable = podAvailableFree.GetComponent<int_HealthPod>();
+            Person offspring = Main.Instance.CreateOffspring(parent1, parent2);
+            podAvailable.PodUseType = 2;
+            podAvailable.Interact(offspring);
+            offspring.IsPlayerDescendant = true;
+            offspring.CantBeForced = true;
+
+            try
+            {
+                if (_npcFemalePreg.Pregnant)
+                {
+                    _npcFemalePreg.GiveBirth();
+                }
+            } catch { }
+        }
+
+        public static object lastHealthPod = null;
+
+        public static void spawnhealthpod()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnhealthpod");
+
+            int_HealthPod healthPod = UnityEngine.Object.FindObjectOfType<int_HealthPod>(true);
+
+            if (healthPod != null)
+            {
+                lastHealthPod = healthPod;
+            }
+
+            if (lastHealthPod == null)
+            {
+                return;
+            }
+
+            GameObject l = ((int_HealthPod)lastHealthPod).gameObject;
+
+            if (l == null)
+            {
+                return;
+            }
+
+            GameObject[] objects = new GameObject[] { l };
+
+            ObjectsSpawn(objects, "_", "_", true);
         }
 
         public static void spawnbirthintopod_with_parent(string parent)
@@ -12273,6 +12384,15 @@ namespace BitchlandCheatConsoleBepInEx
             offspring.CantBeForced = true;
 
             GameObject.Destroy(s.gameObject);
+
+            try
+            {
+                if ((Main.Instance.Player as Girl).Pregnant)
+                {
+                    (Main.Instance.Player as Girl).GiveBirth();
+                }
+            }
+            catch { }
         }
         public static void animplay(string anim)
         {
@@ -15155,6 +15275,19 @@ namespace BitchlandCheatConsoleBepInEx
                 case "spawnbirthintopod":
                     {
                         spawnbirthintopod();
+                    }
+                    break;
+
+                case "spawnbirthnpc":
+                case "spawnbirthintopodex":
+                    {
+                        spawnbirthintopodex();
+                    }
+                    break;
+
+                case "spawnhealthpod":
+                    {
+                        spawnhealthpod();
                     }
                     break;
 
@@ -19879,6 +20012,7 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnother":
                 case "spawnanotherworld":
                 case "spawnobjectexanotherworld":
                     {
