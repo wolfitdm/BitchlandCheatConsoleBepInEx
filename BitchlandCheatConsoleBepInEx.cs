@@ -1882,6 +1882,8 @@ namespace BitchlandCheatConsoleBepInEx
         private bool foldoutSexSpots = false;
         private bool foldoutGameObjectsMove = false;
         private bool foldoutGameObjectsSpawn = false;
+        private bool foldoutGameObjectsMoveOther = false;
+        private bool foldoutGameObjectsSpawnOther = false;
 
         private bool foldoutBuildPlans = false;
         private bool foldoutSpawnFemales = false;
@@ -3273,6 +3275,58 @@ namespace BitchlandCheatConsoleBepInEx
                 }
             }
 
+            foldoutGameObjectsMoveOther = EditorLikeFoldout(foldoutGameObjectsMoveOther, "Move GameObjects Other World");
+
+            if (foldoutGameObjectsMoveOther)
+            {
+                try
+                {
+                    ConcurrentBag<string> allGameObjectsMove = getAllObjectsStringsFastListOtherWorld();
+
+                    List<string> allGameObjects = new List<string>();
+
+                    allGameObjects = allGameObjectsMove.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+
+                    for (int i = 0; i < allGameObjects.Count; i++)
+                    {
+                        string name = allGameObjects[i];
+                        if (GUILayout.Button($"{name}"))
+                        {
+                            handleCommand($"moveother {name}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            foldoutGameObjectsSpawnOther = EditorLikeFoldout(foldoutGameObjectsSpawnOther, "Spawn GameObjects Other World");
+
+            if (foldoutGameObjectsSpawnOther)
+            {
+                try
+                {
+                    ConcurrentBag<string> allGameObjectsSpawn = getAllObjectsStringsFastListOtherWorld();
+
+                    List<string> allGameObjects = new List<string>();
+
+                    allGameObjects = allGameObjectsSpawn.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ThenBy(s => s == null).ToList();
+
+                    for (int i = 0; i < allGameObjects.Count; i++)
+                    {
+                        string name = allGameObjects[i];
+                        if (GUILayout.Button($"{name}"))
+                        {
+                            handleCommand($"moveother {name}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
             return; 
         }
 
@@ -3344,6 +3398,23 @@ namespace BitchlandCheatConsoleBepInEx
                         if (GUILayout.Button($"{name} (Nude With Save)"))
                         {
                             handleCommand($"spawnfemalenudesave {name}");
+                        }
+
+                        if (GUILayout.Button($"{name} (Clothed Without Save Doctor)"))
+                        {
+                            handleCommand($"spawnfemaledoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Clothed With Save Doctor)"))
+                        {
+                            handleCommand($"spawnfemalesavedoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude Without Save Doctor)"))
+                        {
+                            handleCommand($"spawnfemalenudedoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude With Save)"))
+                        {
+                            handleCommand($"spawnfemalenudesavedoctor {name}");
                         }
                     }
                 }
@@ -3514,6 +3585,23 @@ namespace BitchlandCheatConsoleBepInEx
                         if (GUILayout.Button($"{name} (Nude With Save)"))
                         {
                             handleCommand($"spawnmalenudesave {name}");
+                        }
+
+                        if (GUILayout.Button($"{name} (Clothed Without Save Doctor)"))
+                        {
+                            handleCommand($"spawnmaledoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Clothed With Save Doctor)"))
+                        {
+                            handleCommand($"spawnmalesavedoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude Without Save Doctor)"))
+                        {
+                            handleCommand($"spawnmalenudedoctor {name}");
+                        }
+                        if (GUILayout.Button($"{name} (Nude With Save Doctor)"))
+                        {
+                            handleCommand($"spawnmalenudesavedoctor {name}");
                         }
                     }
                 }
@@ -5717,7 +5805,9 @@ namespace BitchlandCheatConsoleBepInEx
             return item;
         }
 
-        public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true, bool loadclothes = true)
+        public static MonoBehaviour jobClinicDoctor = null; 
+
+        public static GameObject CreatePersonNew(string name, bool save = true, bool spawnFemale = true, bool loadclothes = true, bool spawnDoctor = false)
         {
             bool LoadSpecificNPC = true;
             Person PersonGenerated = null;
@@ -5784,6 +5874,40 @@ namespace BitchlandCheatConsoleBepInEx
             setReverseWildStates(PersonGenerated.gameObject);
             PersonGenerated.TheHealth.canDie = false;
             setPersonaltyToNympho(PersonGenerated.gameObject);
+
+            if (spawnDoctor)
+            {
+                bool isOW = false;
+                try
+                {
+                    isOW = Main.Instance.OpenWorld;
+                }
+                catch (Exception ex)
+                {
+                    isOW = false;
+                }
+
+                job_Clinic newDoctorOff = UnityEngine.Object.FindObjectOfType<job_Clinic>(true);
+
+                if (newDoctorOff != null && !isOW)
+                {
+                    jobClinicDoctor = (MonoBehaviour)newDoctorOff;
+                }
+
+                if (jobClinicDoctor != null)
+                {
+                    try
+                    {
+                        PersonGenerated.ThisPersonInt.StartTalkFunc = "Chat_Doctor";
+                        PersonGenerated.ThisPersonInt.StartTalkMono = jobClinicDoctor;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex.ToString());
+                    }
+                }
+            }
+
             return PersonGenerated.gameObject;
         }
 
@@ -12178,7 +12302,7 @@ namespace BitchlandCheatConsoleBepInEx
         }
 
 
-        public static void spawnmale(string value, bool save = false)
+        public static void spawnmale(string value, bool save = false, bool spawnDoctor = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmale");
             Person s = null;
@@ -12186,18 +12310,18 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 default:
                     {
-                        s = CreatePersonNew(value, save, false, true).GetComponent<Person>();
+                        s = CreatePersonNew(value, save, false, true, spawnDoctor).GetComponent<Person>();
                     }
                     break;
             }
         }
 
-        public static void spawnmalenude(string value, bool save = false)
+        public static void spawnmalenude(string value, bool save = false, bool spawnDoctor = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnmalenude");
-            Person s = CreatePersonNew(value, save, false, false).GetComponent<Person>();
+            Person s = CreatePersonNew(value, save, false, false, spawnDoctor).GetComponent<Person>();
         }
-        public static void spawnfemale(string value, bool save = false)
+        public static void spawnfemale(string value, bool save = false, bool spawnDoctor = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemale");
             Person s = null;
@@ -12205,7 +12329,7 @@ namespace BitchlandCheatConsoleBepInEx
             {
                 case "jeanne":
                     {
-                        s = CreatePersonNew("jeanne", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("jeanne", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -12219,7 +12343,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "sarahoffwork":
                     {
-                        s = CreatePersonNew("sarahoffwork", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("sarahoffwork", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -12230,7 +12354,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "uniformedsarah":
                     {
-                        s = CreatePersonNew("uniformedsarah", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("uniformedsarah", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[3]);
@@ -12246,7 +12370,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "nameless":
                     {
-                        s = CreatePersonNew("nameless", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("nameless", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             GameObject[] uniform = new GameObject[6];
@@ -12268,7 +12392,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "rit":
                     {
-                        s = CreatePersonNew("rit", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("rit", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[184]);
@@ -12281,7 +12405,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "carol":
                     {
-                        s = CreatePersonNew("carol", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("carol", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[7]);
@@ -12295,7 +12419,7 @@ namespace BitchlandCheatConsoleBepInEx
 
                 case "beth":
                     {
-                        s = CreatePersonNew("beth", save, true, false).GetComponent<Person>();
+                        s = CreatePersonNew("beth", save, true, false, spawnDoctor).GetComponent<Person>();
                         if (s != null)
                         {
                             s.DressClothe(Main.Instance.AllPrefabs[197]);
@@ -12309,15 +12433,15 @@ namespace BitchlandCheatConsoleBepInEx
 
                 default:
                     {
-                        s = CreatePersonNew(value, save, true, true).GetComponent<Person>();
+                        s = CreatePersonNew(value, save, true, true, spawnDoctor).GetComponent<Person>();
                     }
                     break;
             }
         }
-        public static void spawnfemalenude(string value, bool save = false)
+        public static void spawnfemalenude(string value, bool save = false, bool spawnDoctor = false)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnfemalenude");
-            Person s = CreatePersonNew(value, save, true, false).GetComponent<Person>();
+            Person s = CreatePersonNew(value, save, true, false, spawnDoctor).GetComponent<Person>();
         }
 
         public static void changeskintoperson(GameObject changedSkinPerson, string value, bool isPlayer)
@@ -14937,9 +15061,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmaledoctor":
+                    {
+                        spawnmale("guy1", false, true);
+                    }
+                    break;
+
                 case "spawnfemale":
                     {
                         spawnfemale("nameless");
+                    }
+                    break;
+
+                case "spawnfemaledoctor":
+                    {
+                        spawnfemale("nameless", false, true);
                     }
                     break;
 
@@ -14949,9 +15085,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalenudedoctor":
+                    {
+                        spawnmalenude("guy1", false, true);
+                    }
+                    break;
+
                 case "spawnfemalenude":
                     {
                         spawnfemalenude("brat");
+                    }
+                    break;
+
+                case "spawnfemalenudedoctor":
+                    {
+                        spawnfemalenude("brat", false, true);
                     }
                     break;
 
@@ -14961,9 +15109,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalesavedoctor":
+                    {
+                        spawnmale("guy1", true, true);
+                    }
+                    break;
+
                 case "spawnfemalesave":
                     {
                         spawnfemale("nameless", true);
+                    }
+                    break;
+
+                case "spawnfemalesavedoctor":
+                    {
+                        spawnfemale("nameless", true, true);
                     }
                     break;
 
@@ -14973,9 +15133,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalenudesavedoctor":
+                    {
+                        spawnmalenude("guy1", true, true);
+                    }
+                    break;
+
                 case "spawnfemalenudesave":
                     {
                         spawnfemalenude("brat", true);
+                    }
+                    break;
+
+                case "spawnfemalenudesavedoctor":
+                    {
+                        spawnfemalenude("brat", true, true);
                     }
                     break;
 
@@ -16539,9 +16711,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "listobjectsslowanotherworld":
+                    {
+                        listobjectsslowanotherworld();
+                    }
+                    break;
+
                 case "listobjects":
                     {
                         listobjectsfast();
+                    }
+                    break;
+
+                case "listobjectsfastanotherworld":
+                    {
+                        listobjectsfastanotherworld();
                     }
                     break;
 
@@ -18891,9 +19075,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmaledoctor":
+                    {
+                        spawnmale(value, false, true);
+                    }
+                    break;
+
                 case "spawnfemale":
                     {
                         spawnfemale(value);
+                    }
+                    break;
+
+                case "spawnfemaledoctor":
+                    {
+                        spawnfemale(value, false, true);
                     }
                     break;
 
@@ -18903,9 +19099,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalenudedoctor":
+                    {
+                        spawnmalenude(value, false, true);
+                    }
+                    break;
+
                 case "spawnfemalenude":
                     {
                         spawnfemalenude(value);
+                    }
+                    break;
+
+                case "spawnfemalenudedoctor":
+                    {
+                        spawnfemalenude(value, false, true);
                     }
                     break;
 
@@ -18915,9 +19123,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalesavedoctor":
+                    {
+                        spawnmale(value, true, true);
+                    }
+                    break;
+
                 case "spawnfemalesave":
                     {
                         spawnfemale(value, true);
+                    }
+                    break;
+
+                case "spawnfemalesavedoctor":
+                    {
+                        spawnfemale(value, true, true);
                     }
                     break;
 
@@ -18927,9 +19147,21 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnmalenudesavedoctor":
+                    {
+                        spawnmalenude(value, true, true);
+                    }
+                    break;
+
                 case "spawnfemalenudesave":
                     {
                         spawnfemalenude(value, true);
+                    }
+                    break;
+
+                case "spawnfemalenudesavedoctor":
+                    {
+                        spawnfemalenude(value, true, true);
                     }
                     break;
 
@@ -19605,8 +19837,22 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnslowanotherworld":
+                case "spawnobjectexslowanotherworld":
+                    {
+                        spawnobjectexslowanotherworld(value, true);
+                    }
+                    break;
+
                 case "spawnexslow":
                 case "spawnobjectexexslow":
+                    {
+                        spawnobjectexslow(value, false);
+                    }
+                    break;
+
+                case "spawnexslowanotherworld":
+                case "spawnobjectexexslowanotherworld":
                     {
                         spawnobjectexslow(value, false);
                     }
@@ -19619,10 +19865,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "searchslowanotherworld":
+                case "searchobjectexslowanotherworld":
+                    {
+                        searchobjectexslowanotherworld(value);
+                    }
+                    break;
+
                 case "spawn":
                 case "spawnobjectex":
                     {
                         spawnobjectexfast(value, true);
+                    }
+                    break;
+
+                case "spawnanotherworld":
+                case "spawnobjectexanotherworld":
+                    {
+                        spawnobjectexfastanotherworld(value, true);
                     }
                     break;
 
@@ -19633,6 +19893,14 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "moveother":
+                case "moveanotherworld":
+                case "moveobjectexanotherworld":
+                    {
+                        moveobjectexfastanotherworld(value, true);
+                    }
+                    break;
+
                 case "spawnex":
                 case "spawnobjectexex":
                     {
@@ -19640,10 +19908,24 @@ namespace BitchlandCheatConsoleBepInEx
                     }
                     break;
 
+                case "spawnexanotherworld":
+                case "spawnobjectexexanotherworld":
+                    {
+                        spawnobjectexfastanotherworld(value, false);
+                    }
+                    break;
+
                 case "search":
                 case "searchobjectex":
                     {
                         searchobjectexfast(value);
+                    }
+                    break;
+
+                case "searchanotherworld":
+                case "searchobjectexanotherworld":
+                    {
+                        searchobjectexfastanotherworld(value);
                     }
                     break;
 
@@ -20150,6 +20432,38 @@ namespace BitchlandCheatConsoleBepInEx
             return list;
         }
 
+        private static List<GameObject> getAllObjectsFastOtherWorld()
+        {
+            getAllObjectsFast();
+            bool isOW = false;
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (!isOW)
+            {
+                if (allObjectsFastOW.Count > 0)
+                {
+                    return allObjectsFastOW;
+                }
+            }
+            else
+            {
+                if (allObjectsFastNotOw.Count > 0)
+                {
+                    return allObjectsFastNotOw;
+                }
+            }
+
+            List<GameObject> list = new List<GameObject>();
+            return list;
+        }
+
         private static List<GameObject> allObjectsSlowOW = new List<GameObject>();
         private static List<GameObject> allObjectsSlowNotOw = new List<GameObject>();
         private static List<GameObject> getAllObjectsSlow()
@@ -20202,6 +20516,38 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
            return null;
+        }
+        private static List<GameObject> getAllObjectsSlowOtherWorld()
+        {
+            getAllObjectsSlow();
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (!isOW)
+            {
+                if (allObjectsSlowOW.Count > 0)
+                {
+                    return allObjectsSlowOW;
+                }
+            }
+            else
+            {
+                if (allObjectsSlowNotOw.Count > 0)
+                {
+                    return allObjectsSlowNotOw;
+                }
+            }
+
+            List<GameObject> list = new List<GameObject>();
+            return list;
         }
 
         private static ConcurrentDictionary<string, GameObject> allObjectsSlowStringsOW = new ConcurrentDictionary<string, GameObject>();
@@ -20311,6 +20657,40 @@ namespace BitchlandCheatConsoleBepInEx
             return listex;
         }
 
+        public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsSlowOtherWorld()
+        {
+            getAllObjectsStringsSlow();
+
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (!isOW)
+            {
+                if (allObjectsSlowStringsOW.Count > 0)
+                {
+                    return allObjectsSlowStringsOW;
+                }
+            }
+            else
+            {
+                if (allObjectsSlowStringsNotOw.Count > 0)
+                {
+                    return allObjectsSlowStringsNotOw;
+                }
+            }
+
+            ConcurrentDictionary<string, GameObject> dict = new ConcurrentDictionary<string, GameObject>();
+            return dict;
+        }
+
         private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsOW = new ConcurrentDictionary<string, GameObject>();
         private static ConcurrentDictionary<string, GameObject> allObjectsFastStringsNotOw = new ConcurrentDictionary<string, GameObject>();
 
@@ -20333,6 +20713,38 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             if (isOW)
+            {
+                if (allObjectsFastStringsOW.Count > 0)
+                {
+                    return allObjectsFastStringsOWBag;
+                }
+            }
+            else
+            {
+                if (allObjectsFastStringsNotOw.Count > 0)
+                {
+                    return allObjectsFastStringsNotOWBag;
+                }
+            }
+
+            return null;
+        }
+        public static ConcurrentBag<string> getAllObjectsStringsFastListOtherWorld()
+        {
+            getAllObjectsStringsFast();
+
+            bool isOW = false;
+
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (!isOW)
             {
                 if (allObjectsFastStringsOW.Count > 0)
                 {
@@ -20460,7 +20872,36 @@ namespace BitchlandCheatConsoleBepInEx
 
             return listex;
         }
+        public static ConcurrentDictionary<string, GameObject> getAllObjectsStringsFastOtherWorld()
+        {
+            bool isOW = false;
 
+            try
+            {
+                isOW = Main.Instance.OpenWorld;
+            }
+            catch (Exception ex)
+            {
+                isOW = false;
+            }
+
+            if (!isOW)
+            {
+                if (allObjectsFastStringsOW.Count > 0)
+                {
+                    return allObjectsFastStringsOW;
+                }
+            }
+            else
+            {
+                if (allObjectsFastStringsNotOw.Count > 0)
+                {
+                    return allObjectsFastStringsNotOw;
+                }
+            }
+            ConcurrentDictionary<string, GameObject> dict = new ConcurrentDictionary<string, GameObject>();
+            return dict;
+        }
         private static Dictionary<string, GameObject> preloadedGameObjects = new Dictionary<string, GameObject>();
         public static GameObject getObjectByNameSlow(string value)
         {
@@ -20482,6 +20923,34 @@ namespace BitchlandCheatConsoleBepInEx
             }
 
             ConcurrentDictionary<string,GameObject> objects = getAllObjectsStringsSlow();
+
+            if (objects.ContainsKey(searchedName))
+            {
+                return objects[searchedName];
+            }
+
+            return null;
+        }
+        public static GameObject getObjectByNameSlowOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            if (preloadedGameObjects.ContainsKey(searchedName))
+            {
+                return preloadedGameObjects[searchedName];
+            }
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsSlowOtherWorld();
 
             if (objects.ContainsKey(searchedName))
             {
@@ -20520,6 +20989,35 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        public static GameObject getObjectByNameFastOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            if (preloadedGameObjects.ContainsKey(searchedName))
+            {
+                return preloadedGameObjects[searchedName];
+            }
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFastOtherWorld();
+
+            if (objects.ContainsKey(searchedName))
+            {
+                return objects[searchedName];
+            }
+
+            return null;
+        }
+
         public static GameObject getObjectByNameStartsWithSlow(string value)
         {
             if (value == null)
@@ -20547,6 +21045,33 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        public static GameObject getObjectByNameStartsWithSlowOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsSlowOtherWorld();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.StartsWith(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
         public static GameObject getObjectByNameStartsWithFast(string value)
         {
             if (value == null)
@@ -20562,6 +21087,32 @@ namespace BitchlandCheatConsoleBepInEx
             string searchedName = value.ToLower();
 
             ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFast();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.StartsWith(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+        public static GameObject getObjectByNameStartsWithFastOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFastOtherWorld();
 
             foreach (string name in objects.Keys)
             {
@@ -20601,6 +21152,33 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        public static GameObject getObjectByNameContainsSlowOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsSlowOtherWorld();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.Contains(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
         public static GameObject getObjectByNameContainsFast(string value)
         {
             if (value == null)
@@ -20628,7 +21206,35 @@ namespace BitchlandCheatConsoleBepInEx
             return null;
         }
 
+        public static GameObject getObjectByNameContainsFastOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value == string.Empty)
+            {
+                return null;
+            }
+
+            string searchedName = value.ToLower();
+
+            ConcurrentDictionary<string, GameObject> objects = getAllObjectsStringsFastOtherWorld();
+
+            foreach (string name in objects.Keys)
+            {
+                if (name.Contains(searchedName))
+                {
+                    return objects[name];
+                }
+            }
+
+            return null;
+        }
+
         private static Dictionary<string, GameObject> objectsByNameSlowCache = new Dictionary<string, GameObject>();
+        private static Dictionary<string, GameObject> objectsByNameSlowCacheOtherWorld = new Dictionary<string, GameObject>();
 
         public static GameObject getObjectByNameSlowEx(string value)
         {
@@ -20654,10 +21260,48 @@ namespace BitchlandCheatConsoleBepInEx
                 gameObject = getObjectByNameContainsSlow(value);
             }
 
+            if (gameObject != null)
+            {
+                objectsByNameSlowCache.Add(value, gameObject);
+            }
+
+            return gameObject;
+        }
+
+        public static GameObject getObjectByNameSlowExOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (objectsByNameSlowCacheOtherWorld.ContainsKey(value))
+            {
+                return objectsByNameSlowCacheOtherWorld[value];
+            }
+
+            GameObject gameObject = getObjectByNameSlowOtherWorld(value);
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameStartsWithSlowOtherWorld(value);
+            }
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameContainsSlowOtherWorld(value);
+            }
+
+            if (gameObject != null)
+            {
+                objectsByNameSlowCacheOtherWorld.Add(value, gameObject);
+            }
+
             return gameObject;
         }
 
         private static Dictionary<string, GameObject> objectsByNameFastCache = new Dictionary<string, GameObject>();
+        private static Dictionary<string, GameObject> objectsByNameFastCacheOtherWorld = new Dictionary<string, GameObject>();
         public static GameObject getObjectByNameFastEx(string value)
         {
             if (value == null)
@@ -20690,6 +21334,53 @@ namespace BitchlandCheatConsoleBepInEx
             return gameObject;
         }
 
+        public static GameObject getObjectByNameFastExOtherWorld(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (objectsByNameFastCacheOtherWorld.ContainsKey(value))
+            {
+                return objectsByNameFastCacheOtherWorld[value];
+            }
+
+            GameObject gameObject = getObjectByNameFastOtherWorld(value);
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameStartsWithFastOtherWorld(value);
+            }
+
+            if (gameObject == null)
+            {
+                gameObject = getObjectByNameContainsFastOtherWorld(value);
+            }
+
+            if (gameObject != null)
+            {
+                objectsByNameFastCacheOtherWorld.Add(value, gameObject);
+            }
+
+            return gameObject;
+        }
+
+        private static void listobjectsslowanotherworld()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjectsslowanotherworld");
+
+            try
+            {
+                List<string> objectsNames = getAllObjectsStringsSlowOtherWorld().Keys.ToList();
+                File.WriteAllText("listobjectsslowanotherworld.json", objectsNames.ToJson());
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
         private static void listobjectsslow()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listobjectsslow");
@@ -20718,7 +21409,20 @@ namespace BitchlandCheatConsoleBepInEx
 
             }
         }
+        private static void listobjectsfastanotherworld()
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: listobjectsfastanotherworld");
 
+            try
+            {
+                List<string> objectsNames = getAllObjectsStringsFastOtherWorld().Keys.ToList();
+                File.WriteAllText("listobjectsfastanotherworld.json", objectsNames.ToJson());
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
         private static void listvehicles()
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: listvehicles");
@@ -20877,6 +21581,25 @@ namespace BitchlandCheatConsoleBepInEx
             File.WriteAllText("pisses.json", pisses_.ToJson());
             File.WriteAllText("sexspots.json", sexspots_.ToJson());
         }
+        private static void searchobjectexslowanotherworld(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectexslowanotherworld");
+
+            GameObject gameObject = getObjectByNameSlowExOtherWorld(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
+        }
 
         private static void searchobjectexslow(string value)
         {
@@ -20918,6 +21641,26 @@ namespace BitchlandCheatConsoleBepInEx
             Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
         }
 
+        private static void searchobjectexfastanotherworld(string value)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: searchobjectexfastanotherworld");
+
+            GameObject gameObject = getObjectByNameFastExOtherWorld(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            Main.Instance.GameplayMenu.ShowNotification("object founded : " + gameObject.name);
+        }
+
         private static void spawnobjectexslow(string value, bool opaqueMode)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexslow " + value);
@@ -20940,6 +21683,29 @@ namespace BitchlandCheatConsoleBepInEx
             objects[0] = gameObject;
 
             ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);        
+        }
+        private static void spawnobjectexslowanotherworld(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexslowanotherworld " + value);
+
+            GameObject gameObject = getObjectByNameSlowExOtherWorld(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);
         }
 
         private static void spawnobjectexfast(string value, bool opaqueMode)
@@ -20966,11 +21732,58 @@ namespace BitchlandCheatConsoleBepInEx
             ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);
         }
 
+        private static void spawnobjectexfastanotherworld(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: spawnobjectexfastanotherworld " + value);
+
+            GameObject gameObject = getObjectByNameFastExOtherWorld(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            ObjectsSpawn(objects, "object spawned : ", "!", opaqueMode);
+        }
+
         private static void moveobjectexfast(string value, bool opaqueMode)
         {
             Main.Instance.GameplayMenu.ShowNotification("executed command: moveobjectexfast " + value);
 
             GameObject gameObject = getObjectByNameFastEx(value);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            if (gameObject == null)
+            {
+                Main.Instance.GameplayMenu.ShowNotification("object not found : " + value);
+                return;
+            }
+
+            GameObject[] objects = new GameObject[1];
+
+            objects[0] = gameObject;
+
+            MoveObjects(objects, "object moved : ", "!", opaqueMode);
+        }
+        private static void moveobjectexfastanotherworld(string value, bool opaqueMode)
+        {
+            Main.Instance.GameplayMenu.ShowNotification("executed command: moveobjectexfastanotherworld " + value);
+
+            GameObject gameObject = getObjectByNameFastExOtherWorld(value);
 
             if (value == null)
             {
